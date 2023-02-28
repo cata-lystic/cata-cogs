@@ -34,7 +34,7 @@ class Thoughts(commands.Cog):
             return await ctx.send("Token Set! Please delete your last message.")
         
         if key2 == 'url':
-            await self.config.token.url(newVal)
+            await self.config.url.set(newVal)
             await ctx.send("URL Set!")
         
         if (key2 != '' and newVal != ''):
