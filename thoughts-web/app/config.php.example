@@ -1,0 +1,46 @@
+<?php
+#  API Setup
+# Make unique and secure tokens. Must be at least 8 characters in length with no spaces.
+# When config is complete, give the information to your Discord Bot with: [p]thoughtset api
+
+# Public tokens mainly fetch content. They will not be able to change settings.
+$set['api']['public_tokens'] = ['publicToken1', 'publicToken2']; # Multiple tokens supported
+
+# Private tokens will have full power, only give them to people you trust
+$set['api']['private_tokens'] = ['privateToken1', 'privateToken2']; # Multiple tokens supported
+
+# Script will attempt to autodetect API URL, but it can be set manually
+$set['api']['url'] = 'auto'; # Change if auto detection fails
+
+# API Settings
+$set['api']['searchLimit'] = 500; # Search results max limit. Cannot be changed by API request
+$set['api']['searchResults'] = 3; # Default amount of results per search
+$set['api']['createFlood'] = '10s'; # Time between when a user can post again (format: 5s, 3m, 5d, 7w, etc)
+$set['api']['shuffle'] = 1; # Shuffle search results
+$set['api']['showID'] = 0; # Show thought ID before each result
+$set['api']['quotes'] = ''; # Quotes around each thought. Use \' for single quotes
+$set['api']['breaks'] = 0; # Use &lt;br /&gt; instead of \n\r in API calls
+$set['api']['platform'] = 'api'; # Can be set to anything where the request came from (example: discord)
+
+# Website Settings
+$set['web']['shuffle'] = 1; # Shuffle search results
+$set['web']['showID'] = 0; # Show thought ID before each result
+$set['web']['quotes'] = ''; # Quotes around each thought. Use \' for single quotes
+$set['web']['breaks'] = 0; # Use &lt;br /&gt; instead of \n\r in API calls
+$set['web']['backgroundColor'] = '#212121'; # Background color
+$set['web']['fontColor'] = '#e9e5e5'; # Font color
+$set['web']['accentColor'] = '#393939'; # Box accent color
+$set['web']['accentRadius'] = '10px'; # Border radius of boxes
+$set['web']['info'] = 1; # Enable API info box
+$set['web']['infoVisible'] = 1; # Show API info box by default
+$set['web']['create'] = 1; # Enable thought creation box
+$set['web']['createVisible'] = 1; # Show create box by default
+$set['web']['createFlood'] = '10s'; # Time between when a user can post again (format: 5s, 3m, 5d, 7w, etc)
+$set['web']['search'] = 1; # Enable search
+$set['web']['searchLimit'] = 500; # Search results max limit
+$set['web']['searchResults'] = 500; # Default amount of results per search
+$set['web']['searchVisible'] = 1; # Show search box by default
+$set['web']['github'] = 1; # Show GitHub link in footer
+$set['web']['js'] = 1; # Use JavaScript for search and other features
+# jQuery.js location. Change from "local" to direct URL or built in CDN options
+$set['web']['jquery'] = 'local'; # options: local, google, jquery, microsoft, cdnjs, jsdelivr, Custom URL

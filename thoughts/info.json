@@ -1,0 +1,9 @@
+{
+    "author": ["Catalyst"],
+    "description": "Get and submit random thoughts with a PHP web interface.",
+    "install_msg": "Get and submit random thoughts with a PHP web interface. Thanks for installing!",
+    "short": "Get and Submit Thoughts",
+    "tags": ["thoughts", "quotes", "jokes", "ideas", "database"],
+    "type": "COG",
+    "end_user_data_statement": "This cog only stores data submitted by the user. Retrieving data is not logged."
+}
