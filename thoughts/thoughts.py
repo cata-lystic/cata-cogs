@@ -20,11 +20,11 @@ class Thoughts(commands.Cog):
         self.versionapi = 1.0 # API version
         self.versionweb = 1.0 # Web version (when bot was last updated)
         default_global = {
-            "url": "Nothing",
-            "token": "Nothing"
+            "url": "",
+            "token": ""
         }
         default_guild = {
-            "test": "url"
+            "test": ""
         }
         self.config.register_global(**default_global)
         self.config.register_guild(**default_guild)
@@ -65,7 +65,7 @@ class Thoughts(commands.Cog):
 
         current_token = await self.config.token()
         if current_token == '':
-            await ctx.send(f"You need to set an API token. Type `.tset api token`")
+            await ctx.send("You need to set an API token. Type `.tset api token`")
             pass
 
         try:
