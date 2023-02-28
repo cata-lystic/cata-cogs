@@ -63,6 +63,11 @@ class Thoughts(commands.Cog):
         **.tcreate your thought here**
         """
 
+        current_token = await self.config.token()
+        if current_token == '':
+            await ctx.send(f"You need to set an API token. Type `.tset api token`")
+            pass
+
         try:
             async with aiohttp.request("GET", "https://thoughts.frwd.app?q="+query+"&limit="+str(limit)+"&shuffle="+str(shuffle)+"&showID="+str(showID)+"&platform=discord&api="+str(self.versionapi), headers={"Accept": "text/plain"}) as r:
                 if r.status != 200:
