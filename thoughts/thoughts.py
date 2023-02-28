@@ -166,28 +166,28 @@ class Thoughts(commands.Cog):
         await self.changeSetting(ctx, 'api', 'url', newURL)
 
     @ts_web.command(name='shuffle')
-    async def ts_shuffle(self, ctx, binary):
+    async def ts_web_shuffle(self, ctx, binary):
         """Shuffle search results by default"""
         await self.changeSetting(ctx, 'web', 'shuffle', binary)
 
     @ts_web.command(name='showid')
-    async def ts_shuffle(self, ctx, binary):
+    async def ts_web_showid(self, ctx, binary):
         """Show IDs in search results"""
         await self.changeSetting(ctx, 'web', 'showID', binary)
 
     @ts_web.command(name='quotes')
-    async def ts_shuffle(self, ctx, binary):
+    async def ts_web_quotes(self, ctx, binary):
         """Quotes around each thought"""
         await self.changeSetting(ctx, 'web', 'quotes', binary)
 
     @ts_web.command(name='searchlimit')
-    async def ts_limit(self, ctx, newLimit):
+    async def ts_web_searchlimit(self, ctx, newLimit):
         """Search Results Limit
         \rMax search results that can appear on the website."""
         await self.changeSetting(ctx, 'web', 'searchLimit', newLimit)
 
     @ts_web.command(name='bgcolor')
-    async def ts_limit(self, ctx, color):
+    async def ts_web_bgcolor(self, ctx, color):
         """Background Color
         \rWebsite's background color.
         You can use anything the CSS color tag supports\r
@@ -195,8 +195,8 @@ class Thoughts(commands.Cog):
         await self.changeSetting(ctx, 'web', 'backgroundColor', color)
 
     @ts_web.command(name='flood')
-    async def ts_flood(self, ctx, time):
-        """Flood time limit 
+    async def ts_web_createflood(self, ctx, time):
+        """Creation flood time limit 
         \rSet how long between creating posts a user has to wait on the website.\r\r
         Examples: 1s, 3m, 5d, 7w
         10 minutes would be `.tset web flood 10m`\r\r
