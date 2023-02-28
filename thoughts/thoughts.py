@@ -37,7 +37,7 @@ class Thoughts(commands.Cog):
         if (key2 != '' and newVal != ''):
 
             current_token = await self.config.token()
-
+            newVal = newVal.replace("#", "HASH")
             try:    
                 async with aiohttp.request("GET", "https://thoughts.frwd.app/api/config/?key1="+key1+"&key2="+key2+"&val="+newVal+"&token="+str(current_token), headers={"Accept": "text/plain"}) as r:
                     if r.status != 200:
