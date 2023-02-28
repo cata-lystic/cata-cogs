@@ -126,9 +126,9 @@ class Thoughts(commands.Cog):
     @thoughtset.group(name='api')
     async def ts_api(self, ctx):
         """API Settings
-        \rThese settings are required for the bot to operate.\r\r
-        The API Token is what you set in the config.php file of your website.\r\r
-        The API URL points the bot to your website and API."""
+        \rThese settings change the default values people using your API tokens receieve.\r\r
+        These are different from the default settings your bot will request.
+        To access bot settings, type `.tset bot`"""
         pass
 
     @thoughtset.group(name='bot')
@@ -139,6 +139,14 @@ class Thoughts(commands.Cog):
         `.tset web`"""
         pass
 
+    @thoughtset.group(name='setup')
+    async def ts_setup(self, ctx):
+        """Setup API Token and URL
+        \rThese settings are required for the bot to operate.\r\r
+        The API Token the irst thing you set in the config.php file of your website.\r\r
+        The API URL points the bot to your website and API."""
+        pass
+
     @thoughtset.group(name='web', aliases=['website'])
     async def ts_web(self, ctx):
         """Website Settings
@@ -147,20 +155,20 @@ class Thoughts(commands.Cog):
         `.tset bot`"""
         pass
 
-    @ts_api.command(name='token')
-    async def ts_token(self, ctx, newToken):
-        """Set API token
+    @ts_setup.command(name='token')
+    async def ts_setup_token(self, ctx, newToken):
+        """Set API Token
         \rA token is required for this cog to function.
         Set your token in the config.php file of the web interface.\r\r
         Once finished, set the token
-        `.tset api token tokenGoesHere`\r\r
+        `.tset setup token tokenGoesHere`\r\r
         Finally, set the API URL
-        `.tset url`"""
+        `.tset setup url https://yourwebsite.com`"""
 
         await self.changeSetting(ctx, 'api', 'token', newToken)
 
-    @ts_api.command(name='url')
-    async def ts_url(self, ctx, newURL):
+    @ts_setup.command(name='url')
+    async def ts_setup_url(self, ctx, newURL):
         """Set API URL
         \rSetting the URL lets the bot know how to reach the Thoughts API.\r\r
         Example:
@@ -186,7 +194,7 @@ class Thoughts(commands.Cog):
 
     @ts_api.command(name='breaks')
     async def ts_api_breaks(self, ctx, binary):
-        """Receive <br /> instead of \n\\r
+        """Receive <br /> instead of newlines
         \rValue can be 1 or 0"""
         await self.changeSetting(ctx, 'api', 'breaks', binary)
 
