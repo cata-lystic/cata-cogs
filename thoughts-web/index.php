@@ -31,7 +31,7 @@ if ($platform == "discord") {
 }
 
 // Create Thought (then kill script)
-if (isset($_REPLACE['create'])) {
+if (isset($_REQUEST['create'])) {
 
   // Check if thoughts.json is empty
   if ($total > 0) {
@@ -42,11 +42,11 @@ if (isset($_REPLACE['create'])) {
     $nextID = "1";
   }
 
-  $cAuthor = $_REPLACE['author'] ?? null;
-  $cAuthorID = $_REPLACE['authorID'] ?? null;
-  $cMsg = $_REPLACE['msg'] ?? null;
-  $cTag = strtolower($_REPLACE['tag']) ?? null;
-  $cBase = $_REPLACE['base64'] ?? null; // created msg and author may be in base64
+  $cAuthor = $_REQUEST['author'] ?? null;
+  $cAuthorID = $_REQUEST['authorID'] ?? null;
+  $cMsg = $_REQUEST['msg'] ?? null;
+  $cTag = strtolower($_REQUEST['tag']) ?? null;
+  $cBase = $_REQUEST['base64'] ?? null; // created msg and author may be in base64
 
   if ($cAuthor == null || $cAuthorID == null || $cMsg == null || $cTag == null) {
     echo ("SOMETHING IS MISSING | Author: ".$cAuthor." | ID: ".$cAuthorID." | Tag: ".$cTag." | Msg: ".$cMsg);
@@ -76,15 +76,15 @@ if (isset($_REPLACE['create'])) {
   }
 
   if ($lastPost != 0) {
-    $floodFinal = $lastPost - (time() - $config->floodTime); // Subtract last post time from flood check to see seconds left
+    $floodFinal = $lastPost - (time() - $tools::floodTime); // Subtract last post time from flood check to see seconds left
     if ($floodFinal > 0) {
-      echo "`Slow down!` You can post again in ".$config->floodTime($floodFinal, 1)."."; // stop if flood triggered
+      echo "`Slow down!` You can post again in ".tools::floodTime($floodFinal, 1)."."; // stop if flood triggered
       die();
     }
   }
 
   // All is well, post results
-  echo "`".ucfirst($cTag)." posted!` {$config->url}?q={$nextID}";
+  echo "`".ucfirst($cTag)." posted!` {$config->api['url']}?q={$nextID}";
 
   // Add this to the thoughts.json
   $data[$nextID] = array("msg" => $cMsg, "tag" => $cTag, "author" => $cAuthor, "authorID" => $cAuthorID, "timestamp" => time(), "source" => $platform);

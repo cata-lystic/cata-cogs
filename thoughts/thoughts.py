@@ -1,7 +1,6 @@
 import discord
 from redbot.core import Config, commands, checks
 import aiohttp
-import base64
 import html
 
 
@@ -103,7 +102,7 @@ class Thoughts(commands.Cog):
         tABaseString = tAuthor.replace("#", "HASHTAG")
 
         try:    
-            async with aiohttp.request("GET", "https://thoughts.frwd.app?create=1&token="+current_token+"&base64=1&platform=discord&authorID="+str(tAuthorID)+"&tag="+tag+"&msg="+tBaseString+"&author="+tABaseString, headers={"Accept": "text/plain"}) as r:
+            async with aiohttp.request("GET", "https://thoughts.frwd.app?create=1&token="+current_token+"&platform=discord&authorID="+str(tAuthorID)+"&tag="+tag+"&msg="+tBaseString+"&author="+tABaseString, headers={"Accept": "text/plain"}) as r:
                 if r.status != 200:
                     return await ctx.send("Oops! Cannot create a thought...")
                 result = await r.text(encoding="UTF-8")
