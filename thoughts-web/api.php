@@ -46,10 +46,8 @@ class Config {
         
         $this->defaults = array(
             'api' => array(
-                'private_tokens' => array("['']", ['char>8'], 'Multiple tokens supported', 'Private tokens will have full power, only give them to people you trust'),
-                'public_tokens' => array("['']", ['char>8'], 'Multiple tokens supported', '#Public tokens mainly fetch content. They will not be able to change settings.'),
-                'url' => array('auto', [], 'Change if auto detection fails','#Script will attempt to autodetect API URL, but it can be set manually'),
-                'searchLimit' => array(500, ['number'], 'Search results max limit. Cannot be changed by API request', '#API Settings'),
+                'url' => array('auto', [], 'Change if auto detection fails','#API Settings'),
+                'searchLimit' => array(500, ['number'], 'Search results max limit. Cannot be changed by API request'),
                 'searchResults' => array(3, ['number'], 'Default amount of results per search'),
                 'createFlood' => array('10s', ['alphanum'], 'Time between when a user can post again (format: 5s, 3m, 5d, 7w, etc)'),
                 'shuffle' => array(1, ['binary'], 'Shuffle search results'),
@@ -162,8 +160,8 @@ class Config {
         } else {
             require(__DIR__."/app/config.php");
 
-            // Make sure owner has set a valid tokens in config.php )
-            $checkToken = $this->token(array_merge($set['api']['public_tokens'], $set['api']['private_tokens']), 'valid');
+            // Make sure owner has set valid tokens in config.php )
+            $checkToken = $this->token($set['token'], 'valid');
             
             if ($checkToken !== true) {
                 if ($checkToken == 'Token blank') // Extend the token blank message
@@ -229,7 +227,13 @@ class Config {
             $checkReq = $this->check($key1, $key2, $newVal);
             if ($checkReq !== true) die($checkReq); // Kill script and show error if fails
             
-            $result = "<?php\n#  API Setup\n# Make unique and secure tokens. Must be at least 8 characters in length with no spaces.\n# When config is complete, give the information to your Discord Bot with: [p]thoughtset api\n\n";
+            $result = "<?php\n#  API Setup\n# Make unique and secure tokens. Must be at least 8 characters in length with no spaces.\n# You may create multiple tokens with different permissions\n# Permissions: admin, config, create, delete, search\n# 'admin' permission has full access to all commands. Only give these tokens to people you trust that will help you manage the API and website\n# When config is complete, give an admin token to your Discord Bot with: [p]thoughtset setup api yourAdminToken\n\n";
+
+            // Loop through current $set['token']s and reprint them all out with their permissions
+            foreach($set['token'] as $tVal => $tPerms) {
+                $result .= "\$set['token']['{$tVal}'] = ".$this->arrayToString($set['token'][$tVal]).";\n";
+            }
+
             foreach ($this->defaults as $oldCategory => $oldCatVal) {
 
                 foreach($this->defaults[$oldCategory] as $oldKey => $oldVal) {
@@ -263,32 +267,36 @@ class Config {
 
     }
 
-    // Check if a token is valid or make sure API request token is valid
-    function token($token, $keyType='all') { // $keyType can be all, valid, public, or private
+    // Check if a token is valid or make sure API request token is valid and has proper permissions
+    function token($token, $permission='search') { // $keyType can be all, valid, public, or private
         
-        if (!is_array($token)) $token = array($token); // put single item in array if it's not an array
-        
-        // If token2 isn't set, just make sure the tokens the admin set are valid
-        if ($keyType == "valid") {
+        // If token isn't supplied as an array, put it in one
+        if (!is_array($token)) {
+            $tokens[$token] = array($permission);
+        } else {
+            $tokens = $token;
+        }
+
+        // Just make sure the tokens the admin set are valid
+        if ($permission == "valid") {
 
             // Loop through the array and check if each token is valid
-            foreach($token as $val) {
-                if ($val == '') return 'Token blank';
-                if (strlen($val) < 8) return "Token `{$val}` too short";
-                if (strpos($val, ' ') !== false) return "Token `$val` cannot have spaces";
+            foreach($tokens as $key => $val) {
+                if ($key == '') return 'Token blank';
+                if (strlen($key) < 8) return "Token `{$key}` too short";
+                if (strpos($key, ' ') !== false) return "Token `$key` cannot have spaces";
+                if (count($val) == 0) return "Token `$key` doesn't have any permissions";
+                if ($key == "changeThisAdminToken" || $key == "changeThisPublicToken") return "Set tokens in config.php";
             }
 
         } else {
             
-            foreach($token as $val) {
-               
-                if ($keyType == "all") {
-                    if (!in_array($val, array_merge($_SESSION['api']['public_tokens'], $_SESSION['api']['private_tokens']))) return "Token is invalid";
-                } else if ($keyType == 'public') {
-                    if (!in_array($val, $_SESSION['api']['public_tokens'])) return "Public Token is invalid";
-                } else if ($keyType == 'private') {
-                    if (!in_array($val, $_SESSION['api']['private_tokens'])) return "Private Token is invalid";
-                }
+            // Loop through array and check if each token has proper requested permissions
+            foreach($tokens as $key => $permissions) {
+                if (!isset($_SESSION['token'][$key])) return "Invalid token";
+                $perms = $_SESSION['token'][$key];
+                // Check if this token has admin or requested permission
+                if (!in_array($permission, $perms) && !in_array('admin', $perms)) return "Token $key doesn't have $permission permissions";
             }
         }
 
@@ -341,7 +349,7 @@ class api extends config {
         $token = $this->req['token'] ?? null;
 
         // Make sure API token is valid
-        $checkToken = $this->token($token, 'private');
+        $checkToken = $this->token($token, 'config');
         if ($checkToken !== true) die($checkToken);
 
         // All fields required

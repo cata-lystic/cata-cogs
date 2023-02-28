@@ -1,18 +1,16 @@
 <?php
 #  API Setup
 # Make unique and secure tokens. Must be at least 8 characters in length with no spaces.
-# When config is complete, give the information to your Discord Bot with: [p]thoughtset api
+# You may create multiple tokens with different permissions
+# Permissions: admin, config, create, delete, search
+# 'admin' permission has full access to all commands. Only give these tokens to people you trust that will help you manage the API and website
+# When config is complete, give an admin token to your Discord Bot with: [p]thoughtset setup api yourAdminToken
 
-# Private tokens will have full power, only give them to people you trust
-$set['api']['private_tokens'] = ['privateToken1', 'privateToken2']; # Multiple tokens supported
-
-# Public tokens mainly fetch content. They will not be able to change settings.
-$set['api']['public_tokens'] = ['publicToken1', 'publicToken2']; # Multiple tokens supported
-
-# Script will attempt to autodetect API URL, but it can be set manually
-$set['api']['url'] = 'auto'; # Change if auto detection fails
+$set['token']['changeThisAdminToken'] = ['admin'];
+$set['token']['changeThisPublicToken'] = ['search', 'create'];
 
 # API Settings
+$set['api']['url'] = 'auto'; # Change if auto detection fails
 $set['api']['searchLimit'] = 500; # Search results max limit. Cannot be changed by API request
 $set['api']['searchResults'] = 3; # Default amount of results per search
 $set['api']['createFlood'] = '10s'; # Time between when a user can post again (format: 5s, 3m, 5d, 7w, etc)
