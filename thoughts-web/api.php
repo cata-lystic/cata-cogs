@@ -355,6 +355,9 @@ class api extends config {
     
         // Attempt config change
         $config = new config();
+
+        $val = str_replace("HASHTAG", "#", $val); // convert HASHTAG to #
+        
         $changeSetting = $config->set($key1, $key2, $val);
         
         if ($changeSetting == "OK") {

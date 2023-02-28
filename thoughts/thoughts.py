@@ -102,7 +102,7 @@ class Thoughts(commands.Cog):
         tABaseString = tAuthor.replace("#", "HASHTAG")
 
         try:    
-            async with aiohttp.request("GET", "https://thoughts.frwd.app?create=1&token="+current_token+"&platform=discord&authorID="+str(tAuthorID)+"&tag="+tag+"&msg="+tBaseString+"&author="+tABaseString, headers={"Accept": "text/plain"}) as r:
+            async with aiohttp.request("GET", "https://thoughts.frwd.app/api/create/?token="+current_token+"&platform=discord&authorID="+str(tAuthorID)+"&tag="+tag+"&msg="+tBaseString+"&author="+tABaseString, headers={"Accept": "text/plain"}) as r:
                 if r.status != 200:
                     return await ctx.send("Oops! Cannot create a thought...")
                 result = await r.text(encoding="UTF-8")
@@ -184,26 +184,20 @@ class Thoughts(commands.Cog):
         """Quotes around each thought"""
         await self.changeSetting(ctx, 'web', 'quotes', quotes)
 
-    @ts_web.command(name='searchlimit')
-    async def ts_web_searchlimit(self, ctx, newLimit):
-        """Search Results Limit
-        \rMax search results that can appear on the website."""
-        await self.changeSetting(ctx, 'web', 'searchLimit', newLimit)
-
-    @ts_web.command(name='themebg', aliases=['backgroundcolor'])
+    @ts_web.command(name='themebg', aliases=['bgcolor, backgroundcolor'])
     async def ts_web_bgcolor(self, ctx, color):
         """Background Color
         \rWebsite's background color.
         You can use anything the CSS color tag supports\r
-        Example: `.tset web bgcolor #212121"""
+        Example: `.tset web bgcolor #212121`"""
         await self.changeSetting(ctx, 'web', 'backgroundColor', color)
 
-    @ts_web.command(name='themeaccent', aliases=['accentcolor'])
+    @ts_web.command(name='themeaccent', aliases=['accent, accentcolor'])
     async def ts_web_accentcolor(self, ctx, color):
         """Accent Color
         \rWebsite's box color for API info, search, creation.
         You can use anything the CSS color tag supports\r
-        Example: `.tset web accent #212121"""
+        Example: `.tset web themeaccent #393939`"""
         await self.changeSetting(ctx, 'web', 'accentColor', color)
 
     @ts_web.command(name='themeradius', aliases=['accentradius'])
@@ -211,15 +205,28 @@ class Thoughts(commands.Cog):
         """Accent Border Radius
         \rWebsite's box border radius (roundness)
         You can use anything the CSS border-radius tag supports\r
-        Example: `.tset web themeradius 10px"""
+        Example: `.tset web themeradius 10px`"""
         await self.changeSetting(ctx, 'web', 'accentRadius', radius)
 
-    @ts_web.command(name='flood')
+    @ts_web.command(name='create', aliases=['creation'])
+    async def ts_web_create(self, ctx, binary):
+        """Enable Create Box
+        \rAllow thought creation on the website.
+        \rValue can be 1 or 0"""
+        await self.changeSetting(ctx, 'web', 'create', binary)
+
+    @ts_web.command(name='createvisible')
+    async def ts_web_createvis(self, ctx, binary):
+        """Show create box by default
+        \rValue can be 1 or 0"""
+        await self.changeSetting(ctx, 'web', 'createVisible', binary)
+
+    @ts_web.command(name='createflood')
     async def ts_web_createflood(self, ctx, time):
         """Creation flood time limit 
         \rSet how long between creating posts a user has to wait on the website.\r\r
         Examples: 1s, 3m, 5d, 7w
-        10 minutes would be `.tset web flood 10m`\r\r
+        10 minutes would be `.tset web createflood 10m`\r\r
         This is separate from the flood limit on your bot users."""
         await self.changeSetting(ctx, 'web', 'createFlood', time)
 
@@ -234,3 +241,34 @@ class Thoughts(commands.Cog):
         """Show API info box by default
         \rValue can be 1 or 0"""
         await self.changeSetting(ctx, 'web', 'infoVisible', binary)
+
+    @ts_web.command(name='search')
+    async def ts_web_search(self, ctx, binary):
+        """Enable search box
+        \rAllow searching on the website.
+        \rValue can be 1 or 0"""
+        await self.changeSetting(ctx, 'web', 'search', binary)
+
+    @ts_web.command(name='searchvisible')
+    async def ts_web_searchvis(self, ctx, binary):
+        """Show search box by default
+        \rValue can be 1 or 0"""
+        await self.changeSetting(ctx, 'web', 'searchVisible', binary)
+
+    @ts_web.command(name='searchlimit')
+    async def ts_web_searchlimit(self, ctx, newLimit):
+        """Max search results that can appear on the website
+        \rExample: `.tset searchlimit 500"""
+        await self.changeSetting(ctx, 'web', 'searchLimit', newLimit)
+
+    @ts_web.command(name='searchresults')
+    async def ts_web_searchresults(self, ctx, newLimit):
+        """Default amount of search results
+        \rExample: `.tset searchresults 50"""
+        await self.changeSetting(ctx, 'web', 'searchResults', newLimit)
+
+    @ts_web.command(name='github')
+    async def ts_web_github(self, ctx, binary):
+        """Show link to Thoughts GitHub
+        \rValue can be 1 or 0"""
+        await self.changeSetting(ctx, 'web', 'github', binary)
