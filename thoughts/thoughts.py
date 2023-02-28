@@ -184,25 +184,33 @@ class Thoughts(commands.Cog):
         """Quotes around each thought"""
         await self.changeSetting(ctx, 'web', 'quotes', quotes)
 
-    @ts_web.command(name='themebg', aliases=['bgcolor, backgroundcolor'])
+    @ts_web.command(name='themebg', aliases=['bgcolor', 'backgroundcolor'])
     async def ts_web_bgcolor(self, ctx, color):
-        """Background Color
+        """Background color
         \rWebsite's background color.
         You can use anything the CSS color tag supports\r
         Example: `.tset web bgcolor #212121`"""
         await self.changeSetting(ctx, 'web', 'backgroundColor', color)
 
-    @ts_web.command(name='themeaccent', aliases=['accent, accentcolor'])
+    @ts_web.command(name='themeaccent', aliases=['accent', 'accentcolor'])
     async def ts_web_accentcolor(self, ctx, color):
-        """Accent Color
+        """Accent color
         \rWebsite's box color for API info, search, creation.
         You can use anything the CSS color tag supports\r
         Example: `.tset web themeaccent #393939`"""
         await self.changeSetting(ctx, 'web', 'accentColor', color)
 
+    @ts_web.command(name='themefont', aliases=['fontcolor'])
+    async def ts_web_fontcolor(self, ctx, color):
+        """Font color
+        \rWebsite's font color.
+        You can use anything the CSS color tag supports\r
+        Example: `.tset web themefont #e9e5e5`"""
+        await self.changeSetting(ctx, 'web', 'accentColor', color)
+
     @ts_web.command(name='themeradius', aliases=['accentradius'])
     async def ts_web_accentradius(self, ctx, radius):
-        """Accent Border Radius
+        """Accent box border radius
         \rWebsite's box border radius (roundness)
         You can use anything the CSS border-radius tag supports\r
         Example: `.tset web themeradius 10px`"""
@@ -272,3 +280,23 @@ class Thoughts(commands.Cog):
         """Show link to Thoughts GitHub
         \rValue can be 1 or 0"""
         await self.changeSetting(ctx, 'web', 'github', binary)
+
+    @ts_web.command(name='js', aliases=['javascript'])
+    async def ts_web_js(self, ctx, binary):
+        """Allow JavaScript for searching and other features
+        \rValue can be 1 or 0"""
+        await self.changeSetting(ctx, 'web', 'js', binary)
+
+    @ts_web.command(name='js', aliases=['javascript'])
+    async def ts_web_js(self, ctx, binary):
+        """Allow JavaScript for searching and other features
+        \rValue can be 1 or 0"""
+        await self.changeSetting(ctx, 'web', 'js', binary)
+
+    @ts_web.command(name='jquery')
+    async def ts_web_js(self, ctx, binary):
+        """jQuery.js location
+        \rYou can choose where your jquery.js file is hosted.
+        Built in options: `local` (default), `google`, `jquery`, `microsoft`, `cdnjs`, `jsdelivr`
+        You can also use a custom URL"""
+        await self.changeSetting(ctx, 'web', 'jquery', binary)

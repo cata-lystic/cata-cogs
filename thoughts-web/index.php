@@ -20,7 +20,7 @@ $shuffle = $_REQUEST['shuffle'] ?? $config->web['shuffle']; // shuffle search re
 $showID = $_REQUEST['showID'] ?? $config->web['showID']; // show unique ID before each thought
 $platform = $_REQUEST['platform'] ?? 'web'; // anything besides "web" will be plain text mode
 $quotes = $_REQUEST['quotes'] ?? tools::quotes($config->web['quotes']); // no quotes by default
-$breaks = $_REQUEST['breaks'] ?? $config->web['breaks']; // prefer <br /> over /n/r (web will overwrite this)
+$breaks = $_REQUEST['breaks'] ?? $config->api['breaks']; // prefer <br /> over /n/r (web will overwrite this)
 $js = $_REQUEST['js'] ?? $config->web['js']; // web javascript features enabled by default
 $apiRequest = $_REQUEST['api'] ?? null; // API version from requester
 

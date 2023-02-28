@@ -26,7 +26,6 @@ $set['api']['platform'] = 'api'; # Can be set to anything where the request came
 $set['web']['shuffle'] = 1; # Shuffle search results
 $set['web']['showID'] = 0; # Show thought ID before each result
 $set['web']['quotes'] = 'none'; # Quotes around each thought. options: 'none', 'single', 'double', or custom
-$set['web']['breaks'] = 0; # Use &lt;br /&gt; instead of \n\r in API calls
 $set['web']['backgroundColor'] = '#212121'; # Background color
 $set['web']['fontColor'] = '#e9e5e5'; # Font color
 $set['web']['accentColor'] = '#393939'; # Box accent color
