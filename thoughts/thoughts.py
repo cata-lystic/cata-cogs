@@ -33,6 +33,10 @@ class Thoughts(commands.Cog):
             await self.config.token.set(newVal)
             return await ctx.send("Token Set! Please delete your last message.")
         
+        if key2 == 'url':
+            await self.config.token.url(newVal)
+            await ctx.send("URL Set!")
+        
         if (key2 != '' and newVal != ''):
 
             current_token = await self.config.token()
@@ -63,8 +67,8 @@ class Thoughts(commands.Cog):
 
         current_token = await self.config.token()
         if current_token == '':
-            await ctx.send("You need to set an API Token. Type `.tset api token`")
-            await ctx.send("You need to set an API URL. Type `.tset api url`")
+            await ctx.send("You need to set an API Token. Type `.tset setup token`")
+            await ctx.send("You need to set an API URL. Type `.tset setup url`")
         else :
 
             try:
