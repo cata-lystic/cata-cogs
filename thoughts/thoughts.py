@@ -37,7 +37,7 @@ class Thoughts(commands.Cog):
         if (key2 != '' and newVal != ''):
 
             current_token = await self.config.token()
-            newVal = newVal.replace("#", "HASH")
+            newVal = newVal.replace("#", "HASHTAG")
             try:    
                 async with aiohttp.request("GET", "https://thoughts.frwd.app/api/config/?key1="+key1+"&key2="+key2+"&val="+newVal+"&token="+str(current_token), headers={"Accept": "text/plain"}) as r:
                     if r.status != 200:
@@ -88,18 +88,22 @@ class Thoughts(commands.Cog):
         else:
             tMsg = html.escape(msg)
 
+        current_token = await self.config.token()
+
         tAuthor = html.escape(str(ctx.message.author))
         tAuthorID = html.escape(str(ctx.message.author.id))
 
         # Encode msg and author to base64
         tMsg = tMsg.encode("utf8")
-        tBaseString = base64.b64encode(tMsg).decode("utf8")
+        #tBaseString = base64.b64encode(tMsg).decode("utf8")
+        tBaseString = tMsg.replace("#", "HASHTAG")
 
         tAuthor = tAuthor.encode("utf8")
-        tABaseString = base64.b64encode(tAuthor).decode("utf8")
+        #tABaseString = base64.b64encode(tAuthor).decode("utf8")
+        tABaseString = tAuthor.replace("#", "HASHTAG")
 
         try:    
-            async with aiohttp.request("GET", "https://thoughts.frwd.app?create=1&base64=1&platform=discord&authorID="+str(tAuthorID)+"&tag="+tag+"&msg="+tBaseString+"&author="+tABaseString, headers={"Accept": "text/plain"}) as r:
+            async with aiohttp.request("GET", "https://thoughts.frwd.app?create=1&token="+current_token+"&base64=1&platform=discord&authorID="+str(tAuthorID)+"&tag="+tag+"&msg="+tBaseString+"&author="+tABaseString, headers={"Accept": "text/plain"}) as r:
                 if r.status != 200:
                     return await ctx.send("Oops! Cannot create a thought...")
                 result = await r.text(encoding="UTF-8")

@@ -247,7 +247,7 @@ class Config {
                         }
                     }
                     // $finalVal is the $newVal if this is the changed setting
-                    $finalVal = ($oldCategory == $key1 && $oldKey == $key2) ? htmlspecialchars($newVal) : $this->arrayToString($set[$oldCategory][$oldKey]); 
+                    $finalVal = ($oldCategory == $key1 && $oldKey == $key2) ? htmlspecialchars(str_replace("HASHTAG", "#", $newVal)) : $this->arrayToString($set[$oldCategory][$oldKey]); 
                         
                     // Don't includes quotes around the val if it's meant to be a number
                     $reqs = $this->defaults[$oldCategory][$oldKey][1];
