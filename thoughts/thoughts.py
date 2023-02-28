@@ -94,11 +94,11 @@ class Thoughts(commands.Cog):
         tAuthorID = html.escape(str(ctx.message.author.id))
 
         # Encode msg and author to base64
-        tMsg = tMsg.encode("utf8")
+        #tMsg = tMsg.encode("utf8")
         #tBaseString = base64.b64encode(tMsg).decode("utf8")
         tBaseString = tMsg.replace("#", "HASHTAG")
 
-        tAuthor = tAuthor.encode("utf8")
+        #tAuthor = tAuthor.encode("utf8")
         #tABaseString = base64.b64encode(tAuthor).decode("utf8")
         tABaseString = tAuthor.replace("#", "HASHTAG")
 
