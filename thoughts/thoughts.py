@@ -65,18 +65,19 @@ class Thoughts(commands.Cog):
 
         current_token = await self.config.token()
         if current_token == '':
-            await ctx.send("You need to set an API token. Type `.tset api token`")
-            pass
+            await ctx.send("You need to set an API Token. Type `.tset api token`")
+            await ctx.send("You need to set an API URL. Type `.tset api url`")
+        else :
 
-        try:
-            async with aiohttp.request("GET", "https://thoughts.frwd.app?q="+query+"&limit="+str(limit)+"&shuffle="+str(shuffle)+"&showID="+str(showID)+"&platform=discord&api="+str(self.versionapi), headers={"Accept": "text/plain"}) as r:
-                if r.status != 200:
-                    return await ctx.send("Oops! Cannot get a thought...")
-                result = await r.text(encoding="UTF-8")
-        except aiohttp.ClientConnectionError:
-            return await ctx.send("Oops! Cannot get a thought...")
+            try:
+                async with aiohttp.request("GET", "https://thoughts.frwd.app?q="+query+"&limit="+str(limit)+"&shuffle="+str(shuffle)+"&showID="+str(showID)+"&platform=discord&api="+str(self.versionapi), headers={"Accept": "text/plain"}) as r:
+                    if r.status != 200:
+                        return await ctx.send("Oops! Cannot get a thought...")
+                    result = await r.text(encoding="UTF-8")
+            except aiohttp.ClientConnectionError:
+                return await ctx.send("Oops! Cannot get a thought...")
 
-        await ctx.send(f"{result}")
+            await ctx.send(f"{result}")
 
     @commands.command(aliases=['tcreate'])
     async def thoughtcreate(self, ctx, tag: str, *, msg: str):
@@ -109,6 +110,7 @@ class Thoughts(commands.Cog):
         await ctx.send(f"{result}")
 
     @commands.group(name="thoughtset", aliases=['tset'])
+    @checks.is_owner()
     async def thoughtset(self, ctx):
         """Thought Settings"""
 
