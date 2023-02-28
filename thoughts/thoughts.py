@@ -165,18 +165,34 @@ class Thoughts(commands.Cog):
         `.tset api url https://mysite.com/thoughts`"""
         await self.changeSetting(ctx, 'api', 'url', newURL)
 
+    @ts_web.command(name='shuffle')
+    async def ts_shuffle(self, ctx, binary):
+        """Shuffle search results by default"""
+        await self.changeSetting(ctx, 'web', 'shuffle', binary)
+
+    @ts_web.command(name='showid')
+    async def ts_shuffle(self, ctx, binary):
+        """Show IDs in search results"""
+        await self.changeSetting(ctx, 'web', 'showID', binary)
+
+    @ts_web.command(name='showid')
+    async def ts_shuffle(self, ctx, binary):
+        """Quotes around each thought"""
+        await self.changeSetting(ctx, 'web', 'quotes', binary)
+
     @ts_web.command(name='searchlimit')
     async def ts_limit(self, ctx, newLimit):
         """Search Results Limit
-        \rMax search results that can appear on the website.\r\r
-        **This does not currently change the amount the bot will output**"""
+        \rMax search results that can appear on the website."""
         await self.changeSetting(ctx, 'web', 'searchLimit', newLimit)
 
-    @ts_web.command(name='shuffle')
-    async def ts_shuffle(self, ctx, binary):
-        """Shuffle results by default 
-        \r**This does not currently change the amount the bot will output**"""
-        await self.changeSetting(ctx, 'web', 'shuffle', binary)
+    @ts_web.command(name='bgcolor')
+    async def ts_limit(self, ctx, color):
+        """Background Color
+        \rWebsite's background color.
+        You can use anything the CSS color tag supports\r
+        Example: `.tset web bgcolor #212121"""
+        await self.changeSetting(ctx, 'web', 'backgroundColor', color)
 
     @ts_web.command(name='flood')
     async def ts_flood(self, ctx, time):
