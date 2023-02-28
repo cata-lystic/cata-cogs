@@ -175,7 +175,7 @@ class Thoughts(commands.Cog):
         """Show IDs in search results"""
         await self.changeSetting(ctx, 'web', 'showID', binary)
 
-    @ts_web.command(name='showid')
+    @ts_web.command(name='quotes')
     async def ts_shuffle(self, ctx, binary):
         """Quotes around each thought"""
         await self.changeSetting(ctx, 'web', 'quotes', binary)
