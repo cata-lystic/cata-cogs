@@ -35,14 +35,15 @@ class Thoughts(commands.Cog):
         
         if key2 == 'url':
             await self.config.url.set(newVal)
-            await ctx.send("URL Set!")
+            #await ctx.send("URL Set!")
         
         if (key2 != '' and newVal != ''):
 
             current_token = await self.config.token()
+            current_url = await self.config.url()
             newVal = newVal.replace("#", "HASHTAG")
             try:    
-                async with aiohttp.request("GET", "https://thoughts.frwd.app/api/config/?key1="+key1+"&key2="+key2+"&val="+newVal+"&token="+str(current_token), headers={"Accept": "text/plain"}) as r:
+                async with aiohttp.request("GET", current_url+"/api.php?function=config&key1="+key1+"&key2="+key2+"&val="+newVal+"&token="+str(current_token), headers={"Accept": "text/plain"}) as r:
                     if r.status != 200:
                         return await ctx.send("Oops! Cannot change setting...")
                     result = await r.text(encoding="UTF-8")
@@ -71,8 +72,10 @@ class Thoughts(commands.Cog):
             await ctx.send("You need to set an API URL. Type `.tset setup url`")
         else :
 
+            current_url = await self.config.url()
+
             try:
-                async with aiohttp.request("GET", "https://thoughts.frwd.app?q="+query+"&limit="+str(limit)+"&shuffle="+str(shuffle)+"&showID="+str(showID)+"&platform=discord&api="+str(self.versionapi), headers={"Accept": "text/plain"}) as r:
+                async with aiohttp.request("GET", current_url+"?q="+query+"&limit="+str(limit)+"&shuffle="+str(shuffle)+"&showID="+str(showID)+"&platform=discord&api="+str(self.versionapi), headers={"Accept": "text/plain"}) as r:
                     if r.status != 200:
                         return await ctx.send("Oops! Cannot get a thought...")
                     result = await r.text(encoding="UTF-8")
@@ -105,8 +108,10 @@ class Thoughts(commands.Cog):
         #tABaseString = base64.b64encode(tAuthor).decode("utf8")
         tABaseString = tAuthor.replace("#", "HASHTAG")
 
+        current_url = await self.config.url()
+
         try:    
-            async with aiohttp.request("GET", "https://thoughts.frwd.app/api/create/?token="+current_token+"&platform=discord&authorID="+str(tAuthorID)+"&tag="+tag+"&msg="+tBaseString+"&author="+tABaseString, headers={"Accept": "text/plain"}) as r:
+            async with aiohttp.request("GET", current_url+"/api.php?function=create&token="+current_token+"&platform=discord&authorID="+str(tAuthorID)+"&tag="+tag+"&msg="+tBaseString+"&author="+tABaseString, headers={"Accept": "text/plain"}) as r:
                 if r.status != 200:
                     return await ctx.send("Oops! Cannot create a thought...")
                 result = await r.text(encoding="UTF-8")
