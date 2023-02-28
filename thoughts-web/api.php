@@ -61,7 +61,6 @@ class Config {
                 'shuffle' => array(1, ['binary'], 'Shuffle search results', '#Website Settings'),
                 'showID' => array(0, ['binary'], 'Show thought ID before each result'),
                 'quotes' => array('none', [], 'Quotes around each thought. options: \'none\', \'single\', \'double\', or custom'),
-                'breaks' => array(0, ['binary'], 'Use &lt;br /&gt; instead of \n\r in API calls'),
                 'backgroundColor' => array('#212121', [], 'Background color'),
                 'fontColor' => array('#e9e5e5', [], 'Font color'),
                 'accentColor' => array('#393939', [], 'Box accent color'),
@@ -449,7 +448,7 @@ class view {
             <p>Other flags<br />
             &js=1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Javascript on web page<br />
             &showID=0&nbsp;&nbsp;&nbsp;&nbsp;Show ID of thought<br />
-            &amp;quotes=&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mark to put around each thought (\", ', `, etc)<br />
+            &amp;quotes=&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mark to put around each thought (single, double, none)<br />
             &breaks=0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Return &lt;br /&gt; instead of \\n\\r</p>
         </div>";
     }

@@ -287,14 +287,8 @@ class Thoughts(commands.Cog):
         \rValue can be 1 or 0"""
         await self.changeSetting(ctx, 'web', 'js', binary)
 
-    @ts_web.command(name='js', aliases=['javascript'])
-    async def ts_web_js(self, ctx, binary):
-        """Allow JavaScript for searching and other features
-        \rValue can be 1 or 0"""
-        await self.changeSetting(ctx, 'web', 'js', binary)
-
     @ts_web.command(name='jquery')
-    async def ts_web_js(self, ctx, binary):
+    async def ts_web_jquery(self, ctx, binary):
         """jQuery.js location
         \rYou can choose where your jquery.js file is hosted.
         Built in options: `local` (default), `google`, `jquery`, `microsoft`, `cdnjs`, `jsdelivr`
