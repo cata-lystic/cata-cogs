@@ -167,6 +167,50 @@ class Thoughts(commands.Cog):
         `.tset api url https://mysite.com/thoughts`"""
         await self.changeSetting(ctx, 'api', 'url', newURL)
 
+    @ts_api.command(name='shuffle')
+    async def ts_api_shuffle(self, ctx, binary):
+        """Shuffle search results by default
+        \rValue can be 1 or 0"""
+        await self.changeSetting(ctx, 'api', 'shuffle', binary)
+
+    @ts_api.command(name='showid')
+    async def ts_api_showid(self, ctx, binary):
+        """Show IDs in search results
+        \rValue can be 1 or 0"""
+        await self.changeSetting(ctx, 'api', 'showID', binary)
+
+    @ts_api.command(name='quotes')
+    async def ts_api_quotes(self, ctx, quotes):
+        """Quotes around each thought"""
+        await self.changeSetting(ctx, 'api', 'quotes', quotes)
+
+    @ts_api.command(name='breaks')
+    async def ts_api_breaks(self, ctx, binary):
+        """Receive <br /> instead of \n\\r
+        \rValue can be 1 or 0"""
+        await self.changeSetting(ctx, 'api', 'breaks', binary)
+
+    @ts_api.command(name='createflood')
+    async def ts_api_createflood(self, ctx, time):
+        """Creation flood time limit 
+        \rSet how long between creating posts via the API that a user has to wait.\r\r
+        Examples: 1s, 3m, 5d, 7w
+        10 minutes would be `.tset api createflood 10m`\r\r
+        This is separate from the flood limit on your bot users."""
+        await self.changeSetting(ctx, 'api', 'createFlood', time)
+
+    @ts_api.command(name='searchlimit')
+    async def ts_api_searchlimit(self, ctx, newLimit):
+        """Max search results that can appear via the API
+        \rExample: `.tset api searchlimit 500"""
+        await self.changeSetting(ctx, 'api', 'searchLimit', newLimit)
+
+    @ts_api.command(name='searchresults')
+    async def ts_api_searchresults(self, ctx, newLimit):
+        """Default amount of search results
+        \rExample: `.tset api searchresults 50"""
+        await self.changeSetting(ctx, 'api', 'searchResults', newLimit)
+
     @ts_web.command(name='shuffle')
     async def ts_web_shuffle(self, ctx, binary):
         """Shuffle search results by default
@@ -266,13 +310,13 @@ class Thoughts(commands.Cog):
     @ts_web.command(name='searchlimit')
     async def ts_web_searchlimit(self, ctx, newLimit):
         """Max search results that can appear on the website
-        \rExample: `.tset searchlimit 500"""
+        \rExample: `.tset web searchlimit 500"""
         await self.changeSetting(ctx, 'web', 'searchLimit', newLimit)
 
     @ts_web.command(name='searchresults')
     async def ts_web_searchresults(self, ctx, newLimit):
         """Default amount of search results
-        \rExample: `.tset searchresults 50"""
+        \rExample: `.tset web searchresults 50"""
         await self.changeSetting(ctx, 'web', 'searchResults', newLimit)
 
     @ts_web.command(name='github')
