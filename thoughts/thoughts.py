@@ -169,18 +169,20 @@ class Thoughts(commands.Cog):
 
     @ts_web.command(name='shuffle')
     async def ts_web_shuffle(self, ctx, binary):
-        """Shuffle search results by default"""
+        """Shuffle search results by default
+        \rValue can be 1 or 0"""
         await self.changeSetting(ctx, 'web', 'shuffle', binary)
 
     @ts_web.command(name='showid')
     async def ts_web_showid(self, ctx, binary):
-        """Show IDs in search results"""
+        """Show IDs in search results
+        \rValue can be 1 or 0"""
         await self.changeSetting(ctx, 'web', 'showID', binary)
 
     @ts_web.command(name='quotes')
-    async def ts_web_quotes(self, ctx, binary):
+    async def ts_web_quotes(self, ctx, quotes):
         """Quotes around each thought"""
-        await self.changeSetting(ctx, 'web', 'quotes', binary)
+        await self.changeSetting(ctx, 'web', 'quotes', quotes)
 
     @ts_web.command(name='searchlimit')
     async def ts_web_searchlimit(self, ctx, newLimit):
@@ -188,13 +190,29 @@ class Thoughts(commands.Cog):
         \rMax search results that can appear on the website."""
         await self.changeSetting(ctx, 'web', 'searchLimit', newLimit)
 
-    @ts_web.command(name='bgcolor', aliases=['backgroundcolor'])
+    @ts_web.command(name='themebg', aliases=['backgroundcolor'])
     async def ts_web_bgcolor(self, ctx, color):
         """Background Color
         \rWebsite's background color.
         You can use anything the CSS color tag supports\r
         Example: `.tset web bgcolor #212121"""
         await self.changeSetting(ctx, 'web', 'backgroundColor', color)
+
+    @ts_web.command(name='themeaccent', aliases=['accentcolor'])
+    async def ts_web_accentcolor(self, ctx, color):
+        """Accent Color
+        \rWebsite's box color for API info, search, creation.
+        You can use anything the CSS color tag supports\r
+        Example: `.tset web accent #212121"""
+        await self.changeSetting(ctx, 'web', 'accentColor', color)
+
+    @ts_web.command(name='themeradius', aliases=['accentradius']))
+    async def ts_web_accentradius(self, ctx, radius):
+        """Accent Border Radius
+        \rWebsite's box border radius (roundness)
+        You can use anything the CSS border-radius tag supports\r
+        Example: `.tset web themeradius 10px"""
+        await self.changeSetting(ctx, 'web', 'accentRadius', radius)
 
     @ts_web.command(name='flood')
     async def ts_web_createflood(self, ctx, time):
@@ -204,3 +222,15 @@ class Thoughts(commands.Cog):
         10 minutes would be `.tset web flood 10m`\r\r
         This is separate from the flood limit on your bot users."""
         await self.changeSetting(ctx, 'web', 'createFlood', time)
+
+    @ts_web.command(name='info')
+    async def ts_web_info(self, ctx, binary):
+        """Enable API info box
+        \rValue can be 1 or 0"""
+        await self.changeSetting(ctx, 'web', 'info', binary)
+
+    @ts_web.command(name='infovisible')
+    async def ts_web_infovis(self, ctx, binary):
+        """Show API info box by default
+        \rValue can be 1 or 0"""
+        await self.changeSetting(ctx, 'web', 'infoVisible', binary)
