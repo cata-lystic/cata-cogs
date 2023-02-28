@@ -206,7 +206,7 @@ class Thoughts(commands.Cog):
         Example: `.tset web accent #212121"""
         await self.changeSetting(ctx, 'web', 'accentColor', color)
 
-    @ts_web.command(name='themeradius', aliases=['accentradius']))
+    @ts_web.command(name='themeradius', aliases=['accentradius'])
     async def ts_web_accentradius(self, ctx, radius):
         """Accent Border Radius
         \rWebsite's box border radius (roundness)
