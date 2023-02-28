@@ -76,7 +76,7 @@ if (isset($_REQUEST['create'])) {
   }
 
   if ($lastPost != 0) {
-    $floodFinal = $lastPost - (time() - $tools::floodTime); // Subtract last post time from flood check to see seconds left
+    $floodFinal = $lastPost - (time() - intval($config->api['createFlood'])); // Subtract last post time from flood check to see seconds left
     if ($floodFinal > 0) {
       echo "`Slow down!` You can post again in ".tools::floodTime($floodFinal, 1)."."; // stop if flood triggered
       die();
@@ -87,7 +87,7 @@ if (isset($_REQUEST['create'])) {
   echo "`".ucfirst($cTag)." posted!` {$config->api['url']}?q={$nextID}";
 
   // Add this to the thoughts.json
-  $data[$nextID] = array("msg" => $cMsg, "tag" => $cTag, "author" => $cAuthor, "authorID" => $cAuthorID, "timestamp" => time(), "source" => $platform);
+  $data[$nextID] = array("msg" => $cMsg, "tag" => $cTag, "author" => str_replace("HASHTAG", "#", $cAuthor), "authorID" => $cAuthorID, "timestamp" => time(), "source" => $platform);
   Files::write("app/thoughts.json", json_encode($data, JSON_PRETTY_PRINT));
   die();
 }
@@ -126,7 +126,7 @@ if ($q == "list" && $platform != "discord") {
       echo "I need to think more to get to #".$rand;
     } else {
       $thisID = ($showID == 1) ? "#".$rand.": " : null;
-      echo $thisID."{$quotes}".$data[$rand]['msg']."{$quotes}";
+      echo $thisID."{$quotes}".$data[$rand]['msg']."{$quotes} -".$data[$rand]['author'];
     }
   } else {
     echo "There are no thoughts...";
