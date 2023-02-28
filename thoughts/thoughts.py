@@ -32,8 +32,7 @@ class Thoughts(commands.Cog):
     async def changeSetting(self, ctx, key1, key2, newVal=''):
         if key2 == 'token':
             await self.config.token.set(newVal)
-            await ctx.send("Token Set! Please delete your last message.")
-            pass
+            return await ctx.send("Token Set! Please delete your last message.")
         
         if (key2 != '' and newVal != ''):
 
@@ -186,7 +185,7 @@ class Thoughts(commands.Cog):
         \rMax search results that can appear on the website."""
         await self.changeSetting(ctx, 'web', 'searchLimit', newLimit)
 
-    @ts_web.command(name='bgcolor')
+    @ts_web.command(name='bgcolor', aliases=['backgroundcolor'])
     async def ts_web_bgcolor(self, ctx, color):
         """Background Color
         \rWebsite's background color.

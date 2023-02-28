@@ -14,15 +14,15 @@ $data = Files::read("app/thoughts.json");
 if (!is_array($data)) $data = []; // Create data array if there are no msgs
 
 // Get possible queries
-$q = $_GET['q'] ?? null; // allow a specific ID to be fetched
-$limit = $_GET['limit'] ?? $config->api['searchLimit']; // amount of search results to return
-$shuffle = $_GET['shuffle'] ?? $config->api['shuffle']; // shuffle search results
-$showID = $_GET['showID'] ?? $config->api['showID']; // show unique ID before each thought
-$platform = $_GET['platform'] ?? 'web'; // anything besides "web" will be plain text mode
-$quotes = $_GET['quotes'] ?? $config->api['quotes']; // no quotes by default
-$breaks = $_GET['breaks'] ?? $config->api['breaks']; // prefer <br /> over /n/r (web will overwrite this)
-$js = $_GET['js'] ?? $config->web['js']; // web javascript features enabled by default
-$apiRequest = $_GET['api'] ?? null; // API version from requester
+$q = $_REQUEST['q'] ?? null; // allow a specific ID to be fetched
+$limit = $_REQUEST['limit'] ?? $config->web['searchLimit']; // amount of search results to return
+$shuffle = $_REQUEST['shuffle'] ?? $config->web['shuffle']; // shuffle search results
+$showID = $_REQUEST['showID'] ?? $config->web['showID']; // show unique ID before each thought
+$platform = $_REQUEST['platform'] ?? 'web'; // anything besides "web" will be plain text mode
+$quotes = $_REQUEST['quotes'] ?? tools::quotes($config->web['quotes']); // no quotes by default
+$breaks = $_REQUEST['breaks'] ?? $config->web['breaks']; // prefer <br /> over /n/r (web will overwrite this)
+$js = $_REQUEST['js'] ?? $config->web['js']; // web javascript features enabled by default
+$apiRequest = $_REQUEST['api'] ?? null; // API version from requester
 
 $total = count($data); // total thoughts
 if ($platform == "discord") {
@@ -31,7 +31,7 @@ if ($platform == "discord") {
 }
 
 // Create Thought (then kill script)
-if (isset($_GET['create'])) {
+if (isset($_REPLACE['create'])) {
 
   // Check if thoughts.json is empty
   if ($total > 0) {
@@ -42,11 +42,11 @@ if (isset($_GET['create'])) {
     $nextID = "1";
   }
 
-  $cAuthor = $_GET['author'] ?? null;
-  $cAuthorID = $_GET['authorID'] ?? null;
-  $cMsg = $_GET['msg'] ?? null;
-  $cTag = strtolower($_GET['tag']) ?? null;
-  $cBase = $_GET['base64'] ?? null; // created msg and author may be in base64
+  $cAuthor = $_REPLACE['author'] ?? null;
+  $cAuthorID = $_REPLACE['authorID'] ?? null;
+  $cMsg = $_REPLACE['msg'] ?? null;
+  $cTag = strtolower($_REPLACE['tag']) ?? null;
+  $cBase = $_REPLACE['base64'] ?? null; // created msg and author may be in base64
 
   if ($cAuthor == null || $cAuthorID == null || $cMsg == null || $cTag == null) {
     echo ("SOMETHING IS MISSING | Author: ".$cAuthor." | ID: ".$cAuthorID." | Tag: ".$cTag." | Msg: ".$cMsg);

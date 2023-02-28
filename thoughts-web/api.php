@@ -46,21 +46,21 @@ class Config {
         
         $this->defaults = array(
             'api' => array(
-                'public_tokens' => array("['']", ['char>8'], 'Multiple tokens supported', 'Public tokens mainly fetch content. They will not be able to change settings.'),
-                'private_tokens' => array("['']", ['char>8'], 'Multiple tokens supported', '#Private tokens will have full power, only give them to people you trust'),
+                'private_tokens' => array("['']", ['char>8'], 'Multiple tokens supported', 'Private tokens will have full power, only give them to people you trust'),
+                'public_tokens' => array("['']", ['char>8'], 'Multiple tokens supported', '#Public tokens mainly fetch content. They will not be able to change settings.'),
                 'url' => array('auto', [], 'Change if auto detection fails','#Script will attempt to autodetect API URL, but it can be set manually'),
                 'searchLimit' => array(500, ['number'], 'Search results max limit. Cannot be changed by API request', '#API Settings'),
                 'searchResults' => array(3, ['number'], 'Default amount of results per search'),
                 'createFlood' => array('10s', ['alphanum'], 'Time between when a user can post again (format: 5s, 3m, 5d, 7w, etc)'),
                 'shuffle' => array(1, ['binary'], 'Shuffle search results'),
                 'showID' => array(0, ['binary'], 'Show thought ID before each result'),
-                'quotes' => array('', [], 'Quotes around each thought. Use \\\' for single quotes'),
+                'quotes' => array('none', [], 'Quotes around each thought. options: \'none\', \'single\', \'double\', or custom'),
                 'breaks' => array(0, ['binary'], 'Use &lt;br /&gt; instead of \n\r in API calls'),
                 'platform' => array('api', ['alpha'], 'Can be set to anything where the request came from (example: discord)')),
             "web" => array(
                 'shuffle' => array(1, ['binary'], 'Shuffle search results', '#Website Settings'),
                 'showID' => array(0, ['binary'], 'Show thought ID before each result'),
-                'quotes' => array('', [], 'Quotes around each thought. Use \\\' for single quotes'),
+                'quotes' => array('none', [], 'Quotes around each thought. options: \'none\', \'single\', \'double\', or custom'),
                 'breaks' => array(0, ['binary'], 'Use &lt;br /&gt; instead of \n\r in API calls'),
                 'backgroundColor' => array('#212121', [], 'Background color'),
                 'fontColor' => array('#e9e5e5', [], 'Font color'),
@@ -247,7 +247,7 @@ class Config {
                         }
                     }
                     // $finalVal is the $newVal if this is the changed setting
-                    $finalVal = ($oldCategory == $key1 && $oldKey == $key2) ? $newVal : $this->arrayToString($set[$oldCategory][$oldKey]); 
+                    $finalVal = ($oldCategory == $key1 && $oldKey == $key2) ? htmlspecialchars($newVal) : $this->arrayToString($set[$oldCategory][$oldKey]); 
                         
                     // Don't includes quotes around the val if it's meant to be a number
                     $reqs = $this->defaults[$oldCategory][$oldKey][1];
@@ -477,7 +477,7 @@ class view {
     // Detect which Javascript and jQuery file to use (or not use)
     public function js() {
 
-        if ($_SESSION['web']['js'] != 1 || isset($_GET['js']) && $_GET['js'] == 0) return false;
+        if ($_SESSION['web']['js'] != 1 || isset($_REQUEST['js']) && $_REQUEST['js'] == 0) return false;
         $jq = strtolower($_SESSION['web']['jquery']);
         $jqVer = "3.6.3";
 
@@ -555,6 +555,20 @@ class tools {
         }
 
         return $time;
+    }
+
+    // Process quotes (convert single or double to ' or "")
+    public static function quotes($str) {
+        if ($str == "none") {
+            $quote = "";
+        } else if ($str == "single") {
+            $quote = "'";
+        } else if ($str == "double") {
+            $quote = '"';
+        } else {
+            $quote = $str;
+        }
+        return $quote;
     }
 
     // Plural. Check if word (like Days) needs an 's' at the end.

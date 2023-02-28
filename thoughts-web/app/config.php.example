@@ -3,11 +3,11 @@
 # Make unique and secure tokens. Must be at least 8 characters in length with no spaces.
 # When config is complete, give the information to your Discord Bot with: [p]thoughtset api
 
-# Public tokens mainly fetch content. They will not be able to change settings.
-$set['api']['public_tokens'] = ['publicToken1', 'publicToken2']; # Multiple tokens supported
-
 # Private tokens will have full power, only give them to people you trust
 $set['api']['private_tokens'] = ['privateToken1', 'privateToken2']; # Multiple tokens supported
+
+# Public tokens mainly fetch content. They will not be able to change settings.
+$set['api']['public_tokens'] = ['publicToken1', 'publicToken2']; # Multiple tokens supported
 
 # Script will attempt to autodetect API URL, but it can be set manually
 $set['api']['url'] = 'auto'; # Change if auto detection fails
@@ -18,14 +18,14 @@ $set['api']['searchResults'] = 3; # Default amount of results per search
 $set['api']['createFlood'] = '10s'; # Time between when a user can post again (format: 5s, 3m, 5d, 7w, etc)
 $set['api']['shuffle'] = 1; # Shuffle search results
 $set['api']['showID'] = 0; # Show thought ID before each result
-$set['api']['quotes'] = ''; # Quotes around each thought. Use \' for single quotes
+$set['api']['quotes'] = 'none'; # Quotes around each thought. options: 'none', 'single', 'double', or custom
 $set['api']['breaks'] = 0; # Use &lt;br /&gt; instead of \n\r in API calls
 $set['api']['platform'] = 'api'; # Can be set to anything where the request came from (example: discord)
 
 # Website Settings
 $set['web']['shuffle'] = 1; # Shuffle search results
 $set['web']['showID'] = 0; # Show thought ID before each result
-$set['web']['quotes'] = ''; # Quotes around each thought. Use \' for single quotes
+$set['web']['quotes'] = 'none'; # Quotes around each thought. options: 'none', 'single', 'double', or custom
 $set['web']['breaks'] = 0; # Use &lt;br /&gt; instead of \n\r in API calls
 $set['web']['backgroundColor'] = '#212121'; # Background color
 $set['web']['fontColor'] = '#e9e5e5'; # Font color
