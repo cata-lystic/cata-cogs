@@ -79,6 +79,46 @@ class Config {
         
     }
 
+    public function load() {
+
+        // Check if there is already session config data
+        if (isset($_SESSION['api']['url'])) {
+            // Loop through each session config var for the object vars
+            foreach($_SESSION as $key => $val) {
+                $this->$key = $val;
+            }
+    
+        } else {
+            require(__DIR__."/app/config.php");
+
+            // Make sure owner has set valid tokens in config.php )
+            $checkToken = $this->token($set['token'], 'valid');
+            
+            if ($checkToken !== true) {
+                if ($checkToken == 'Token blank') // Extend the token blank message
+                    $checkToken = 'Token blank. Update $set[\'api\'][\'public_tokens\'] in config.php';
+                die($checkToken);
+            }
+
+            // Throw each var into a session
+            // Note: is it necessary to always load the discord-web api key or only when needed? maybe only when logged in too.
+            foreach($set as $key => $var) {
+                $_SESSION[$key] = $var;
+                $this->$key = $var;
+            }
+            //unset($_SESSION['api']['public_tokens'], $_SESSION['api']['private_tokens']); // Don't include tokens in session
+
+            // Detect URL if auto enabled
+            $this->api['url'] = tools::detectURL();
+            $_SESSION['api']['url'] = $this->api['url'];
+
+            // Convert floodTime to seconds
+            $this->api['createFlood'] = tools::floodTime();
+            $_SESSION['api']['floodTime'] = $this->api['createFlood'];
+        }
+        
+    }
+
     // Check to make sure setting matches required criteria
     function check($key1, $key2, $val) {
 
@@ -146,46 +186,6 @@ class Config {
         }
 
         return true;
-    }
-
-    public function load() {
-
-        // Check if there is already session config data
-        if (isset($_SESSION['api']['url'])) {
-            // Loop through each session config var for the object vars
-            foreach($_SESSION as $key => $val) {
-                $this->$key = $val;
-            }
-    
-        } else {
-            require(__DIR__."/app/config.php");
-
-            // Make sure owner has set valid tokens in config.php )
-            $checkToken = $this->token($set['token'], 'valid');
-            
-            if ($checkToken !== true) {
-                if ($checkToken == 'Token blank') // Extend the token blank message
-                    $checkToken = 'Token blank. Update $set[\'api\'][\'public_tokens\'] in config.php';
-                die($checkToken);
-            }
-
-            // Throw each var into a session
-            // Note: is it necessary to always load the discord-web api key or only when needed? maybe only when logged in too.
-            foreach($set as $key => $var) {
-                $_SESSION[$key] = $var;
-                $this->$key = $var;
-            }
-            //unset($_SESSION['api']['public_tokens'], $_SESSION['api']['private_tokens']); // Don't include tokens in session
-
-            // Detect URL if auto enabled
-            $this->api['url'] = tools::detectURL();
-            $_SESSION['api']['url'] = $this->api['url'];
-
-            // Convert floodTime to seconds
-            $this->api['createFlood'] = tools::floodTime();
-            $_SESSION['api']['floodTime'] = $this->api['createFlood'];
-        }
-        
     }
 
     // Convert array to a string such as ['one', 'two']
@@ -361,11 +361,11 @@ class api extends config {
             die("You can't change the web token from the API");
     
         // Attempt config change
-        $config = new config();
+        //$config = new config();
 
         $val = str_replace("HASHTAG", "#", $val); // convert HASHTAG to #
         
-        $changeSetting = $config->set($key1, $key2, $val);
+        $changeSetting = parent::set($key1, $key2, $val);
         
         if ($changeSetting == "OK") {
             echo "Changed `{$key1} {$key2}` to `{$val}`";
@@ -376,7 +376,70 @@ class api extends config {
     }
 
     function create() {
-        echo "CREATE UNFINISHED";
+
+        $data = Files::read("app/thoughts.json");
+        if (!is_array($data)) $data = []; // Create data array if there are no msgs
+        $total = count($data); // total thoughts
+
+        // Check if thoughts.json is empty
+        if ($total > 0) {
+            $lastID = key(array_slice($data, -1, 1, true)); // Get the last key's ID
+            $nextID = intval($lastID) + 1; // increase it by 1
+        } else {
+            $total = 0;
+            $nextID = "1";
+        }
+
+        $author = $this->req['author'] ?? null;
+        $authorID = $this->req['authorID'] ?? null;
+        $cMsg = $this->req['msg'] ?? null;
+        $cTag = strtolower($this->req['tag']) ?? null;
+        $cBase = $this->req['base64'] ?? null; // created msg and author may be in base64
+        $platform = $this->req['platform'] ?? "api";
+
+        if ($author == null || $authorID == null || $cMsg == null || $cTag == null) {
+            echo ("SOMETHING IS MISSING | Author: ".$author." | ID: ".$authorID." | Tag: ".$cTag." | Msg: ".$cMsg);
+            die();
+        }
+
+        // Only certain tags are allowed
+        $tagsAllowed = array('thought', 'music', 'spam');
+        if (!in_array($cTag, $tagsAllowed)) {
+            echo "WRONG TAG";
+            die();
+        }
+
+        // Decode Base64 if requested
+        if ($cBase == 1) {
+            $cMsg = base64_decode($cMsg);
+            $author = base64_decode($author);
+        }
+
+        // Make sure the author isn't flooding
+        // Loop through the thoughts and find the author's latest post
+        $lastPost = 0;
+        foreach ($data as $id => $val) {
+            if ($val['author'] == $author) {
+            $lastPost = $val['timestamp'];
+            }
+        }
+
+        if ($lastPost != 0) {
+            $floodFinal = $lastPost - (time() - intval($_SESSION['api']['createFlood'])); // Subtract last post time from flood check to see seconds left
+            if ($floodFinal > 0) {
+            echo "`Slow down!` You can post again in ".tools::floodTime($floodFinal, 1)."."; // stop if flood triggered
+            die();
+            }
+        }
+
+        // All is well, post results
+        echo "`".ucfirst($cTag)." posted!` {$_SESSION['api']['url']}?q={$nextID}";
+
+        // Add this to the thoughts.json
+        $data[$nextID] = array("msg" => $cMsg, "tag" => $cTag, "author" => str_replace("HASHTAG", "#", $author), "authorID" => $authorID, "timestamp" => time(), "source" => $platform);
+        Files::write("app/thoughts.json", json_encode($data, JSON_PRETTY_PRINT));
+        die();
+
     }
 
     function search() {
