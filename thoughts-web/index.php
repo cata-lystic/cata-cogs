@@ -6,8 +6,6 @@ ini_set("memory_limit", 512 * 1024 * 1024); // Set memory limit to 512mb so PHP 
 error_reporting(E_ALL);
 
 require_once("api.php");
-$config = new config();
-$api = new api();
 
 // Get Settings and Thoughts
 $data = Files::read("app/thoughts.json");

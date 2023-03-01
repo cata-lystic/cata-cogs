@@ -37,7 +37,6 @@ class Config {
             'api' => 1.0 // API version
         );
 
-        $this->load(); // Load the config file and variables
         // List of config settings. Array includes the follwoing:
         // [0] Default value
         // [1] Requirements
@@ -77,6 +76,8 @@ class Config {
                 'jquery' => array('local', [], 'options: local, google, jquery, microsoft, cdnjs, jsdelivr, Custom URL', 'jQuery.js location. Change from "local" to direct URL or built in CDN options'))
             );
         
+
+            $this->load(); // Load the config file and variables
     }
 
     public function load() {
@@ -217,13 +218,14 @@ class Config {
             // If var still doesn't exist kill the script
             return $_SESSION[$key1][$key2] ?? null;
         } else {
+            
             // As far as I know, to do this we have to rewrite the config.php file each time.
             // This will loop through the defaults to get the keys and descriptions to remake the file
             // The user's current config settings will be saved but the requested key will be overwritten
             require("app/config.php"); // old config settings will be in $set
 
             // Make sure this var is an actual setting
-            if (!isset($set[$key1]) || !in_array($key2, array_keys($this->defaults[$key1]))) return "ERROR: `{$key1} {$key2}` is not a valid setting";
+            if (!isset($set[$key1][$key2]) || !isset($_SESSION[$key1][$key2])) return "ERROR: `{$key1} {$key2}` is not a valid setting";
             
             // Check to make sure new value meets requirements
             $checkReq = $this->check($key1, $key2, $newVal);
@@ -318,12 +320,16 @@ class api extends config {
 
     function __construct() {
         
+        Config::__construct();
+
         $this->allowedFunctions = ['config', 'create', 'search'];
 
         // Get all request variables and put them in an array
         foreach($_REQUEST as $key => $val) {
             $this->req[$key] = $val;
         }
+
+        
 
     }
 
@@ -352,22 +358,19 @@ class api extends config {
         $key1 = $this->req['key1'] ?? null;
         $key2 = $this->req['key2'] ?? null;
         $val = $this->req['val'] ?? null;
-        $token = $this->req['token'] ?? null;
+        $token = $this->req['token'] ?? 'default';
 
         // All fields required
         if (empty($key1) || empty($key2) || $val == null || empty($token))
             die("Missing key1, key2, val, or token");
     
         // Can't change token from API
-        if ($key2 == "public_tokens" || $key2 == "private_tokens")
-            die("You can't change the web token from the API");
-    
-        // Attempt config change
-        //$config = new config();
+        if ($key1 == "token")
+            die("You can't change the web tokens from the API");
 
         $val = str_replace("HASHTAG", "#", $val); // convert HASHTAG to #
         
-        $changeSetting = parent::set($key1, $key2, $val);
+        $changeSetting = $this->set($key1, $key2, $val);
         
         if ($changeSetting == "OK") {
             echo "Changed `{$key1} {$key2}` to `{$val}`";
@@ -436,7 +439,7 @@ class api extends config {
         }
 
         // All is well, post results
-        echo "`".ucfirst($cTag)." posted!` {$_SESSION['api']['url']}?q={$nextID}";
+        echo "`".ucfirst($cTag)." posted!` {$_SESSION['api']['url']}?s={$nextID}";
 
         // Add this to the thoughts.json
         $data[$nextID] = array("msg" => $cMsg, "tag" => $cTag, "author" => str_replace("HASHTAG", "#", $author), "authorID" => $authorID, "timestamp" => time(), "source" => $platform);
