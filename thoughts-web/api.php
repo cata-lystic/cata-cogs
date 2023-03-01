@@ -111,7 +111,7 @@ class Config {
 
             // Detect URL if auto enabled
             if ($this->api['url'] == 'auto') {
-                $this->api['url'] = tools::detectURL();
+                $this->api['url'] = tools::detectURL($this->api['url']);
                 $_SESSION['api']['url'] = $this->api['url'];
             }
 
@@ -322,7 +322,7 @@ class api extends config {
         
         Config::__construct();
 
-        $this->allowedFunctions = ['config', 'create', 'delete', 'list', 'search'];
+        $this->allowedFunctions = ['config', 'create', 'delete', 'list', 'search', 'dev'];
 
         // Get all request variables and put them in an array
         foreach($_REQUEST as $key => $val) {
@@ -481,8 +481,7 @@ class api extends config {
     
     // List all posts
     function list() {
-        //echo "api::list() UNFINISHED";
-        $this->req['s'] = 'list';
+        $this->req['s'] = 'list'; // change search result to 'list' (this needs to be fixed)
         $this->search();
     }
 
@@ -568,6 +567,11 @@ class api extends config {
         }
         
 
+    }
+
+    // This function is only used for me to test out code.
+    function dev() {
+       echo 'Nothing in dev() right now...';
     }
 
 }
@@ -702,13 +706,19 @@ class view {
 class tools {
 
     // Detect URL or use custom
-    public static function detectURL() {
-        $url = $_SESSION['api']['url'];
+    public static function detectURL($url=null) {
+
+        if ($url == null) $url = 'auto';
 
         // Try to autodetect the URL. It can overwritten it in settings.
-        if ($url == "" || $url == "auto") {
+        if ($url == '' || $url == 'auto') {
             $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']) ? 'https://' : 'http://'; 
-            $url = $protocol.$_SERVER['HTTP_HOST'];
+            $url = $_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'];
+
+            // Remove the main possible files that could be accessed. Remove them and you have the domain.
+            if (substr($url, -8) == '/api.php') $url = substr($url, 0, -8);
+            if (substr($url, -10) == '/index.php') $url = substr($url, 0, -10);
+            $url = $protocol.$url;
         }
         return $url;
     }

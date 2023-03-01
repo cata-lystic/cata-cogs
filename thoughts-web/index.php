@@ -42,6 +42,8 @@ if ($platform == "web") {
   <div id='content'>"; // create the content div for web for javascript search
 }
 
+
+
 // Website only shows if needed
 if ($platform == "web") {
 
