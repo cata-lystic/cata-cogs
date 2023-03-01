@@ -43,7 +43,7 @@ class Thoughts(commands.Cog):
             current_url = await self.config.url()
             newVal = newVal.replace("#", "HASHTAG")
             try:    
-                async with aiohttp.request("GET", current_url+"/api.php?function=config&key1="+key1+"&key2="+key2+"&val="+newVal+"&token="+str(current_token), headers={"Accept": "text/plain"}) as r:
+                async with aiohttp.request("GET", current_url+"/api.php?q=config&key1="+key1+"&key2="+key2+"&val="+newVal+"&token="+str(current_token), headers={"Accept": "text/plain"}) as r:
                     if r.status != 200:
                         return await ctx.send("Oops! Cannot change setting...")
                     result = await r.text(encoding="UTF-8")
@@ -77,7 +77,7 @@ class Thoughts(commands.Cog):
             return await ctx.send("You need to set an API URL. Type `.tset setup url`")
         
         try:
-            async with aiohttp.request("GET", current_url+"/api.php?function=search&token="+current_token+"&s="+search+"&limit="+str(limit)+"&shuffle="+str(shuffle)+"&showID="+str(showID)+"&platform=discord&api="+str(self.versionapi), headers={"Accept": "text/plain"}) as r:
+            async with aiohttp.request("GET", current_url+"/api.php?q=search&token="+current_token+"&s="+search+"&limit="+str(limit)+"&shuffle="+str(shuffle)+"&showID="+str(showID)+"&platform=discord&api="+str(self.versionapi), headers={"Accept": "text/plain"}) as r:
                 if r.status != 200:
                     return await ctx.send("Oops! Cannot get a thought...")
                 result = await r.text(encoding="UTF-8")
@@ -113,7 +113,7 @@ class Thoughts(commands.Cog):
         current_url = await self.config.url()
 
         try:    
-            async with aiohttp.request("GET", current_url+"/api.php?function=create&token="+current_token+"&platform=discord&authorID="+str(tAuthorID)+"&tag="+tag+"&msg="+tBaseString+"&author="+tABaseString, headers={"Accept": "text/plain"}) as r:
+            async with aiohttp.request("GET", current_url+"/api.php?q=create&token="+current_token+"&platform=discord&authorID="+str(tAuthorID)+"&tag="+tag+"&msg="+tBaseString+"&author="+tABaseString, headers={"Accept": "text/plain"}) as r:
                 if r.status != 200:
                     return await ctx.send("Oops! Cannot create a thought...")
                 result = await r.text(encoding="UTF-8")

@@ -2,12 +2,15 @@
 #  API Setup
 # Make unique and secure tokens. Must be at least 8 characters in length with no spaces.
 # You may create multiple tokens with different permissions
-# Permissions: admin, config, create, delete, search
+# Permissions: admin, config, create, delete, list, search
 # 'admin' permission has full access to all commands. Only give these tokens to people you trust that will help you manage the API and website
+# Do not delete the 'default' token. This is used for when your API is accessed with no other request.
+# The default token should only be used for 'search' and 'list' (maybe 'create' if you want creation public)
 # When config is complete, give an admin token to your Discord Bot with: [p]thoughtset setup api yourAdminToken
 
 $set['token']['changeThisAdminToken'] = ['admin'];
-$set['token']['changeThisPublicToken'] = ['search', 'create'];
+$set['token']['changeThisCustomToken'] = ['search', 'list', 'create', 'delete'];
+$set['token']['default'] = ['search', 'list'];
 
 # API Settings
 $set['api']['url'] = 'auto'; # Change if auto detection fails

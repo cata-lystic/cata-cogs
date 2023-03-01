@@ -229,7 +229,7 @@ class Config {
             $checkReq = $this->check($key1, $key2, $newVal);
             if ($checkReq !== true) die($checkReq); // Kill script and show error if fails
             
-            $result = "<?php\n#  API Setup\n# Make unique and secure tokens. Must be at least 8 characters in length with no spaces.\n# You may create multiple tokens with different permissions\n# Permissions: admin, config, create, delete, search\n# 'admin' permission has full access to all commands. Only give these tokens to people you trust that will help you manage the API and website\n# When config is complete, give an admin token to your Discord Bot with: [p]thoughtset setup api yourAdminToken\n\n";
+            $result = "<?php\n#  API Setup\n# Make unique and secure tokens. Must be at least 8 characters in length with no spaces.\n# You may create multiple tokens with different permissions\n# Permissions: admin, config, create, delete, search\n# 'admin' permission has full access to all commands. Only give these tokens to people you trust that will help you manage the API and website\n# Do not delete the 'default' token. This is used for when your API is accessed with no other request.\n# # The default token should only be used for 'search' and 'list' (maybe 'create' if you want creation public)\n# When config is complete, give an admin token to your Discord Bot with: [p]thoughtset setup api yourAdminToken\n\n";
 
             // Loop through current $set['token']s and reprint them all out with their permissions
             foreach($set['token'] as $tVal => $tPerms) {
@@ -282,14 +282,17 @@ class Config {
         // Just make sure the tokens the admin set are valid
         if ($permission == "valid") {
 
-            // Loop through the array and check if each token is valid
+            // Loop through the array and check if each token is valid. Make sure there's a default token
+            $hasDefault = false;
             foreach($tokens as $key => $val) {
+                if ($key == 'default') $hasDefault = true;
                 if ($key == '') return 'Token blank';
-                if (strlen($key) < 8) return "Token `{$key}` too short";
+                if (strlen($key) < 8 && $key != 'default') return "Token `{$key}` too short";
                 if (strpos($key, ' ') !== false) return "Token `$key` cannot have spaces";
                 if (count($val) == 0) return "Token `$key` doesn't have any permissions";
-                if ($key == "changeThisAdminToken" || $key == "changeThisPublicToken") return "Set tokens in config.php";
+                if ($key == "changeThisAdminToken" || $key == "changeThisCustomToken") return "Set tokens in config.php";
             }
+            if ($hasDefault === false) return 'No default token set';
 
         } else {
             
@@ -298,7 +301,7 @@ class Config {
                 if (!isset($_SESSION['token'][$key])) return "Invalid token";
                 $perms = $_SESSION['token'][$key];
                 // Check if this token has admin or requested permission
-                if (!in_array($permission, $perms) && !in_array('admin', $perms)) return "Token $key doesn't have $permission permissions";
+                if (!in_array($permission, $perms) && !in_array('admin', $perms)) return "Token doesn't have `{$permission}` permissions";
             }
         }
 
@@ -327,18 +330,19 @@ class api extends config {
     // Process what has been requested and send to proper function
     function process() {
 
-        // Check if there was a 'function' request
-        $func = $this->req['function'] ?? null;
-        $token = $this->req['token'] ?? null;
+        // Check if there was a 'q' (query) request
+        $func = $this->req['q'] ?? 'search'; // Consider no query a search for a random thought
+ 
+        // Make sure token is valid and has the proper permissions
+        $token = $this->req['token'] ?? 'default';
+        $checkToken = $this->token($token, $func);
+        if ($checkToken !== true) die($checkToken);
 
-        if (!empty($func)) {
+        // Make sure this is a valid function
+        if (!in_array($func, $this->allowedFunctions)) die("Invalid function");
 
-            // Make sure this is a valid function
-            if (!in_array($func, $this->allowedFunctions)) die("Invalid function");
-
-            // Run requested function
-            $this->$func();
-        }
+        // Run requested function
+        $this->$func();
 
     }
 
@@ -349,10 +353,6 @@ class api extends config {
         $key2 = $this->req['key2'] ?? null;
         $val = $this->req['val'] ?? null;
         $token = $this->req['token'] ?? null;
-
-        // Make sure API token is valid
-        $checkToken = $this->token($token, 'config');
-        if ($checkToken !== true) die($checkToken);
 
         // All fields required
         if (empty($key1) || empty($key2) || $val == null || empty($token))
@@ -447,17 +447,12 @@ class api extends config {
 
     function search() {
 
-        // Make sure API token is valid
-        $token = $this->req['token'] ?? null;
-        $checkToken = $this->token($token, 'search');
-        if ($checkToken !== true) die($checkToken);
-
         // Get Settings and Thoughts
         $data = Files::read("app/thoughts.json");
         if (!is_array($data)) $data = []; // Create data array if there are no msgs
 
         // Get possible queries
-        $q = $this->req['s'] ?? null; // specific ID or query to be searched
+        $s = $this->req['s'] ?? null; // specific ID or query to be searched
         $limit = $this->req['limit'] ?? $_SESSION['api']['searchLimit']; // amount of search results to return
         $shuffle = $this->req['shuffle'] ?? $_SESSION['api']['shuffle']; // shuffle search results
         $showID = $this->req['showID'] ?? $_SESSION['api']['showID']; // show unique ID before each thought
@@ -473,23 +468,23 @@ class api extends config {
         }
 
         // ?q=list creates an entire list of thoughts and then quits
-        if ($q == "list" && $platform != "discord") {
+        if ($s == "list" && $platform != "discord") {
             foreach ($data as $id => $val) {
             $thisID = ($showID == 1) ? "#{$id}: " : null;
             echo "<p class='thought'>{$thisID}{$val['msg']}</p>";
         }
         
         // ?q=list for a non-web platform just shows a link to the list page
-        } else if ($q == "list" && $platform == "discord") {
+        } else if ($s == "list" && $platform == "discord") {
             echo "Full list of thoughts can be found at {$config->url}?q=list";
         
-        // If $q is numeric or empty, fetch a random or desired ID
-        } else if ($q == null || is_numeric($q)) {
+        // If $s is numeric or empty, fetch a random or desired ID
+        } else if ($s == null || is_numeric($s)) {
         
             //if ($platform != "web" && $apiRequest == "") die("API version required");
         
             if ($total != 0) {
-            $rand = ($q == null) ? rand(1, $total) : $q;
+            $rand = ($s == null) ? rand(1, $total) : $s;
             if ($rand > $total) {
                 echo "I need to think more to get to #".$rand;
             } else {
@@ -500,20 +495,20 @@ class api extends config {
             echo "There are no thoughts...";
             }
         
-        // If $q is a string, search each thought to see if that word is in it
-        } else if ($q != null && !is_numeric($q)) {
+        // If $s is a string, search each thought to see if that word is in it
+        } else if ($s != null && !is_numeric($s)) {
         
             $matches = [];
         
             foreach ($data as $id => $val) {
-            if (preg_match("/{$q}/i", $val['msg'])) {
+            if (preg_match("/{$s}/i", $val['msg'])) {
                 $matches[$id] = $val['msg'];
             }
             }
         
         
             if (count($matches) == 0) {
-            echo "No thoughts found related to `$q`";
+            echo "No thoughts found related to `$s`";
             } else {
             if ($shuffle == 1) $matches = shuffle_assoc($matches);
             $results = 0;
@@ -541,7 +536,7 @@ class view {
 
         if ($_SESSION['web']['search'] != 1) return false;
 
-        $q = $args['s'] ?? ''; // Search query
+        $s = $args['s'] ?? ''; // Search query
         $limit = $args['limit'] ?? '';
         $quotes = $args['quotes'] ?? '';
         $showID = $args['showID'] ?? '';
@@ -553,7 +548,7 @@ class view {
         return "
         <div id='search' style='display: {$searchVisible}'>
         <form id='searchForm' method='get' action='index.php'>
-            <p><input type='text' id='searchbox' name='q' placeholder='Search...' value='{$q}' /><p>
+            <p><input type='text' id='searchbox' name='q' placeholder='Search...' value='{$s}' /><p>
             <p><label>Limit: <input type='number' id='searchLimit' name='limit' value='{$limit}' size='4' /></label> <label>Quotes: <input type='text' id='searchQuotes' name='quotes' value='{$quotes}' size='3'></label></p>
             <p><label><input type='checkbox' id='searchShuffle' name='shuffle' value='1' {$shuffleChecked} /> Shuffle</label> <label><input type='checkbox' id='searchShowID' name='showID' {$showIDChecked} /> Show ID</label></p> {$submitVisible}
             <input type='hidden' id='searchJS' name='js' value='0' />
