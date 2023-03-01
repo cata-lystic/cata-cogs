@@ -6,48 +6,5 @@
         "authorID": "1324378924812309",
         "timestamp": 1677345759,
         "source": "web"
-    },
-    "2": {
-        "msg": "heres deleted",
-        "tag": "thought",
-        "author": "Catalyst#1494",
-        "authorID": "514556311573364746",
-        "timestamp": 1677645021,
-        "source": "discord",
-        "deleted": 1,
-        "deleter": "18181818181",
-        "deleteReason": "because why not"
-    },
-    "3": {
-        "msg": "heres two",
-        "tag": "thought",
-        "author": "Catalyst#1494",
-        "authorID": "514556311573364746",
-        "timestamp": 1677645024,
-        "source": "discord"
-    },
-    "4": {
-        "msg": "heres three",
-        "tag": "thought",
-        "author": "Catalyst#1494",
-        "authorID": "514556311573364746",
-        "timestamp": 1677645026,
-        "source": "discord"
-    },
-    "5": {
-        "msg": "f ajksfd jfkadhfjk fhajksfh ajksfh dfjkhdfk",
-        "tag": "thought",
-        "author": "Catalyst#1494",
-        "authorID": "514556311573364746",
-        "timestamp": 1677645662,
-        "source": "discord"
-    },
-    "6": {
-        "msg": "here is a new post",
-        "tag": "thought",
-        "author": "Catalyst#1494",
-        "authorID": "514556311573364746",
-        "timestamp": 1677648907,
-        "source": "discord"
     }
 }

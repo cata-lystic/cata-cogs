@@ -478,6 +478,13 @@ class api extends config {
         }
 
     }
+    
+    // List all posts
+    function list() {
+        //echo "api::list() UNFINISHED";
+        $this->req['s'] = 'list';
+        $this->search();
+    }
 
     function search() {
 
@@ -504,9 +511,10 @@ class api extends config {
         // ?q=list creates an entire list of thoughts and then quits
         if ($s == "list" && $platform != "discord") {
             foreach ($data as $id => $val) {
-            $thisID = ($showID == 1) ? "#{$id}: " : null;
-            echo "<p class='thought'>{$thisID}{$val['msg']}</p>";
-        }
+                if (isset($val['deleted'])) continue;
+                $thisID = ($showID == 1) ? "#{$id}: " : null;
+                echo "<p class='thought'>{$thisID}{$val['msg']}</p>";
+            }
         
         // ?q=list for a non-web platform just shows a link to the list page
         } else if ($s == "list" && $platform == "discord") {
