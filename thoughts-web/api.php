@@ -322,14 +322,12 @@ class api extends config {
         
         Config::__construct();
 
-        $this->allowedFunctions = ['config', 'create', 'search'];
+        $this->allowedFunctions = ['config', 'create', 'delete', 'list', 'search'];
 
         // Get all request variables and put them in an array
         foreach($_REQUEST as $key => $val) {
             $this->req[$key] = $val;
         }
-
-        
 
     }
 
@@ -448,6 +446,39 @@ class api extends config {
 
     }
 
+    // Delete thought
+    function delete() {
+     
+        $id = $this->req['id'] ?? null; // ID of post to be deleted
+        $deleter = $this->req['deleter'] ?? null; // ID of who is requesting delete
+        $reason = $this->req['reason'] ?? null; // Reason this post was deleted
+        $wipe = $this->req['wipe'] ?? 0; // Wipe=1 will remove the original text from the .json file instead of just marking it as deleted
+        
+        if ($id == null || $deleter == null || $reason == null)
+            die("Missing id, deleter, or reason");
+
+        // Load thoughts data
+        $data = Files::read("app/thoughts.json");
+        if (!is_array($data)) $data = []; // Create data array if there are no msgs
+        $total = count($data); // total thoughts
+        if ($total == 0) return "There are no thoughts to delete";
+
+        // Get data about requested ID
+        if (isset($data[$id])) {
+            
+            $data[$id]['deleted'] = 1;
+            $data[$id]['deleter'] = $deleter;
+            $data[$id]['deleteReason'] = $reason;
+            if ($wipe == 1) $data[$id]['msg'] = "DELETED";
+            Files::write("app/thoughts.json", json_encode($data, JSON_PRETTY_PRINT));
+            echo "Post #{$id} deleted";
+
+        } else {
+            echo "ID DOESNT EXIST";
+        }
+
+    }
+
     function search() {
 
         // Get Settings and Thoughts
@@ -483,19 +514,21 @@ class api extends config {
         
         // If $s is numeric or empty, fetch a random or desired ID
         } else if ($s == null || is_numeric($s)) {
-        
-            //if ($platform != "web" && $apiRequest == "") die("API version required");
-        
+                
             if ($total != 0) {
-            $rand = ($s == null) ? rand(1, $total) : $s;
-            if ($rand > $total) {
-                echo "I need to think more to get to #".$rand;
+                $rand = ($s == null) ? rand(1, $total) : $s;
+                if ($rand > $total) {
+                    echo "I need to think more to get to #".$rand;
+                } else {
+                    if (!isset($data[$rand]['deleted'])) { // Check if post has been deleted
+                        $thisID = ($showID == 1) ? "#".$rand.": " : null;
+                        echo $thisID."{$quotes}".$data[$rand]['msg']."{$quotes} -".$data[$rand]['author'];
+                    } else {
+                        echo "Post deleted";
+                    }
+                }
             } else {
-                $thisID = ($showID == 1) ? "#".$rand.": " : null;
-                echo $thisID."{$quotes}".$data[$rand]['msg']."{$quotes} -".$data[$rand]['author'];
-            }
-            } else {
-            echo "There are no thoughts...";
+                echo "There are no thoughts...";
             }
         
         // If $s is a string, search each thought to see if that word is in it
@@ -504,24 +537,24 @@ class api extends config {
             $matches = [];
         
             foreach ($data as $id => $val) {
-            if (preg_match("/{$s}/i", $val['msg'])) {
-                $matches[$id] = $val['msg'];
+                if (preg_match("/{$s}/i", $val['msg'])) {
+                    if (isset($val['deleted'])) continue; // don't include if message is deleted
+                    $matches[$id] = $val['msg'];
+                }
             }
-            }
-        
         
             if (count($matches) == 0) {
-            echo "No thoughts found related to `$s`";
+                echo "No thoughts found related to `$s`";
             } else {
-            if ($shuffle == 1) $matches = shuffle_assoc($matches);
-            $results = 0;
-            foreach($matches as $ids => $vals) {
-                if ($results > $limit-1) break; // stop after the $limit
-                if ($results > 0) echo ($platform == "web" || $breaks == 1) ? "<br />" : "\n\r"; // different line breaks per platform
-                $thisID = ($showID == 1) ? "#".$ids.": " : null;
-                echo "{$thisID}{$quotes}{$vals}{$quotes}";
-                $results++;
-            }
+                if ($shuffle == 1) $matches = shuffle_assoc($matches);
+                $results = 0;
+                foreach($matches as $ids => $vals) {
+                    if ($results > $limit-1) break; // stop after the $limit
+                    if ($results > 0) echo ($platform == "web" || $breaks == 1) ? "<br />" : "\n\r"; // different line breaks per platform
+                    $thisID = ($showID == 1) ? "#".$ids.": " : null;
+                    echo "{$thisID}{$quotes}{$vals}{$quotes}";
+                    $results++;
+                }
             }
         
         }
