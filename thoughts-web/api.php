@@ -447,6 +447,11 @@ class api extends config {
 
     function search() {
 
+        // Make sure API token is valid
+        $token = $this->req['token'] ?? null;
+        $checkToken = $this->token($token, 'search');
+        if ($checkToken !== true) die($checkToken);
+
         // Get Settings and Thoughts
         $data = Files::read("app/thoughts.json");
         if (!is_array($data)) $data = []; // Create data array if there are no msgs
