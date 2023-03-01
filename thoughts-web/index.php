@@ -30,68 +30,6 @@ if ($platform == "discord") {
   $limit = ($limit > 5) ? 5 : $limit; // Discord limit can't go past 5 for now. until there's a word count
 }
 
-// Create Thought (then kill script)
-if (isset($_REQUEST['create'])) {
-
-  // Check if thoughts.json is empty
-  if ($total > 0) {
-    $lastID = key(array_slice($data, -1, 1, true)); // Get the last key's ID
-    $nextID = intval($lastID) + 1; // increase it by 1
-  } else {
-    $total = 0;
-    $nextID = "1";
-  }
-
-  $cAuthor = $_REQUEST['author'] ?? null;
-  $cAuthorID = $_REQUEST['authorID'] ?? null;
-  $cMsg = $_REQUEST['msg'] ?? null;
-  $cTag = strtolower($_REQUEST['tag']) ?? null;
-  $cBase = $_REQUEST['base64'] ?? null; // created msg and author may be in base64
-
-  if ($cAuthor == null || $cAuthorID == null || $cMsg == null || $cTag == null) {
-    echo ("SOMETHING IS MISSING | Author: ".$cAuthor." | ID: ".$cAuthorID." | Tag: ".$cTag." | Msg: ".$cMsg);
-    die();
-  }
-
-  // Only certain tags are allowed
-  $tagsAllowed = array('thought', 'music', 'spam');
-  if (!in_array($cTag, $tagsAllowed)) {
-    echo "WRONG TAG";
-    die();
-  }
-
-  // Decode Base64 if requested
-  if ($cBase == 1) {
-    $cMsg = base64_decode($cMsg);
-    $cAuthor = base64_decode($cAuthor);
-  }
-
-  // Make sure the author isn't flooding
-  // Loop through the thoughts and find the author's latest post
-  $lastPost = 0;
-  foreach ($data as $id => $val) {
-    if ($val['author'] == $cAuthor) {
-      $lastPost = $val['timestamp'];
-    }
-  }
-
-  if ($lastPost != 0) {
-    $floodFinal = $lastPost - (time() - intval($config->api['createFlood'])); // Subtract last post time from flood check to see seconds left
-    if ($floodFinal > 0) {
-      echo "`Slow down!` You can post again in ".tools::floodTime($floodFinal, 1)."."; // stop if flood triggered
-      die();
-    }
-  }
-
-  // All is well, post results
-  echo "`".ucfirst($cTag)." posted!` {$config->api['url']}?q={$nextID}";
-
-  // Add this to the thoughts.json
-  $data[$nextID] = array("msg" => $cMsg, "tag" => $cTag, "author" => str_replace("HASHTAG", "#", $cAuthor), "authorID" => $cAuthorID, "timestamp" => time(), "source" => $platform);
-  Files::write("app/thoughts.json", json_encode($data, JSON_PRETTY_PRINT));
-  die();
-}
-
 if ($platform == "web") {
   echo "<title>Thoughts</title>
 

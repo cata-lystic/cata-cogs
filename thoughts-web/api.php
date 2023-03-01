@@ -109,8 +109,10 @@ class Config {
             //unset($_SESSION['api']['public_tokens'], $_SESSION['api']['private_tokens']); // Don't include tokens in session
 
             // Detect URL if auto enabled
-            $this->api['url'] = tools::detectURL();
-            $_SESSION['api']['url'] = $this->api['url'];
+            if ($this->api['url'] == 'auto') {
+                $this->api['url'] = tools::detectURL();
+                $_SESSION['api']['url'] = $this->api['url'];
+            }
 
             // Convert floodTime to seconds
             $this->api['createFlood'] = tools::floodTime();
@@ -393,7 +395,7 @@ class api extends config {
         $author = $this->req['author'] ?? null;
         $authorID = $this->req['authorID'] ?? null;
         $cMsg = $this->req['msg'] ?? null;
-        $cTag = strtolower($this->req['tag']) ?? null;
+        $cTag = $this->req['tag'] ?? null;
         $cBase = $this->req['base64'] ?? null; // created msg and author may be in base64
         $platform = $this->req['platform'] ?? "api";
 
@@ -404,6 +406,7 @@ class api extends config {
 
         // Only certain tags are allowed
         $tagsAllowed = array('thought', 'music', 'spam');
+        $cTag = strtolower($cTag); // lowercase tag
         if (!in_array($cTag, $tagsAllowed)) {
             echo "WRONG TAG";
             die();
