@@ -446,7 +446,84 @@ class api extends config {
     }
 
     function search() {
-        echo "SEARCH UNFINISHED";
+
+        // Get Settings and Thoughts
+        $data = Files::read("app/thoughts.json");
+        if (!is_array($data)) $data = []; // Create data array if there are no msgs
+
+        // Get possible queries
+        $q = $this->req['s'] ?? null; // specific ID or query to be searched
+        $limit = $this->req['limit'] ?? $_SESSION['api']['searchLimit']; // amount of search results to return
+        $shuffle = $this->req['shuffle'] ?? $_SESSION['api']['shuffle']; // shuffle search results
+        $showID = $this->req['showID'] ?? $_SESSION['api']['showID']; // show unique ID before each thought
+        $platform = $this->req['platform'] ?? 'web'; // anything besides "web" will be plain text mode
+        $quotes = $this->req['quotes'] ?? tools::quotes($_SESSION['api']['quotes']); // no quotes by default
+        $breaks = $this->req['breaks'] ?? $_SESSION['api']['breaks']; // prefer <br /> over /n/r (web will overwrite this)
+        $apiRequest = $this->req['api'] ?? null; // API version from requester
+
+        $total = count($data); // total thoughts
+        if ($platform == "discord") {
+            $quotes = "`"; // force Discord thoughts to be in a quote box
+            $limit = ($limit > 5) ? 5 : $limit; // Discord limit can't go past 5 for now. until there's a word count
+        }
+
+        // ?q=list creates an entire list of thoughts and then quits
+        if ($q == "list" && $platform != "discord") {
+            foreach ($data as $id => $val) {
+            $thisID = ($showID == 1) ? "#{$id}: " : null;
+            echo "<p class='thought'>{$thisID}{$val['msg']}</p>";
+        }
+        
+        // ?q=list for a non-web platform just shows a link to the list page
+        } else if ($q == "list" && $platform == "discord") {
+            echo "Full list of thoughts can be found at {$config->url}?q=list";
+        
+        // If $q is numeric or empty, fetch a random or desired ID
+        } else if ($q == null || is_numeric($q)) {
+        
+            //if ($platform != "web" && $apiRequest == "") die("API version required");
+        
+            if ($total != 0) {
+            $rand = ($q == null) ? rand(1, $total) : $q;
+            if ($rand > $total) {
+                echo "I need to think more to get to #".$rand;
+            } else {
+                $thisID = ($showID == 1) ? "#".$rand.": " : null;
+                echo $thisID."{$quotes}".$data[$rand]['msg']."{$quotes} -".$data[$rand]['author'];
+            }
+            } else {
+            echo "There are no thoughts...";
+            }
+        
+        // If $q is a string, search each thought to see if that word is in it
+        } else if ($q != null && !is_numeric($q)) {
+        
+            $matches = [];
+        
+            foreach ($data as $id => $val) {
+            if (preg_match("/{$q}/i", $val['msg'])) {
+                $matches[$id] = $val['msg'];
+            }
+            }
+        
+        
+            if (count($matches) == 0) {
+            echo "No thoughts found related to `$q`";
+            } else {
+            if ($shuffle == 1) $matches = shuffle_assoc($matches);
+            $results = 0;
+            foreach($matches as $ids => $vals) {
+                if ($results > $limit-1) break; // stop after the $limit
+                if ($results > 0) echo ($platform == "web" || $breaks == 1) ? "<br />" : "\n\r"; // different line breaks per platform
+                $thisID = ($showID == 1) ? "#".$ids.": " : null;
+                echo "{$thisID}{$quotes}{$vals}{$quotes}";
+                $results++;
+            }
+            }
+        
+        }
+        
+
     }
 
 }
@@ -459,7 +536,7 @@ class view {
 
         if ($_SESSION['web']['search'] != 1) return false;
 
-        $q = $args['q'] ?? '';
+        $q = $args['s'] ?? ''; // Search query
         $limit = $args['limit'] ?? '';
         $quotes = $args['quotes'] ?? '';
         $showID = $args['showID'] ?? '';
@@ -484,6 +561,7 @@ class view {
     // Create Box
     public function create() {
 
+        
         if ($_SESSION['web']['create'] != 1) return false;
 
         $createVisible = ($_SESSION['web']['createVisible'] == 1) ? "block":"none";
@@ -512,13 +590,13 @@ class view {
             <p>Random Thought<br />
             <a href='{$d}'>{$d}</a></p>
             <p>Thought List<br />
-            <a href='{$d}?q=list'>{$d}?q=list</a></p>
+            <a href='{$d}?s=list'>{$d}?s=list</a></p>
             <p>Link to Thought List<br />
-            <a href='{$d}?q=list&platform=discord'>{$d}?q=list&platform=discord</a></p>
+            <a href='{$d}?s=list&platform=discord'>{$d}?s=list&platform=discord</a></p>
             <p>Thought by ID #<br />
-            <a href='{$d}?q=25'>{$d}?q=25</a> (ID #25)</p>
+            <a href='{$d}?s=25'>{$d}?s=25</a> (ID #25)</p>
             <p>Thought by word search<br />
-            <a href='{$d}?q=multiple word search&limit=3'>{$d}?q=multiple words&limit=3&shuffle=1</a></p>
+            <a href='{$d}?s=multiple word search&limit=3'>{$d}?s=multiple words&limit=3&shuffle=1</a></p>
             <p>Other flags<br />
             &js=1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Javascript on web page<br />
             &showID=0&nbsp;&nbsp;&nbsp;&nbsp;Show ID of thought<br />
@@ -586,7 +664,7 @@ class tools {
         // Try to autodetect the URL. It can overwritten it in settings.
         if ($url == "" || $url == "auto") {
             $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']) ? 'https://' : 'http://'; 
-            $url = substr($protocol.$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'], 0, -10); // Remove "/index.php"
+            $url = $protocol.$_SERVER['HTTP_HOST'];
         }
         return $url;
     }

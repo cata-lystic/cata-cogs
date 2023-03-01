@@ -53,7 +53,7 @@ class Thoughts(commands.Cog):
             await ctx.send(f"{result}")
 
     @commands.command(aliases=['thoughts'])
-    async def thought(self, ctx, query="", limit=3, shuffle=1, showID=0):
+    async def thought(self, ctx, search="", limit=3, shuffle=1, showID=0):
         """Gets a thought.
 
         **.thought** - Get random thought
@@ -75,7 +75,7 @@ class Thoughts(commands.Cog):
             current_url = await self.config.url()
 
             try:
-                async with aiohttp.request("GET", current_url+"?q="+query+"&limit="+str(limit)+"&shuffle="+str(shuffle)+"&showID="+str(showID)+"&platform=discord&api="+str(self.versionapi), headers={"Accept": "text/plain"}) as r:
+                async with aiohttp.request("GET", current_url+"/api.php?function=search&s="+search+"&limit="+str(limit)+"&shuffle="+str(shuffle)+"&showID="+str(showID)+"&platform=discord&api="+str(self.versionapi), headers={"Accept": "text/plain"}) as r:
                     if r.status != 200:
                         return await ctx.send("Oops! Cannot get a thought...")
                     result = await r.text(encoding="UTF-8")

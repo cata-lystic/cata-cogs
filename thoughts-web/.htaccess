@@ -5,4 +5,5 @@ RewriteCond %{REQUEST_FILENAME} !-f
 
 # Rewrite for the API for up to three optional directories (if ever needed)
 RewriteRule ^api/?([^/]+)?/?(.+)?$ api.php?function=$1&two=$2&three=$3 [L,QSA]
+RewriteRule ^t/?([^/]+)?/?(.+)?$ index.php?q=$1 [L,QSA]
 #RewriteRule ^([^/]+)?/?([^/]+)?/?(.+)?$ api.php? [L,QSA]
