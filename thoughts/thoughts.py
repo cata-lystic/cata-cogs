@@ -21,7 +21,8 @@ class Thoughts(commands.Cog):
         default_global = {
             "url": "",
             "token": "",
-            "reasonDeleteShow": 1
+            "deletedReason": 1,
+            "deletedBy": 1
         }
         default_guild = {
             "test": ""
@@ -79,10 +80,11 @@ class Thoughts(commands.Cog):
         if current_url == '':
             return await ctx.send("You need to set an API URL. Type `.tset setup url`")
         
-        reason_show = await self.config.reasonDeleteShow() # whether or not to show deleted reason
+        deleted_reason = await self.config.deletedReason() # whether or not to show deleted reason
+        deleted_by = await self.config.deletedBy() # whether or not to show who deleted post
         
         try:
-            async with aiohttp.request("GET", current_url+"/api.php?q=search&token="+current_token+"&s="+search+"&limit="+str(limit)+"&shuffle="+str(shuffle)+"&showID="+str(showID)+"&reason="+str(reason_show)+"&platform=discord&api="+str(self.versionapi), headers={"Accept": "text/plain"}) as r:
+            async with aiohttp.request("GET", current_url+"/api.php?q=search&token="+current_token+"&s="+search+"&limit="+str(limit)+"&shuffle="+str(shuffle)+"&showID="+str(showID)+"&reason="+str(deleted_reason)+"&reasonby="+str(deleted_by)+"&platform=discord&api="+str(self.versionapi), headers={"Accept": "text/plain"}) as r:
                 if r.status != 200:
                     return await ctx.send("Oops! Cannot get a thought...")
                 result = await r.text(encoding="UTF-8")
@@ -260,16 +262,27 @@ class Thoughts(commands.Cog):
         \rExample: `.tset api searchresults 50"""
         await self.changeSetting(ctx, 'api', 'searchResults', newLimit)
 
-    @ts_bot.command(name='reasondeleted')
-    async def ts_bot_reasondeleted(self, ctx, binary):
+    @ts_bot.command(name='deletedreason')
+    async def ts_bot_deletedreason(self, ctx, binary):
         """Show reason posts were deleted
-        \rExample: `.tset bot reasondeleted 1"""
+        \rExample: `.tset bot deletedreason 1"""
 
         if binary == "1" or binary == "0":
-            await self.config.reasonDeleteShow.set(binary)
-            return await ctx.send("Set `bot reasondeleted` to "+binary)
+            await self.config.deletedReason.set(binary)
+            return await ctx.send("Set `bot deletedreason` to "+binary)
         else:
-            return await ctx.send("Error: `bot reasondeleted` must be a 1 or 0")
+            return await ctx.send("Error: `bot deletedreason` must be a 1 or 0")
+        
+    @ts_bot.command(name='deletedby')
+    async def ts_bot_deletedby(self, ctx, binary):
+        """Show who deleted queried post
+        \rExample: `.tset bot deletedby 1"""
+
+        if binary == "1" or binary == "0":
+            await self.config.deletedBy.set(binary)
+            return await ctx.send("Set `bot deletedby` to "+binary)
+        else:
+            return await ctx.send("Error: `bot deletedby` must be a 1 or 0")
 
     @ts_web.command(name='shuffle')
     async def ts_web_shuffle(self, ctx, binary):

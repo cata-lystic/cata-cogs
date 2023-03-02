@@ -502,6 +502,7 @@ class api extends config {
         $breaks = $this->req['breaks'] ?? $_SESSION['api']['breaks']; // prefer <br /> over /n/r (web will overwrite this)
         $apiRequest = $this->req['api'] ?? null; // API version from requester
         $reason = $this->req['reason'] ?? 0; // Show reason for post deletion
+        $reasonby = $this->req['reasonby'] ?? 0; // Show who deleted post
 
         $total = count($data); // total thoughts
         if ($platform == "discord") {
@@ -551,8 +552,9 @@ class api extends config {
                 $thisID = ($showID == 1) ? "#".$s.": " : null;
                 echo $thisID."{$quotes}".$data[$s]['msg']."{$quotes} -".$data[$s]['author'];
             } else {
-                echo "Post deleted. ";
-                if ($reason == 1) echo "Reason: {$data[$s]['deleteReason']}";
+                echo "`Post deleted.`";
+                if ($reasonby == 1) echo " Deleted by: {$data[$s]['deleter']}.";
+                if ($reason == 1) echo " Reason: {$data[$s]['deleteReason']}.";
             }
         
         // If $s is a string, search each thought to see if that word is in it
