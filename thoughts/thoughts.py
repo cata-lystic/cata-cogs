@@ -280,7 +280,35 @@ class Thoughts(commands.Cog):
         """Default tag on new posts
         \rTag that will be used on newly created posts if none is set\r
         Example: `.tset api tagdefault mytag`"""
-        await self.changeSetting(ctx, 'api', 'tagDefault', tag)
+        #await self.changeSetting(ctx, 'api', 'tagDefault', tag)
+
+    @ts_api_tags.command(name='add')
+    async def ts_api_tagadd(self, ctx, tag):
+        """Default tag on new posts
+        \rTag that will be used on newly created posts if none is set\r
+        Example: `.tset api tagdefault mytag`"""
+        #await self.changeSetting(ctx, 'api', 'tagDefault', tag)
+
+    @ts_api_tags.command(name='remove')
+    async def ts_api_tagremove(self, ctx, tag):
+        """Default tag on new posts
+        \rTag that will be used on newly created posts if none is set\r
+        Example: `.tset api tagdefault mytag`"""
+        #await self.changeSetting(ctx, 'api', 'tagDefault', tag)
+
+    @ts_api_tags.command(name='list')
+    async def ts_api_taglist(self, ctx):
+        """Default tag on new posts
+        \rTag that will be used on newly created posts if none is set\r
+        Example: `.tset api tagdefault mytag`"""
+        #await self.changeSetting(ctx, 'api', 'tagDefault', tag)
+
+    @ts_api_tags.command(name='rename')
+    async def ts_api_tagrename(self, ctx, oldTag, newTag):
+        """Default tag on new posts
+        \rTag that will be used on newly created posts if none is set\r
+        Example: `.tset api tagdefault mytag`"""
+        #await self.changeSetting(ctx, 'api', 'tagDefault', tag)
 
     @ts_bot.command(name='deletedreason')
     async def ts_bot_deletedreason(self, ctx, binary):
