@@ -237,7 +237,7 @@ class Config {
             $checkReq = $this->check($key1, $key2, $newVal);
             if ($checkReq !== true) die($checkReq); // Kill script and show error if fails
             
-            $result = "<?php\n#  API Setup\n# Make unique and secure tokens. Must be at least 8 characters in length with no spaces.\n# You may create multiple tokens with different permissions\n# Permissions: admin, config, create, delete, list, search, tags\n# 'admin' permission has full access to all commands. Only give these tokens to people you trust that will help you manage the API and website\n# Do not delete the 'default' token. This is used for when your API is accessed with no other request.\n# All other tokens will inherit 'default' token's permissions\n# The default token permissions should generally not be changed unless you want to prevent public post creation.\n# When config is complete, give an admin token to your Discord Bot with: [p]thoughtset setup api yourAdminToken\n\n# Tokens\n";
+            $result = "<?php\n#  API Setup\n# Make unique and secure tokens. Must be at least 8 characters in length with no spaces.\n# You may create multiple tokens with different permissions\n# Permissions: admin, config, create, delete, list, read, search, tags\n# 'admin' permission has full access to all commands. Only give these tokens to people you trust that will help you manage the API and website\n# Do not delete the 'default' token. This is used for when your API is accessed with no other request.\n# All other tokens will inherit 'default' token's permissions\n# The default token permissions should generally not be changed unless you want to prevent public post creation.\n# When config is complete, give an admin token to your Discord Bot with: [p]thoughtset setup api yourAdminToken\n\n# Tokens\n";
 
             // Loop through current $set['token']s and reprint them all out with their permissions
             foreach($set['token'] as $tVal => $tPerms) {
@@ -357,19 +357,30 @@ class api extends config {
         
         Config::__construct();
 
-        $this->allowedFunctions = ['config', 'create', 'delete', 'list', 'search', 'tags', 'dev'];
+        $this->allowedFunctions = ['config', 'create', 'delete', 'list', 'search', 'tags', 'info', 'dev'];
 
         // Get all request variables and put them in an array
         foreach($_REQUEST as $key => $val) {
             $this->req[$key] = $val;
         }
 
-        $this->req['token'] = $this->req['token'] ?? 'default'; // default token if none set
+        if (!isset($this->req['token']) || empty($this->req['token'])) $this->req['token'] = 'default'; // default token if none set
 
     }
 
     // Process what has been requested and send to proper function
-    function process() {
+    function process($source='') {
+
+        // Require API version (?version=) if source isn't web browser
+        if ($source != 'web') {
+            if (!isset($this->req['version']) || $this->req['version'] == '') {
+                die("Please supply API version");
+            } else {
+                if ($this->req['version'] < $this->versions['api']) {
+                    die("API Version {$this->req['version']} is not supported. Latest: {$this->versions['api']}");
+                }
+            }
+        }
 
         // Check if there was a 'q' (query) request
         $func = $this->req['q'] ?? null; // no query = search for random thought
@@ -588,6 +599,10 @@ class api extends config {
         // ?q=list for a non-web platform just shows a link to the list page
         } else if ($s == "list" && $platform == "discord") {
             echo "Full list of thoughts can be found at {$_SESSION['api']['url']}?q=list";
+
+        // ?q=info to display Thoughts info and versions
+        } else if ($s == "info") {
+            $this->info();
         
         // If $s is numeric or empty, fetch a random or desired ID
         } else if ($s == null || is_numeric($s)) {
@@ -740,17 +755,15 @@ class api extends config {
 
     // Display info about Thoughts and each version
     function info() {
-        
+
         // This function only requires 'read' permissions
         $checkToken = $this->token($this->req['token'], 'read');
         if ($checkToken !== true) die($checkToken);
-
         $botVersion = $this->req['botversion'] ?? null;
-        echo "Thoughts\n
-        API Version: {$this->versions['api']}\n
-        Web Version: {$this->versions['web']}";
+        echo "Thoughts by Catalyst\nAPI Version: {$this->versions['api']}\nWeb Version: {$this->versions['web']}";
         if ($botVersion != null)
             echo "\nBot Version: {$botVersion}";
+        echo "\nSource: <https://github.com/cata-lystic/cata-cogs>";
      }
 
     // This function is only used for me to test out code.
