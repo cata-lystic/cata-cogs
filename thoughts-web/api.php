@@ -364,6 +364,8 @@ class api extends config {
             $this->req[$key] = $val;
         }
 
+        $this->req['token'] = $this->req['token'] ?? 'default'; // default token if none set
+
     }
 
     // Process what has been requested and send to proper function
@@ -372,11 +374,6 @@ class api extends config {
         // Check if there was a 'q' (query) request
         $func = $this->req['q'] ?? null; // no query = search for random thought
         if (empty($func)) $func = 'search';
-
-        // Make sure token is valid and has the proper permissions
-        $token = $this->req['token'] ?? 'default';
-        $checkToken = $this->token($token, $func);
-        if ($checkToken !== true) die($checkToken);
 
         // Make sure this is a valid function
         if (!in_array($func, $this->allowedFunctions)) die("Invalid function");
@@ -389,13 +386,16 @@ class api extends config {
     // Change a setting in config.php
     function config() {
 
+        // Make sure token is valid and has the proper permissions
+        $checkToken = $this->token($this->req['token'], 'config');
+        if ($checkToken !== true) die($checkToken);
+
         $key1 = $this->req['key1'] ?? null;
         $key2 = $this->req['key2'] ?? null;
         $val = $this->req['val'] ?? null;
-        $token = $this->req['token'] ?? 'default';
 
         // All fields required
-        if (empty($key1) || empty($key2) || $val == null || empty($token))
+        if (empty($key1) || empty($key2) || $val == null || empty($this->req['token']))
             die("Missing key1, key2, val, or token");
     
         // Can't change token from API
@@ -415,6 +415,10 @@ class api extends config {
     }
 
     function create() {
+
+        // Make sure token is valid and has the proper permissions
+        $checkToken = $this->token($this->req['token'], 'create');
+        if ($checkToken !== true) die($checkToken);
 
         $author = $this->req['author'] ?? null;
         $authorID = $this->req['authorID'] ?? null;
@@ -486,6 +490,10 @@ class api extends config {
 
     // Delete thought
     function delete() {
+
+        // Make sure token is valid and has the proper permissions
+        $checkToken = $this->token($this->req['token'], 'delete');
+        if ($checkToken !== true) die($checkToken);
      
         $id = $this->req['id'] ?? null; // ID of post to be deleted
         $deleter = $this->req['deleter'] ?? null; // Name of who is requesting delete
@@ -542,6 +550,10 @@ class api extends config {
     }
 
     function search() {
+
+        // Make sure token is valid and has the proper permissions
+        $checkToken = $this->token($this->req['token'], 'read');
+        if ($checkToken !== true) die($checkToken);
 
         // Get Settings and Thoughts
         $data = Files::read("app/thoughts.json");
@@ -653,15 +665,25 @@ class api extends config {
 
         // List all tags
         if ($s == 'list') {
+
+            // This function only requires 'read' permissions
+            $checkToken = $this->token($this->req['token'], 'read');
+            if ($checkToken !== true) die($checkToken);
+
             $taglist = '';
             foreach ($tags as $tag) {
                 $taglist .= $tag.", ";
             }
-            echo substr($taglist, 0, -2);
+            die (substr($taglist, 0, -2));
         }
 
-            // Add or remove tag
+        // Anything past this point requires 'tags' permissions
+        $checkToken = $this->token($this->req['token'], 'tags');
+        if ($checkToken !== true) die($checkToken);
+
+        // Add or remove tag
         if ($s == 'add' || $s == 'remove') {
+
             $authorID = $this->req['authorID'] ?? null;
             if ($authorID == null) die("Missing authorID");
             if ($this->isAdmin($authorID) == false) die("Only admin can edit tags");
