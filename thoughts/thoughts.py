@@ -262,6 +262,13 @@ class Thoughts(commands.Cog):
         \rExample: `.tset api searchresults 50"""
         await self.changeSetting(ctx, 'api', 'searchResults', newLimit)
 
+    @ts_api.command(name='tagdefault')
+    async def ts_api_tagdefault(self, ctx, tag):
+        """Default tag on new posts
+        \rTag that will be used on newly created posts if none is set\r
+        Example: `.tset api tagdefault mytag`"""
+        await self.changeSetting(ctx, 'api', 'tagDefault', tag)
+
     @ts_bot.command(name='deletedreason')
     async def ts_bot_deletedreason(self, ctx, binary):
         """Show reason posts were deleted
