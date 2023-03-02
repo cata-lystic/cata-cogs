@@ -53,7 +53,7 @@ class Thoughts(commands.Cog):
             await ctx.send(f"{result}")
 
     @commands.group(aliases=['thoughts'])
-    async def thought(self, ctx, search="", limit=3, shuffle=1, showID=0):
+    async def thought(self, ctx, search='', limit: str='3', shuffle: str='1', showID: str='0'):
         """Gets a thought.
 
         **.thought** - Get random thought
