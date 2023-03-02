@@ -66,6 +66,9 @@ class Thoughts(commands.Cog):
         **.tcreate your thought here**
         """
 
+        if (search == 'create'):
+            pass
+
         current_token = await self.config.token()
         
         if current_token == '':
