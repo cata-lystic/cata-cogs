@@ -43,6 +43,7 @@ class Config {
         $this->defaults = array(
             'api' => array(
                 'url' => array('auto', [], 'Change if auto detection fails','#API Settings'),
+                'tags' => array(array('thought', 'music', 'spam'), [], 'Tags that thoughts can be categorized into'),
                 'searchLimit' => array(500, ['number'], 'Search results max limit. Cannot be changed by API request'),
                 'searchResults' => array(3, ['number'], 'Default amount of results per search'),
                 'createFlood' => array('10s', ['alphanum'], 'Time between when a user can post again (format: 5s, 3m, 5d, 7w, etc)'),
@@ -330,6 +331,12 @@ class Config {
         return $this->isMod($id, 1);
     }
 
+    // Check if a tag is valid
+    function isTag($tag) {
+        $tags = $_SESSION['api']['tags'];
+        return (in_array($tag, $tags)) ? true:false;
+    }
+
 }
 
 
@@ -427,10 +434,8 @@ class api extends config {
         }
 
         // Only certain tags are allowed
-        $tagsAllowed = array('thought', 'music', 'spam');
-        $cTag = strtolower($cTag); // lowercase tag
-        if (!in_array($cTag, $tagsAllowed)) {
-            echo "WRONG TAG";
+        if ($this->isTag(strtolower($cTag)) == false) {
+            echo "Invalid tag";
             die();
         }
 

@@ -19,6 +19,7 @@ $set['mod'] = ['2222222222', '3333333333']; # Discord IDs of those that can mod 
 
 # API Settings
 $set['api']['url'] = 'auto'; # Change if auto detection fails
+$set['api']['tags'] = ['thought', 'music', 'spam']; # Tags that thoughts can be categorized into
 $set['api']['searchLimit'] = 500; # Search results max limit. Cannot be changed by API request
 $set['api']['searchResults'] = 3; # Default amount of results per search
 $set['api']['createFlood'] = '10s'; # Time between when a user can post again (format: 5s, 3m, 5d, 7w, etc)
