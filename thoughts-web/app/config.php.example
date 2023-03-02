@@ -49,6 +49,7 @@ $set['web']['searchLimit'] = 500; # Search results max limit
 $set['web']['searchResults'] = 500; # Default amount of results per search
 $set['web']['searchVisible'] = 1; # Show search box by default
 $set['web']['github'] = 1; # Show GitHub link in footer
+$set['web']['versionVisible'] = 1; # Show Thoughts Web version in footer
 $set['web']['js'] = 1; # Use JavaScript for search and other features
 # jQuery.js location. Change from "local" to direct URL or built in CDN options
 $set['web']['jquery'] = 'local'; # options: local, google, jquery, microsoft, cdnjs, jsdelivr, Custom URL

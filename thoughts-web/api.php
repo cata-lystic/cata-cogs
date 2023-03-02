@@ -73,6 +73,7 @@ class Config {
                 'searchResults' => array(50, ['number'], 'Default amount of results per search'),
                 'searchVisible' => array(1, ['binary'], 'Show search box by default'),
                 'github' => array(1, ['binary'], 'Show GitHub link in footer'),
+                'versionVisible' => array(1, ['binary'], 'Show Thoughts Web version in footer'),
                 'js' => array(1, ['binary'], 'Use JavaScript for search and other features'),
                 'jquery' => array('local', [], 'options: local, google, jquery, microsoft, cdnjs, jsdelivr, Custom URL', 'jQuery.js location. Change from "local" to direct URL or built in CDN options'))
             );
@@ -89,6 +90,7 @@ class Config {
             foreach($_SESSION as $key => $val) {
                 $this->$key = $val;
             }
+            $_SESSION['versions'] = $this->versions;
     
         } else {
             require(__DIR__."/app/config.php");
@@ -761,7 +763,7 @@ class api extends config {
         if (isset($this->req['platform']) && $this->req['platform'] == 'discord') {
             $extra1 = '<'; $extra2 = '>'; // show <> around URL for Discord so it doesn't embed link
         }
-        
+
         $info .= "\nWebsite: {$extra1}{$this->api['url']}{$extra2}";
         $info .= "\nSource: {$extra1}https://github.com/cata-lystic/cata-cogs{$extra2}";
         echo ($this->source != 'web') ? $info : nl2br($info); // show breaks for web
@@ -823,7 +825,7 @@ class view {
     // Create Box
     public function create() {
         
-        if ($_SESSION['web']['create'] != 1) return false;
+        if ($_SESSION['web']['create'] != 1 || $_SESSION['api']['create'] != 1) return false;
 
         $createVisible = ($_SESSION['web']['createVisible'] == 1) ? "block":"none";
         $createForm = "
@@ -890,12 +892,15 @@ class view {
             $ret[2] = "<a href='#' data-toggle='#info' class='divToggle'>API</a>&nbsp;&nbsp;&nbsp;";
 
         if ($_SESSION['web']['github'] == 1)
-            $ret[3] = "<a href='https://github.com/cata-lystic/redbot-cogs/tree/main/thoughts' target='_blank'>GitHub</a>";
+            $ret[3] = "<a href='https://github.com/cata-lystic/redbot-cogs/tree/main/thoughts' target='_blank'>GitHub</a>&nbsp;&nbsp;&nbsp;";
+
+        if ($_SESSION['web']['versionVisible'] == 1)
+            $ret[4] = "Thoughts {$_SESSION['versions']['web']}";
 
         return "
         <div id='footer'>
             <div id='footerContent'>
-                {$ret[0]}{$ret[1]}{$ret[2]}{$ret[3]}
+                {$ret[0]}{$ret[1]}{$ret[2]}{$ret[3]}{$ret[4]}
             </div>
         </div>";
     }
