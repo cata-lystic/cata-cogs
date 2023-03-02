@@ -413,6 +413,11 @@ class api extends config {
 
     function create() {
 
+        $author = $this->req['author'] ?? null;
+        $authorID = $this->req['authorID'] ?? null;
+
+        if ($this->api['create'] == 0 && $this->isMod($authorID) == false) die("Post creation is currently disabled");
+
         $data = Files::read("app/thoughts.json");
         if (!is_array($data)) $data = []; // Create data array if there are no msgs
         $total = count($data); // total thoughts
@@ -425,9 +430,6 @@ class api extends config {
             $total = 0;
             $nextID = "1";
         }
-
-        $author = $this->req['author'] ?? null;
-        $authorID = $this->req['authorID'] ?? null;
         $cMsg = $this->req['msg'] ?? null;
         $cTag = $this->req['tag'] ?? null;
         $cBase = $this->req['base64'] ?? null; // created msg and author may be in base64
