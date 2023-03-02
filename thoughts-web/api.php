@@ -465,6 +465,9 @@ class api extends config {
 
         // Get data about requested ID
         if (isset($data[$id])) {
+
+            $alreadyDeleted = $data[$id]['deleted'] ?? 0;
+            if ($alreadyDeleted == 1) die($id." already deleted");
             
             $data[$id]['deleted'] = 1;
             $data[$id]['deleter'] = $deleter;
@@ -500,6 +503,7 @@ class api extends config {
         $quotes = $this->req['quotes'] ?? tools::quotes($_SESSION['api']['quotes']); // no quotes by default
         $breaks = $this->req['breaks'] ?? $_SESSION['api']['breaks']; // prefer <br /> over /n/r (web will overwrite this)
         $apiRequest = $this->req['api'] ?? null; // API version from requester
+        $reason = $this->req['reason'] ?? 0; // Show reason for post deletion
 
         $total = count($data); // total thoughts
         if ($platform == "discord") {
@@ -522,20 +526,35 @@ class api extends config {
         // If $s is numeric or empty, fetch a random or desired ID
         } else if ($s == null || is_numeric($s)) {
                 
-            if ($total != 0) {
-                $rand = ($s == null) ? rand(1, $total) : $s;
-                if ($rand > $total) {
-                    echo "I need to think more to get to #".$rand;
+            if ($total == 0) die("There are no thoughts...");
+
+            if ($s > $total) die("I need to think more to get to #".$s);
+
+            // If user didn't submit a search query:
+            // Generate a random number within the count of the data array
+            // If that ID happens to be deleted, up $rand by 1 and keep trying the next post up until one isn't deleted
+            // If the $rand gets higher than $total then output an error or maybe start back at 1?
+
+            $rand = rand(1, $total);
+            while ($s == null) {
+                $isDeleted = isset($data[$rand]['deleted']) ?? 0;
+                if ($isDeleted != 1){
+                    $s = $rand;
+                    break;
                 } else {
-                    if (!isset($data[$rand]['deleted'])) { // Check if post has been deleted
-                        $thisID = ($showID == 1) ? "#".$rand.": " : null;
-                        echo $thisID."{$quotes}".$data[$rand]['msg']."{$quotes} -".$data[$rand]['author'];
-                    } else {
-                        echo "Post deleted";
-                    }
+                    $rand++;
                 }
+                if ($rand > $total) die("Something went wrong... Try again.");
+            }
+
+            // Check if the search is deleted. If it is, show that the post is deleted.
+            $isDeleted = isset($data[$s]['deleted']) ?? 0;
+            if ($isDeleted == 0) { // Check if post has been deleted (show that it has if the post was directly requested)
+                $thisID = ($showID == 1) ? "#".$s.": " : null;
+                echo $thisID."{$quotes}".$data[$s]['msg']."{$quotes} -".$data[$s]['author'];
             } else {
-                echo "There are no thoughts...";
+                echo "Post deleted. ";
+                if ($reason == 1) echo "Reason: {$data[$s]['deleteReason']}";
             }
         
         // If $s is a string, search each thought to see if that word is in it
@@ -822,14 +841,14 @@ class Files {
 
 // Shuffle associated array
 function shuffle_assoc($arr) {
-$keys = array_keys($arr);
+    $keys = array_keys($arr);
 
-shuffle($keys);
+    shuffle($keys);
 
-foreach($keys as $key) {
-    $new[$key] = $arr[$key];
-}
+    foreach($keys as $key) {
+        $new[$key] = $arr[$key];
+    }
 
-$arr = $new;
-return $arr;
+    $arr = $new;
+    return $arr;
 }
