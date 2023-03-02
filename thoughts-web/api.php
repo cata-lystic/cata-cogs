@@ -229,7 +229,7 @@ class Config {
             $checkReq = $this->check($key1, $key2, $newVal);
             if ($checkReq !== true) die($checkReq); // Kill script and show error if fails
             
-            $result = "<?php\n#  API Setup\n# Make unique and secure tokens. Must be at least 8 characters in length with no spaces.\n# You may create multiple tokens with different permissions\n# Permissions: admin, config, create, delete, search\n# 'admin' permission has full access to all commands. Only give these tokens to people you trust that will help you manage the API and website\n# Do not delete the 'default' token. This is used for when your API is accessed with no other request.\n# # The default token should only be used for 'search' and 'list' (maybe 'create' if you want creation public)\n# When config is complete, give an admin token to your Discord Bot with: [p]thoughtset setup api yourAdminToken\n\n# Tokens\n";
+            $result = "<?php\n#  API Setup\n# Make unique and secure tokens. Must be at least 8 characters in length with no spaces.\n# You may create multiple tokens with different permissions\n# Permissions: admin, config, create, delete, list, search, tags\n# 'admin' permission has full access to all commands. Only give these tokens to people you trust that will help you manage the API and website\n# Do not delete the 'default' token. This is used for when your API is accessed with no other request.\n# # The default token should only be used for 'search' and 'list' (maybe 'create' if you want creation public)\n# When config is complete, give an admin token to your Discord Bot with: [p]thoughtset setup api yourAdminToken\n\n# Tokens\n";
 
             // Loop through current $set['token']s and reprint them all out with their permissions
             foreach($set['token'] as $tVal => $tPerms) {
@@ -257,7 +257,7 @@ class Config {
                         }
                     }
                     // $finalVal is the $newVal if this is the changed setting
-                    $finalVal = ($oldCategory == $key1 && $oldKey == $key2) ? htmlspecialchars(str_replace("HASHTAG", "#", $newVal)) : $this->arrayToString($set[$oldCategory][$oldKey]); 
+                    $finalVal = ($oldCategory == $key1 && $oldKey == $key2) ? str_replace("HASHTAG", "#", $this->arrayToString($newVal)) : $this->arrayToString($set[$oldCategory][$oldKey]); 
                         
                     // Don't includes quotes around the val if it's meant to be a number
                     $reqs = $this->defaults[$oldCategory][$oldKey][1];
@@ -349,7 +349,7 @@ class api extends config {
         
         Config::__construct();
 
-        $this->allowedFunctions = ['config', 'create', 'delete', 'list', 'search', 'dev'];
+        $this->allowedFunctions = ['config', 'create', 'delete', 'list', 'search', 'tags', 'dev'];
 
         // Get all request variables and put them in an array
         foreach($_REQUEST as $key => $val) {
@@ -620,6 +620,79 @@ class api extends config {
         
         }
         
+
+    }
+
+    // List and manage Tags
+    function tags() {
+
+        $s = $this->req['s'] ?? 'list';
+        $tag = $this->req['tag'] ?? null; // Tag user is requesting
+        $tagRename = $this->req['rename'] ?? null; // User may be requesting to edit tag's name
+        $tags = $this->api['tags'];
+
+        // List all tags
+        if ($s == 'list') {
+            $taglist = '';
+            foreach ($tags as $tag) {
+                $taglist .= $tag.", ";
+            }
+            echo substr($taglist, 0, -2);
+        }
+
+            // Add or remove tag
+        if ($s == 'add' || $s == 'remove') {
+            $authorID = $this->req['authorID'] ?? null;
+            if ($authorID == null) die("Missing authorID");
+            if ($this->isAdmin($authorID) == false) die("Only admin can edit tags");
+            if ($tag == null) die("Missing tag"); // Tag required
+
+            if ($s == 'add') {
+                if (!in_array($tag, $this->api['tags'])) {
+                    array_push($this->api['tags'], $tag);
+                    $this->set('api', 'tags', $this->api['tags']);
+                    echo "Tag added";
+                } else {
+                    echo "Tag already exists";
+                }
+            } else {
+                //print_r($this->api['tags']);
+                if (in_array($tag, $this->api['tags'])) {
+                    $tagID = array_search($tag, $this->api['tags']);
+                    unset($this->api['tags'][$tagID]);
+                    $this->set('api', 'tags', $this->api['tags']);
+                    echo "Tag removed";
+                } else {
+                    echo "Tag doesn't exist";
+                }
+            }   
+        }
+
+        // Edit tag
+        if ($s == 'edit') {
+
+            // Make sure tag exists
+            if (!is_array($tags)) die("Tag doesn't exist");
+
+            $data = Files::read("app/thoughts.json");
+            if (!is_array($data)) $data = []; // Create data array if there are no posts
+
+            // Rename tag
+            if ($tagRename != null) {
+                $tagID = array_search($tag, $this->api['tags']);
+                unset($this->api['tags'][$tagID]);
+                array_push($this->api['tags'], $tagRename);
+
+                // Loop through current posts and change their current tag
+                foreach($data as $key => $val) {
+                    if ($val['tag'] == $tag) $data[$key]['tag'] = $tagRename;
+                }
+                $this->set('api', 'tags', $this->api['tags']);
+                Files::write("app/thoughts.json", json_encode($data, JSON_PRETTY_PRINT));
+                echo "Tag `$tag` renamed to `$tagRename`";
+            }
+
+        }
 
     }
 
