@@ -267,7 +267,9 @@ class Thoughts(commands.Cog):
 
         if binary == "1" or binary == "0":
             self.config.reasonDeleteShow.set(binary)
-            return await ctx.send("Set `bot reasondeleted` to "+binary)
+            await ctx.send("Set `bot reasondeleted` to "+binary)
+            oktest = self.config.reasonDeleteShow()
+            return await ctx.send("Set it really to "+oktest+"")
         else:
             return await ctx.send("Error: `bot reasondeleted` must be a 1 or 0")
 
