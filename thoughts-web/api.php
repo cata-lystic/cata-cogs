@@ -660,9 +660,9 @@ class api extends config {
                 if (!in_array($tag, $this->api['tags'])) {
                     array_push($this->api['tags'], $tag);
                     $this->set('api', 'tags', $this->api['tags']);
-                    echo "Tag added";
+                    echo "Tag `$tag` added";
                 } else {
-                    echo "Tag already exists";
+                    echo "Tag `$tag` already exists";
                 }
             } else {
                 //print_r($this->api['tags']);
@@ -670,9 +670,9 @@ class api extends config {
                     $tagID = array_search($tag, $this->api['tags']);
                     unset($this->api['tags'][$tagID]);
                     $this->set('api', 'tags', $this->api['tags']);
-                    echo "Tag removed";
+                    echo "Tag `$tag` removed";
                 } else {
-                    echo "Tag doesn't exist";
+                    echo "Tag `$tag` doesn't exist";
                 }
             }   
         }
