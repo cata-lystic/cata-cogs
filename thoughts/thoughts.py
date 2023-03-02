@@ -393,7 +393,7 @@ class Thoughts(commands.Cog):
         """Background color
         \rWebsite's background color.
         You can use anything the CSS color tag supports\r
-        Example: `.tset web bgcolor #212121`"""
+        Example: `.tset web theme bgcolor #212121`"""
         await self.changeSetting(ctx, 'theme', 'backgroundColor', color)
 
     @ts_web_theme.command(name='accent', aliases=['accentcolor'])
@@ -401,7 +401,7 @@ class Thoughts(commands.Cog):
         """Accent color
         \rWebsite's box color for API info, search, creation.
         You can use anything the CSS color tag supports\r
-        Example: `.tset web themeaccent #393939`"""
+        Example: `.tset web theme accent #393939`"""
         await self.changeSetting(ctx, 'theme', 'accentColor', color)
 
     @ts_web_theme.command(name='font', aliases=['fontcolor'])
@@ -409,15 +409,23 @@ class Thoughts(commands.Cog):
         """Font color
         \rWebsite's font color.
         You can use anything the CSS color tag supports\r
-        Example: `.tset web themefont #e9e5e5`"""
+        Example: `.tset web theme font #e9e5e5`"""
         await self.changeSetting(ctx, 'theme', 'accentColor', color)
+
+    @ts_web_theme.command(name='fontsize', aliases=['size'])
+    async def ts_web_fontsize(self, ctx, size):
+        """Font color
+        \rWebsite's font color.
+        You can use anything the CSS color tag supports\r
+        Example: `.tset web theme fontsize #e9e5e5`"""
+        await self.changeSetting(ctx, 'theme', 'fontSize', size)
 
     @ts_web_theme.command(name='radius', aliases=['accentradius'])
     async def ts_web_accentradius(self, ctx, radius):
         """Accent box border radius
         \rWebsite's box border radius (roundness)
         You can use anything the CSS border-radius tag supports\r
-        Example: `.tset web themeradius 10px`"""
+        Example: `.tset web theme radius 10px`"""
         await self.changeSetting(ctx, 'theme', 'accentRadius', radius)
 
     @ts_web.command(name='create', aliases=['creation'])

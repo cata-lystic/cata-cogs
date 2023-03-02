@@ -75,6 +75,7 @@ class Config {
             "theme" => array(
                 'backgroundColor' => array('#212121', [], 'Background color', '#Theme Settings'),
                 'fontColor' => array('#e9e5e5', [], 'Font color'),
+                'fontSize' => array('1em', [], 'Font size'),
                 'accentColor' => array('#393939', [], 'Box accent color'),
                 'accentRadius' => array("10px", [], 'Border radius of boxes'))
             );
@@ -227,8 +228,11 @@ class Config {
             if ($key2 == 'tagDefault' && $this->isTag($newVal) == false) die("Tag doesn't exist");
 
             // Make sure createFlood has at least a 's' at the end (for seconds)
-            if ($key2 == 'createFlood' && ctype_digit($newVal)) $newVal .= "s";
-            
+            if ($key2 == 'createFlood' && ctype_digit($newVal)) $newVal .= 's';
+
+            // Make sure fontSize at least has 'px' at the end if only a number was supplied
+            if ($key2 == 'fontSize' && ctype_digit($newVal)) $newVal .= 'px';
+
             // As far as I know, to do this we have to rewrite the config.php file each time.
             // This will loop through the defaults to get the keys and descriptions to remake the file
             // The user's current config settings will be saved but the requested key will be overwritten

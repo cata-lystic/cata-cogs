@@ -53,5 +53,6 @@ $set['web']['jquery'] = 'local'; # options: local, google, jquery, microsoft, cd
 # Theme Settings
 $set['theme']['backgroundColor'] = '#212121'; # Background color
 $set['theme']['fontColor'] = '#e9e5e5'; # Font color
+$set['theme']['fontSize'] = '1em'; # Font Size
 $set['theme']['accentColor'] = '#393939'; # Box accent color
 $set['theme']['accentRadius'] = '10px'; # Border radius of boxes
