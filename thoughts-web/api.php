@@ -237,8 +237,8 @@ class Config {
 
             // Print out the admins and mods
             $result .= "\n# Admins and Mods\n";
-            $result .= "\$set['admin'] = ".$this->arrayToString($set['admin']).";\n";
-            $result .= "\$set['mod'] = ".$this->arrayToString($set['mod']).";\n";
+            $result .= "\$set['admin'] = ".$this->arrayToString($set['admin'])."; # Discord IDs of those that can do anything\n";
+            $result .= "\$set['mod'] = ".$this->arrayToString($set['mod'])."; # Discord IDs of those that can mod posts\n";
 
             foreach ($this->defaults as $oldCategory => $oldCatVal) {
 
