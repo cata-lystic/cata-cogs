@@ -266,10 +266,8 @@ class Thoughts(commands.Cog):
         \rExample: `.tset bot reasondeleted 1"""
 
         if binary == "1" or binary == "0":
-            self.config.reasonDeleteShow.set(binary)
-            await ctx.send("Set `bot reasondeleted` to "+binary)
-            oktest = await self.config.reasonDeleteShow
-            return await ctx.send(f"Set it really to "+str(oktest)+"")
+            await self.config.reasonDeleteShow.set(binary)
+            return await ctx.send("Set `bot reasondeleted` to "+binary)
         else:
             return await ctx.send("Error: `bot reasondeleted` must be a 1 or 0")
 
