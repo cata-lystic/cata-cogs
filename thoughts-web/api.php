@@ -553,7 +553,7 @@ class api extends config {
                 echo $thisID."{$quotes}".$data[$s]['msg']."{$quotes} -".$data[$s]['author'];
             } else {
                 echo "`Post deleted.`";
-                if ($reasonby == 1) echo " Deleted by: {$data[$s]['deleter']}.";
+                if ($reasonby == 1) echo " Deleted by: ".str_replace("HASHTAG", "#", $data[$s]['deleter']).".";
                 if ($reason == 1) echo " Reason: {$data[$s]['deleteReason']}.";
             }
         
