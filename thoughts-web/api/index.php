@@ -54,7 +54,9 @@ class Config {
                 'showID' => array(0, ['binary'], 'Show thought ID before each result'),
                 'quotes' => array('none', [], 'Quotes around each thought. options: \'none\', \'single\', \'double\', or custom'),
                 'breaks' => array(0, ['binary'], 'Use <br /> instead of \n\r in API calls'),
-                'platform' => array('api', ['alpha'], 'Can be set to anything where the request came from (example: discord)')),
+                'platform' => array('api', ['alpha'], 'Can be set to anything where the request came from (example: discord)'),
+                'ipLog' => array(1, ['binary'], 'Log IP address of post creator'),
+                'ipHash' => array(1, ['binary'], 'Hash IP addresses')),
             "web" => array(
                 'shuffle' => array(1, ['binary'], 'Shuffle search results', '#Website Settings'),
                 'showID' => array(0, ['binary'], 'Show thought ID before each result'),
@@ -458,6 +460,13 @@ class api extends config {
         $cBase = $this->req['base64'] ?? null; // created msg and author may be in base64
         $platform = $this->req['platform'] ?? "api";
 
+        // Process IP address if necessary
+        if ($this->api['ipLog'] == 1) {
+            $ip = ($this->api['ipHash'] == 1) ? md5($_SERVER['REMOTE_ADDR']) : $_SERVER['REMOTE_ADDR']; // Check ipHash setting
+        } else {
+            $ip = null;
+        }
+
         if ($author == null || $authorID == null || $cMsg == null || $cTag == null) {
             echo ("SOMETHING IS MISSING | Author: ".$author." | ID: ".$authorID." | Tag: ".$cTag." | Msg: ".$cMsg);
             die();
@@ -499,6 +508,7 @@ class api extends config {
 
         // Add this to the thoughts.json
         $data[$nextID] = array("msg" => $cMsg, "tag" => $cTag, "author" => str_replace("HASHTAG", "#", $author), "authorID" => $authorID, "timestamp" => time(), "source" => $platform);
+        if ($ip != null) $data[$nextID]['ip'] = $ip;
         Files::write("thoughts.json", json_encode($data, JSON_PRETTY_PRINT));
         die();
 

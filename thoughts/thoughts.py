@@ -306,6 +306,18 @@ class Thoughts(commands.Cog):
         \rExample: `.tset api searchresults 50"""
         await self.changeSetting(ctx, 'api', 'searchResults', newLimit)
 
+    @ts_api.command(name='iplog')
+    async def ts_api_iplog(self, ctx, binary):
+        """Log IP address of post creator
+        \rValue can be 1 or 0"""
+        await self.changeSetting(ctx, 'api', 'ipLog', binary)
+
+    @ts_api.command(name='iphash')
+    async def ts_api_iplog(self, ctx, binary):
+        """Hash IP addresses
+        \rValue can be 1 or 0"""
+        await self.changeSetting(ctx, 'api', 'ipHash', binary)
+
     # Set -> API -> tags
     @ts_api.group(name='tags', aliases=['tag'])
     async def ts_api_tags(self, ctx):

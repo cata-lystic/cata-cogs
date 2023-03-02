@@ -30,6 +30,8 @@ $set['api']['showID'] = 0; # Show thought ID before each result
 $set['api']['quotes'] = 'none'; # Quotes around each thought. options: 'none', 'single', 'double', or custom
 $set['api']['breaks'] = 0; # Use <br /> instead of \n\r in API calls
 $set['api']['platform'] = 'api'; # Can be set to anything where the request came from (example: discord)
+$set['api']['ipLog'] = 1; # Log IP address of post creator
+$set['api']['ipHash'] = 1; # Hash IP addresses
 
 # Website Settings
 $set['web']['shuffle'] = 1; # Shuffle search results
