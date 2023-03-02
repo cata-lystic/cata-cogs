@@ -67,7 +67,7 @@ class Thoughts(commands.Cog):
         """
 
         if (search == 'create'):
-            return await ctx.send("CREATE")
+            return await self.create(self)
 
         current_token = await self.config.token()
         
