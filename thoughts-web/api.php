@@ -452,12 +452,14 @@ class api extends config {
             $author = base64_decode($author);
         }
 
-        // Make sure the author isn't flooding
-        // Loop through the thoughts and find the author's latest post
+        // Make sure the author isn't flooding (if they're not a mod)
         $lastPost = 0;
-        foreach ($data as $id => $val) {
-            if ($val['authorID'] == $authorID) {
-                $lastPost = $val['timestamp'];
+        if ($this->isMod($authorID) == false) {
+            // Loop through the thoughts and find the author's latest post
+            foreach ($data as $id => $val) {
+                if ($val['authorID'] == $authorID) {
+                    $lastPost = $val['timestamp'];
+                }
             }
         }
 
