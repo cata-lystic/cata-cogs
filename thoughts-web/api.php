@@ -895,7 +895,7 @@ class view {
             $ret[3] = "<a href='https://github.com/cata-lystic/redbot-cogs/tree/main/thoughts' target='_blank'>GitHub</a>&nbsp;&nbsp;&nbsp;";
 
         if ($_SESSION['web']['versionVisible'] == 1)
-            $ret[4] = "Thoughts {$_SESSION['versions']['web']}";
+            $ret[4] = "<span title='API Version: ".$_SESSION['versions']['api']."'>Thoughts {$_SESSION['versions']['web']}</span>";
 
         return "
         <div id='footer'>
