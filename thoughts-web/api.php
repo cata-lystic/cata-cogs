@@ -374,7 +374,7 @@ class api extends config {
         // Require API version (?version=) if source isn't web browser
         if ($source != 'web') {
             if (!isset($this->req['version']) || $this->req['version'] == '') {
-                die("Please supply API version");
+                die("Please supply your API version in request");
             } else {
                 if ($this->req['version'] < $this->versions['api']) {
                     die("API Version {$this->req['version']} is not supported. Latest: {$this->versions['api']}");

@@ -101,7 +101,7 @@ class Thoughts(commands.Cog):
         deleted_by = await self.config.deletedBy() # whether or not to show who deleted post
         
         try:
-            async with aiohttp.request("GET", current_url+"/api.php?q=search&token="+current_token+"&s="+search+"&limit="+str(limit)+"&shuffle="+str(shuffle)+"&showID="+str(showID)+"&reason="+str(deleted_reason)+"&reasonby="+str(deleted_by)+"&platform=discord&api="+str(self.versionapi), headers={"Accept": "text/plain"}) as r:
+            async with aiohttp.request("GET", current_url+"/api.php?q=search&token="+current_token+"&s="+search+"&limit="+str(limit)+"&shuffle="+str(shuffle)+"&showID="+str(showID)+"&reason="+str(deleted_reason)+"&reasonby="+str(deleted_by)+"&platform=discord&version="+str(self.versionapi), headers={"Accept": "text/plain"}) as r:
                 if r.status != 200:
                     return await ctx.send("Oops! Cannot get a thought...")
                 result = await r.text(encoding="UTF-8")
