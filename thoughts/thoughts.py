@@ -287,7 +287,7 @@ class Thoughts(commands.Cog):
 
     # Set -> API -> tags
     @ts_api.group(name='tags')
-    async def ts_api_tags(self, ctx, tag):
+    async def ts_api_tags(self, ctx):
         """Tag settings"""
 
     @ts_api_tags.command(name='default')
