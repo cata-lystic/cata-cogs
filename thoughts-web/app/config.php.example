@@ -23,6 +23,7 @@ $set['api']['tags'] = ['thought', 'music', 'spam']; # Tags that thoughts can be 
 $set['api']['tagDefault'] = 'thought'; # Default tag for new posts. Must be an existing tag
 $set['api']['searchLimit'] = 500; # Search results max limit. Cannot be changed by API request
 $set['api']['searchResults'] = 3; # Default amount of results per search
+$set['api']['create'] = 1; # Allow new post creation to non-mods via API
 $set['api']['createFlood'] = '10s'; # Time between when a user can post again (format: 5s, 3m, 5d, 7w, etc)
 $set['api']['shuffle'] = 1; # Shuffle search results
 $set['api']['showID'] = 0; # Show thought ID before each result

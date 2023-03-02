@@ -47,6 +47,7 @@ class Config {
                 'tagDefault' => array('thought', ['alphanum'], 'Default tag for new posts. Must be an existing tag'),
                 'searchLimit' => array(500, ['number'], 'Search results max limit. Cannot be changed by API request'),
                 'searchResults' => array(3, ['number'], 'Default amount of results per search'),
+                'create' => array(1, ['binary'], 'Allow new post creation to non-mods via API'),
                 'createFlood' => array('10s', ['alphanum'], 'Time between when a user can post again (format: 5s, 3m, 5d, 7w, etc)'),
                 'shuffle' => array(1, ['binary'], 'Shuffle search results'),
                 'showID' => array(0, ['binary'], 'Show thought ID before each result'),

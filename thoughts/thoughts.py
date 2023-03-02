@@ -241,6 +241,12 @@ class Thoughts(commands.Cog):
         \rValue can be 1 or 0"""
         await self.changeSetting(ctx, 'api', 'breaks', binary)
 
+    @ts_api.command(name='create')
+    async def ts_api_create(self, ctx, binary):
+        """Allow new post creation to non-mods via API
+        \rValue can be 1 or 0"""
+        await self.changeSetting(ctx, 'api', 'create', binary)
+
     @ts_api.command(name='createflood')
     async def ts_api_createflood(self, ctx, time):
         """Creation flood time limit 
