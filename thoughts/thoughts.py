@@ -265,7 +265,7 @@ class Thoughts(commands.Cog):
         """Show reason posts were deleted
         \rExample: `.tset bot reasondeleted 1"""
 
-        if binary == 1 or binary == 0:
+        if binary == "1" or binary == "0":
             self.config.reasonDeleteShow.set(binary)
             return await ctx.send("Set `bot reasondeleted` to "+binary)
         else:
