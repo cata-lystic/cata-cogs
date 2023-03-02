@@ -49,7 +49,7 @@ class Config {
                 'shuffle' => array(1, ['binary'], 'Shuffle search results'),
                 'showID' => array(0, ['binary'], 'Show thought ID before each result'),
                 'quotes' => array('none', [], 'Quotes around each thought. options: \'none\', \'single\', \'double\', or custom'),
-                'breaks' => array(0, ['binary'], 'Use &lt;br /&gt; instead of \n\r in API calls'),
+                'breaks' => array(0, ['binary'], 'Use <br /> instead of \n\r in API calls'),
                 'platform' => array('api', ['alpha'], 'Can be set to anything where the request came from (example: discord)')),
             "web" => array(
                 'shuffle' => array(1, ['binary'], 'Shuffle search results', '#Website Settings'),
@@ -228,12 +228,17 @@ class Config {
             $checkReq = $this->check($key1, $key2, $newVal);
             if ($checkReq !== true) die($checkReq); // Kill script and show error if fails
             
-            $result = "<?php\n#  API Setup\n# Make unique and secure tokens. Must be at least 8 characters in length with no spaces.\n# You may create multiple tokens with different permissions\n# Permissions: admin, config, create, delete, search\n# 'admin' permission has full access to all commands. Only give these tokens to people you trust that will help you manage the API and website\n# Do not delete the 'default' token. This is used for when your API is accessed with no other request.\n# # The default token should only be used for 'search' and 'list' (maybe 'create' if you want creation public)\n# When config is complete, give an admin token to your Discord Bot with: [p]thoughtset setup api yourAdminToken\n\n";
+            $result = "<?php\n#  API Setup\n# Make unique and secure tokens. Must be at least 8 characters in length with no spaces.\n# You may create multiple tokens with different permissions\n# Permissions: admin, config, create, delete, search\n# 'admin' permission has full access to all commands. Only give these tokens to people you trust that will help you manage the API and website\n# Do not delete the 'default' token. This is used for when your API is accessed with no other request.\n# # The default token should only be used for 'search' and 'list' (maybe 'create' if you want creation public)\n# When config is complete, give an admin token to your Discord Bot with: [p]thoughtset setup api yourAdminToken\n\n# Tokens\n";
 
             // Loop through current $set['token']s and reprint them all out with their permissions
             foreach($set['token'] as $tVal => $tPerms) {
                 $result .= "\$set['token']['{$tVal}'] = ".$this->arrayToString($set['token'][$tVal]).";\n";
             }
+
+            // Print out the admins and mods
+            $result .= "\n# Admins and Mods\n";
+            $result .= "\$set['admin'] = ".$this->arrayToString($set['admin']).";\n";
+            $result .= "\$set['mod'] = ".$this->arrayToString($set['mod']).";\n";
 
             foreach ($this->defaults as $oldCategory => $oldCatVal) {
 
@@ -305,6 +310,27 @@ class Config {
         }
 
         return true;
+    }
+
+    // Check if userID is a Mod (use $adminOnly==1 to only check if user is admin.)
+    function isMod($id, $adminOnly=null) {
+
+        $admins = $_SESSION['admin'];
+
+        if ($adminOnly == 1) {
+            if (!in_array($id, $admins)) return false;
+        } else {
+            $mods = $_SESSION['mod'];
+            if (!in_array($id, $admins) && !in_array($id, $mods)) return false;
+        }
+     
+        return true; // if no errors
+        
+    }
+
+    // Shortcut for isMod($id, 1)
+    function isAdmin($id) {
+        return $this->isMod($id, 1);
     }
 
 }

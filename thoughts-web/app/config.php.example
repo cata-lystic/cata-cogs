@@ -8,9 +8,14 @@
 # The default token should only be used for 'search' and 'list' (maybe 'create' if you want creation public)
 # When config is complete, give an admin token to your Discord Bot with: [p]thoughtset setup api yourAdminToken
 
+# Tokens
 $set['token']['changeThisAdminToken'] = ['admin'];
 $set['token']['changeThisCustomToken'] = ['search', 'list', 'create', 'delete'];
 $set['token']['default'] = ['search', 'list'];
+
+# Admins and Mods
+$set['admin'] = ['1111111111']; // Discord IDs of those that can do anything
+$set['mod'] = ['2222222222', '3333333333']; # Discord IDs of those that can mod posts
 
 # API Settings
 $set['api']['url'] = 'auto'; # Change if auto detection fails
