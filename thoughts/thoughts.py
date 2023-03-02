@@ -61,7 +61,7 @@ class Thoughts(commands.Cog):
         authorID = html.escape(str(ctx.message.author.id))
 
         try:    
-            async with aiohttp.request("GET", current_url+"/api.php?q=tags&s="+str(query)+"&tag="+str(tag1)+"authorID="+str(authorID)+"&rename="+str(tag2)+"&token="+str(current_token), headers={"Accept": "text/plain"}) as r:
+            async with aiohttp.request("GET", current_url+"/api.php?q=tags&s="+str(query)+"&tag="+str(tag1)+"&authorID="+str(authorID)+"&rename="+str(tag2)+"&token="+str(current_token), headers={"Accept": "text/plain"}) as r:
                 if r.status != 200:
                     return await ctx.send("Oops! Cannot make tag request...")
                 result = await r.text(encoding="UTF-8")
