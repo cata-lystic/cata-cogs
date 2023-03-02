@@ -21,7 +21,7 @@ class Thoughts(commands.Cog):
         default_global = {
             "url": "",
             "token": "",
-            "deleteReasonShow": 1
+            "reasonDeleteShow": 1
         }
         default_guild = {
             "test": ""
@@ -79,7 +79,7 @@ class Thoughts(commands.Cog):
         if current_url == '':
             return await ctx.send("You need to set an API URL. Type `.tset setup url`")
         
-        reason_show = await self.config.deleteReasonShow() # whether or not to show deleted reason
+        reason_show = await self.config.reasonDeleteShow() # whether or not to show deleted reason
         
         try:
             async with aiohttp.request("GET", current_url+"/api.php?q=search&token="+current_token+"&s="+search+"&limit="+str(limit)+"&shuffle="+str(shuffle)+"&showID="+str(showID)+"&reason="+str(reason_show)+"&platform=discord&api="+str(self.versionapi), headers={"Accept": "text/plain"}) as r:
@@ -259,6 +259,17 @@ class Thoughts(commands.Cog):
         """Default amount of search results
         \rExample: `.tset api searchresults 50"""
         await self.changeSetting(ctx, 'api', 'searchResults', newLimit)
+
+    @ts_bot.command(name='reasondeleted')
+    async def ts_bot_reasondeleted(self, ctx, binary):
+        """Show reason posts were deleted
+        \rExample: `.tset bot reasondeleted 1"""
+
+        if binary == 1 or binary == 0:
+            self.config.reasonDeleteShow.set(binary)
+            return await ctx.send("Set `bot reasondeleted` to "+binary)
+        else:
+            return await ctx.send("Error: `bot reasondeleted` must be a 1 or 0")
 
     @ts_web.command(name='shuffle')
     async def ts_web_shuffle(self, ctx, binary):
