@@ -319,7 +319,7 @@ class Thoughts(commands.Cog):
         """Rename tag
         \rThis will change all posts from one tag to another and remove the old tag.
         \rExample: `.tset api tag rename oldTag newTag`"""
-        await self.changeTag(ctx, 'rename', oldTag, newTag)
+        await self.changeTag(ctx, 'edit', oldTag, newTag)
 
     # end Set -> API -> tags
 
