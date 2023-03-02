@@ -238,7 +238,7 @@ class Config {
 
             // Make sure color changes at least have '#' at the beginning if only 6 chars was supplied
             $colorChanges = array('fontColor', 'backgroundColor', 'accentColor', 'urlColor');
-            if (strlen($newVal) == 6 && in_array($key2, $colorChanges)) $newVal = '#'.$newVal;
+            if (in_array($key2, $colorChanges) && strlen($newVal) == 6) $newVal = '#'.$newVal;
             
             // As far as I know, to do this we have to rewrite the config.php file each time.
             // This will loop through the defaults to get the keys and descriptions to remake the file
