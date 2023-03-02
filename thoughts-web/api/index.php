@@ -77,7 +77,8 @@ class Config {
                 'fontColor' => array('#e9e5e5', [], 'Font color'),
                 'fontSize' => array('1em', [], 'Font size'),
                 'accentColor' => array('#393939', [], 'Box accent color'),
-                'accentRadius' => array("10px", [], 'Border radius of boxes'))
+                'accentRadius' => array("10px", [], 'Border radius of boxes'),
+                'urlColor' => array("#e9e5e5", [], 'URL color'))
             );
         
 

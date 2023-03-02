@@ -412,6 +412,14 @@ class Thoughts(commands.Cog):
         Example: `.tset web theme font #e9e5e5`"""
         await self.changeSetting(ctx, 'theme', 'accentColor', color)
 
+    @ts_web_theme.command(name='url', aliases=['urlcolor'])
+    async def ts_web_url(self, ctx, color):
+        """URL color
+        \rWebsite's URL color.
+        You can use anything the CSS color tag supports\r
+        Example: `.tset web theme url #e9e5e5`"""
+        await self.changeSetting(ctx, 'theme', 'urlColor', color)
+
     @ts_web_theme.command(name='fontsize', aliases=['size'])
     async def ts_web_fontsize(self, ctx, size):
         """Font size
