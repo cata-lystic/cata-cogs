@@ -44,7 +44,7 @@ class Config {
             'api' => array(
                 'url' => array('auto', [], 'Change if auto detection fails','#API Settings'),
                 'tags' => array(array('thought', 'music', 'spam'), [], 'Tags that thoughts can be categorized into'),
-                'tagDefault' => array('thought', ['alphanum'], 'Default tag'),
+                'tagDefault' => array('thought', ['alphanum'], 'Default tag for new posts. Must be an existing tag'),
                 'searchLimit' => array(500, ['number'], 'Search results max limit. Cannot be changed by API request'),
                 'searchResults' => array(3, ['number'], 'Default amount of results per search'),
                 'createFlood' => array('10s', ['alphanum'], 'Time between when a user can post again (format: 5s, 3m, 5d, 7w, etc)'),
@@ -233,7 +233,7 @@ class Config {
             $checkReq = $this->check($key1, $key2, $newVal);
             if ($checkReq !== true) die($checkReq); // Kill script and show error if fails
             
-            $result = "<?php\n#  API Setup\n# Make unique and secure tokens. Must be at least 8 characters in length with no spaces.\n# You may create multiple tokens with different permissions\n# Permissions: admin, config, create, delete, list, search, tags\n# 'admin' permission has full access to all commands. Only give these tokens to people you trust that will help you manage the API and website\n# Do not delete the 'default' token. This is used for when your API is accessed with no other request.\n# # The default token should only be used for 'search' and 'list' (maybe 'create' if you want creation public)\n# When config is complete, give an admin token to your Discord Bot with: [p]thoughtset setup api yourAdminToken\n\n# Tokens\n";
+            $result = "<?php\n#  API Setup\n# Make unique and secure tokens. Must be at least 8 characters in length with no spaces.\n# You may create multiple tokens with different permissions\n# Permissions: admin, config, create, delete, list, search, tags\n# 'admin' permission has full access to all commands. Only give these tokens to people you trust that will help you manage the API and website\n# Do not delete the 'default' token. This is used for when your API is accessed with no other request.\n# All other tokens will inherit 'default' token's permissions\n# The default token permissions should generally not be changed unless you want to prevent public post creation.\n# When config is complete, give an admin token to your Discord Bot with: [p]thoughtset setup api yourAdminToken\n\n# Tokens\n";
 
             // Loop through current $set['token']s and reprint them all out with their permissions
             foreach($set['token'] as $tVal => $tPerms) {
@@ -309,8 +309,8 @@ class Config {
             foreach($tokens as $key => $permissions) {
                 if (!isset($_SESSION['token'][$key])) return "Invalid token";
                 $perms = $_SESSION['token'][$key];
-                // Check if this token has admin or requested permission
-                if (!in_array($permission, $perms) && !in_array('admin', $perms)) return "Token doesn't have `{$permission}` permissions";
+                // Check if this token has 'admin' or requested permission (or is in default permissions)
+                if (!in_array($permission, $perms) && !in_array('admin', $perms) && !in_array($permission, $_SESSION['token']['default'])) return "Token doesn't have `{$permission}` permissions";
             }
         }
 
@@ -746,6 +746,7 @@ class view {
         $createForm = "
         <div id='create' style='display: {$createVisible}'>
         <form id='createForm' method='get' action='index.php'>
+            <input type='hidden' name='q' value='create' />
             <h1>Create Thought</h1>
             <p><input type='text' id='createUser' name='author' placeholder='Username' value='' /><p>
             <p><input type='text' id='createUserID' name='authorID' placeholder='User ID' value='' /><p>
