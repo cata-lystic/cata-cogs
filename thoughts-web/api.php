@@ -738,6 +738,21 @@ class api extends config {
 
     }
 
+    // Display info about Thoughts and each version
+    function info() {
+        
+        // This function only requires 'read' permissions
+        $checkToken = $this->token($this->req['token'], 'read');
+        if ($checkToken !== true) die($checkToken);
+
+        $botVersion = $this->req['botversion'] ?? null;
+        echo "Thoughts\n
+        API Version: {$this->versions['api']}\n
+        Web Version: {$this->versions['web']}";
+        if ($botVersion != null)
+            echo "\nBot Version: {$botVersion}";
+     }
+
     // This function is only used for me to test out code.
     function dev() {
        echo 'Nothing in dev() right now...';
