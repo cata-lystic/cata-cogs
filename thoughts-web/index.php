@@ -41,6 +41,7 @@ echo "<head>
 <body>
 
 <div id='content'>"; // create the content div for web for javascript search
+
 $api->process(); // fetch thought from whatever user has requested
 
 $view = new view();

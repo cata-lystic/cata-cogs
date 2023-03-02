@@ -332,8 +332,8 @@ class api extends config {
     function process() {
 
         // Check if there was a 'q' (query) request
-        $func = $this->req['q'] ?? 'search'; // Consider no query a search for a random thought
- 
+        $func = (isset($this->req['q']) && !empty($func)) ? $this->req['q'] : 'search'; // no query = search for random thought
+
         // Make sure token is valid and has the proper permissions
         $token = $this->req['token'] ?? 'default';
         $checkToken = $this->token($token, $func);

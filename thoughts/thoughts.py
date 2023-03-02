@@ -52,7 +52,7 @@ class Thoughts(commands.Cog):
 
             await ctx.send(f"{result}")
 
-    @commands.command(aliases=['thoughts'])
+    @commands.group(aliases=['thoughts'])
     async def thought(self, ctx, search="", limit=3, shuffle=1, showID=0):
         """Gets a thought.
 
@@ -86,8 +86,8 @@ class Thoughts(commands.Cog):
 
         return await ctx.send(f"{result}")
 
-    @commands.command(aliases=['tcreate'])
-    async def thoughtcreate(self, ctx, tag: str, *, msg: str):
+    @thought.command(aliases=['tcreate'])
+    async def create(self, ctx, tag: str, *, msg: str):
         """Create a thought
         ***.tcreate your thought here"""
         if tag != 'thought' and tag != 'music' and tag != 'spam':
