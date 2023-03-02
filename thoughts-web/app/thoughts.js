@@ -16,6 +16,9 @@ $(document).on("click", ".divToggle", function(e) {
   
 })
 
+// Search each time search bar changes
+$(document).on("keyup change", "#searchbox", function(e) { search() })
+
 function search() {
   let searchQuery = $("#searchbox").val()
   let limit = $("#searchLimit").val()
@@ -26,12 +29,12 @@ function search() {
   if (searchQuery == "") searchQuery = "list"
   $.ajax({
     type: "GET",
-    url: "index.php?q="+searchQuery+"&limit="+limit+"&shuffle="+shuffle+"&showID="+showID+"&quotes="+quotes+"&platform="+platform+"&breaks=1",
+    url: "api.php?q=search&s="+searchQuery+"&limit="+limit+"&shuffle="+shuffle+"&showID="+showID+"&quotes="+quotes+"&platform="+platform+"&breaks=1",
     cache: false
   }).done(function (data, textStatus, errorThrown) {
     $("#content").html(data)
     // Change the URL for easy copy/pasting
-    ChangeUrl("test", "?q="+searchQuery+"&limit="+limit+"&shuffle="+shuffle+"&showID="+showID+"&quotes="+quotes+"&breaks=1")
+    ChangeUrl("test", "?q=search&s="+searchQuery+"&limit="+limit+"&shuffle="+shuffle+"&showID="+showID+"&quotes="+quotes+"&breaks=1")
   })
 }
 

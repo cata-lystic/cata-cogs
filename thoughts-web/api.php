@@ -9,17 +9,14 @@ session_start();
 // These are just here for development purposes
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
-ini_set("memory_limit", 512 * 1024 * 1024); // Set memory limit to 512mb
 error_reporting(E_ALL);
 
 // Load api and config classes
 $config = new Config();
 $api = new api();
-// Process the request
-$api->process();
 
-// All API calls require a function
-//if ($function == null) die(("No function requested"));
+// Process the request immediately if just the api.php is being loaded
+if (!isset($web)) $api->process();
 
 
 class Config {
@@ -467,7 +464,7 @@ class api extends config {
         if (isset($data[$id])) {
 
             $alreadyDeleted = $data[$id]['deleted'] ?? 0;
-            if ($alreadyDeleted == 1) die($id." already deleted");
+            if ($alreadyDeleted == 1) die("#{$id} already deleted");
             
             $data[$id]['deleted'] = 1;
             $data[$id]['deleter'] = $deleter;
@@ -521,7 +518,7 @@ class api extends config {
         
         // ?q=list for a non-web platform just shows a link to the list page
         } else if ($s == "list" && $platform == "discord") {
-            echo "Full list of thoughts can be found at {$config->url}?q=list";
+            echo "Full list of thoughts can be found at {$_SESSION['api']['url']}?q=list";
         
         // If $s is numeric or empty, fetch a random or desired ID
         } else if ($s == null || is_numeric($s)) {
