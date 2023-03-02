@@ -754,8 +754,11 @@ class api extends config {
         // This function only requires 'read' permissions
         $checkToken = $this->token($this->req['token'], 'read');
         if ($checkToken !== true) die($checkToken);
-        $botVersion = $this->req['versionbot'] ?? null;
+
+        $break = $this->req['break'] ?? 0; // User can also request breaks via API instead of platform=web
+
         $info = "Thoughts by Catalyst\nAPI Version: {$this->versions['api']}\nWeb Version: {$this->versions['web']}";
+        $botVersion = $this->req['versionbot'] ?? null;
         if ($botVersion != null)
             $info .= "\nBot Version: {$botVersion}";
         
@@ -766,7 +769,7 @@ class api extends config {
 
         $info .= "\nWebsite: {$extra1}{$this->api['url']}{$extra2}";
         $info .= "\nSource: {$extra1}https://github.com/cata-lystic/cata-cogs{$extra2}";
-        echo ($this->source != 'web') ? $info : nl2br($info); // show breaks for web
+        echo ($break != 1 && $this->source != 'web') ? $info : nl2br($info); // show breaks for web
      }
 
     // Detect if user's API version supports current function
