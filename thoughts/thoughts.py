@@ -414,8 +414,8 @@ class Thoughts(commands.Cog):
 
     @ts_web_theme.command(name='fontsize', aliases=['size'])
     async def ts_web_fontsize(self, ctx, size):
-        """Font color
-        \rWebsite's font color.
+        """Font size
+        \rWebsite's font size.
         You can use anything the CSS color tag supports\r
         Example: `.tset web theme fontsize #e9e5e5`"""
         await self.changeSetting(ctx, 'theme', 'fontSize', size)
