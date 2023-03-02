@@ -45,7 +45,7 @@ class Thoughts(commands.Cog):
             current_url = await self.config.url()
             newVal = newVal.replace("#", "HASHTAG")
             try:    
-                async with aiohttp.request("GET", current_url+"/api.php?q=config&key1="+key1+"&key2="+key2+"&val="+newVal+"&version="+str(self.versionapi)+"&versionbot="+str(self.versionbot)+"&token="+str(current_token), headers={"Accept": "text/plain"}) as r:
+                async with aiohttp.request("GET", current_url+"/api.php?q=config&key1="+key1+"&key2="+key2+"&val="+newVal+"&version="+str(self.versionapi)+"&versionbot="+str(self.versionbot)+"&platform=discord&token="+str(current_token), headers={"Accept": "text/plain"}) as r:
                     if r.status != 200:
                         return await ctx.send("Oops! Cannot change setting...")
                     result = await r.text(encoding="UTF-8")
@@ -61,7 +61,7 @@ class Thoughts(commands.Cog):
         authorID = html.escape(str(ctx.message.author.id))
 
         try:    
-            async with aiohttp.request("GET", current_url+"/api.php?q=tags&s="+str(query)+"&tag="+str(tag1)+"&authorID="+str(authorID)+"&rename="+str(tag2)+"&version="+str(self.versionapi)+"&versionbot="+str(self.versionbot)+"&token="+str(current_token), headers={"Accept": "text/plain"}) as r:
+            async with aiohttp.request("GET", current_url+"/api.php?q=tags&s="+str(query)+"&tag="+str(tag1)+"&authorID="+str(authorID)+"&rename="+str(tag2)+"&version="+str(self.versionapi)+"&versionbot="+str(self.versionbot)+"&platform=discord&token="+str(current_token), headers={"Accept": "text/plain"}) as r:
                 if r.status != 200:
                     return await ctx.send("Oops! Cannot make tag request...")
                 result = await r.text(encoding="UTF-8")

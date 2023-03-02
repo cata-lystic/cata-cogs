@@ -357,7 +357,7 @@ class api extends config {
         
         Config::__construct();
 
-        $this->allowedFunctions = ['config', 'create', 'delete', 'list', 'search', 'tags', 'info', 'dev'];
+        $this->allowedFunctions = ['config', 'create', 'delete', 'list', 'search', 'tags', 'info', 'dev', 'new'];
 
         // Get all request variables and put them in an array
         foreach($_REQUEST as $key => $val) {
@@ -752,8 +752,13 @@ class api extends config {
         echo "Thoughts by Catalyst\nAPI Version: {$this->versions['api']}\nWeb Version: {$this->versions['web']}";
         if ($botVersion != null)
             echo "\nBot Version: {$botVersion}";
-        echo "\nWebsite: <{$this->api['url']}>";
-        echo "\nSource: <https://github.com/cata-lystic/cata-cogs>";
+        
+        $extra1 = null; $extra2 = null;
+        if ($this->req['platform'] == 'discord')
+            $extra1 = '<'; $extra2 = '>'; // show <> around URL for Discord so it doesn't embed link
+            
+        echo "\nWebsite: {$extra1}{$this->api['url']}{$extra2}";
+        echo "\nSource: {$extra1}https://github.com/cata-lystic/cata-cogs{$extra2}";
      }
 
     // Detect if user's API version supports current function
@@ -769,6 +774,12 @@ class api extends config {
     // This function is only used for me to test out code.
     function dev() {
        echo 'Nothing in dev() right now...';
+    }
+
+    // This function is only to test API version checks
+    function new() {
+        $checkAPI = $this->version(1.5);
+        die($checkAPI);
     }
 
 }
