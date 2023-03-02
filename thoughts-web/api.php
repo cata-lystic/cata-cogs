@@ -456,8 +456,8 @@ class api extends config {
         // Loop through the thoughts and find the author's latest post
         $lastPost = 0;
         foreach ($data as $id => $val) {
-            if ($val['author'] == $author) {
-            $lastPost = $val['timestamp'];
+            if ($val['authorID'] == $authorID) {
+                $lastPost = $val['timestamp'];
             }
         }
 
