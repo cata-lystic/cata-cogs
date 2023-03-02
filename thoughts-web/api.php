@@ -15,6 +15,7 @@ error_reporting(E_ALL);
 $config = new Config();
 $api = new api();
 
+
 // Process the request immediately if just the api.php is being loaded
 if (!isset($web)) $api->process();
 
@@ -352,6 +353,7 @@ class api extends config {
 
     public $req = []; // all $_REQUESTs will be stored
     public $allowedFunctions; // All allowed functions by the API
+    public $source; // web or api, usually
 
     function __construct() {
         
@@ -370,6 +372,8 @@ class api extends config {
 
     // Process what has been requested and send to proper function
     function process($source='') {
+
+        $this->source = ($source != '') ? $source : 'api'; // API is default source
 
         // Check if there was a 'q' (query) request
         $func = $this->req['q'] ?? null; // no query = search for random thought
@@ -749,16 +753,18 @@ class api extends config {
         $checkToken = $this->token($this->req['token'], 'read');
         if ($checkToken !== true) die($checkToken);
         $botVersion = $this->req['versionbot'] ?? null;
-        echo "Thoughts by Catalyst\nAPI Version: {$this->versions['api']}\nWeb Version: {$this->versions['web']}";
+        $info = "Thoughts by Catalyst\nAPI Version: {$this->versions['api']}\nWeb Version: {$this->versions['web']}";
         if ($botVersion != null)
-            echo "\nBot Version: {$botVersion}";
+            $info .= "\nBot Version: {$botVersion}";
         
         $extra1 = null; $extra2 = null;
-        if ($this->req['platform'] == 'discord')
+        if (isset($this->req['platform']) && $this->req['platform'] == 'discord') {
             $extra1 = '<'; $extra2 = '>'; // show <> around URL for Discord so it doesn't embed link
-            
-        echo "\nWebsite: {$extra1}{$this->api['url']}{$extra2}";
-        echo "\nSource: {$extra1}https://github.com/cata-lystic/cata-cogs{$extra2}";
+        }
+        
+        $info .= "\nWebsite: {$extra1}{$this->api['url']}{$extra2}";
+        $info .= "\nSource: {$extra1}https://github.com/cata-lystic/cata-cogs{$extra2}";
+        echo ($this->source != 'web') ? $info : nl2br($info); // show breaks for web
      }
 
     // Detect if user's API version supports current function
