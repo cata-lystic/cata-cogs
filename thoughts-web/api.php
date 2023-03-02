@@ -217,6 +217,9 @@ class Config {
             // If var still doesn't exist kill the script
             return $_SESSION[$key1][$key2] ?? null;
         } else {
+
+            // Make sure tagDefault is an existing tag
+            if ($key2 == 'tagDefault' && $this->isTag($newVal) == false) die("Tag doesn't exist");
             
             // As far as I know, to do this we have to rewrite the config.php file each time.
             // This will loop through the defaults to get the keys and descriptions to remake the file
