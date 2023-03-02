@@ -34,8 +34,7 @@ class Thoughts(commands.Cog):
     async def changeSetting(self, ctx, key1, key2, newVal=''):
         if key2 == 'token':
             await self.config.token.set(newVal)
-            await ctx.message.delete() # delete message that set token for security
-            return await ctx.send("Token Set! Hopefully your last message was deleted!")
+            return await ctx.send("Token Set! Please delete your last message.")
         
         if key2 == 'folder':
             await self.config.apiFolder.set(newVal)
