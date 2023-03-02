@@ -516,6 +516,13 @@ class api extends config {
             $data[$id]['deleted'] = 1;
             $data[$id]['deleter'] = str_replace("HASHTAG", "#", $deleter);
             $data[$id]['deleterID'] = $deleterID;
+
+            // Make sure deleteReason doesn't start with 'wipe'
+            if (substr($reason, 0, 4) == 'wipe') {
+                $wipe = 1;
+                $deleteReason = trim(substr($reason, 4)); // remove 'wipe' from front of reason
+            }
+
             $data[$id]['deleteReason'] = $reason;
             if ($wipe == 1) $data[$id]['msg'] = "DELETED";
             Files::write("app/thoughts.json", json_encode($data, JSON_PRETTY_PRINT));

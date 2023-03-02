@@ -150,7 +150,9 @@ class Thoughts(commands.Cog):
     async def thoughtdelete(self, ctx, id: int, *, reason: str):
         """Delete a thought
         \rYou can only delete your own thought!
-        Example: ***.tdelete*** thoughtID reason"""
+        Example: ***.tdelete*** thoughtID reason\r
+        Note: Original post can still be seen in thoughts.json. To permanently delete, wipe instead:
+        Example: ***.tdelete*** thoughtID wipe reason"""
         
         reason = html.escape(reason)
         current_token = await self.config.token()
@@ -159,6 +161,8 @@ class Thoughts(commands.Cog):
         deleterID = html.escape(str(ctx.message.author.id))
         reason = reason.replace("#", "HASHTAG")
         current_url = await self.config.url()
+
+        # Note: if reason starts with 'wipe', it will be the same as adding the ?wipe=1 flag
 
         try:    
             async with aiohttp.request("GET", current_url+"/api.php?q=delete&token="+current_token+"&platform=discord&id="+str(id)+"&deleterID="+str(deleterID)+"&reason="+reason+"&deleter="+deleter, headers={"Accept": "text/plain"}) as r:
