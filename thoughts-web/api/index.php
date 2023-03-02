@@ -59,10 +59,6 @@ class Config {
                 'shuffle' => array(1, ['binary'], 'Shuffle search results', '#Website Settings'),
                 'showID' => array(0, ['binary'], 'Show thought ID before each result'),
                 'quotes' => array('none', [], 'Quotes around each thought. options: \'none\', \'single\', \'double\', or custom'),
-                'backgroundColor' => array('#212121', [], 'Background color'),
-                'fontColor' => array('#e9e5e5', [], 'Font color'),
-                'accentColor' => array('#393939', [], 'Box accent color'),
-                'accentRadius' => array("10px", [], 'Border radius of boxes'),
                 'info' => array(1, ['binary'], 'Enable API info box'),
                 'infoVisible' => array(1, ['binary'], 'Show API info box by default'),
                 'create' => array(1, ['binary'], 'Enable thought creation box'),
@@ -75,7 +71,12 @@ class Config {
                 'github' => array(1, ['binary'], 'Show GitHub link in footer'),
                 'versionVisible' => array(1, ['binary'], 'Show Thoughts Web version in footer'),
                 'js' => array(1, ['binary'], 'Use JavaScript for search and other features'),
-                'jquery' => array('local', [], 'options: local, google, jquery, microsoft, cdnjs, jsdelivr, Custom URL', 'jQuery.js location. Change from "local" to direct URL or built in CDN options'))
+                'jquery' => array('local', [], 'options: local, google, jquery, microsoft, cdnjs, jsdelivr, Custom URL', 'jQuery.js location. Change from "local" to direct URL or built in CDN options')),
+            "theme" => array(
+                'backgroundColor' => array('#212121', [], 'Background color', '#Theme Settings'),
+                'fontColor' => array('#e9e5e5', [], 'Font color'),
+                'accentColor' => array('#393939', [], 'Box accent color'),
+                'accentRadius' => array("10px", [], 'Border radius of boxes'))
             );
         
 

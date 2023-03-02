@@ -24,7 +24,7 @@ if ($platform == "discord") {
 echo "<head>
 <title>Thoughts</title>
 
-<style>:root { --bg-color: {$config->web['backgroundColor']}; --accent-color: {$config->web['accentColor']}; --font-color: {$config->web['fontColor']}; --accent-radius: {$config->web['accentRadius']}; }</style>
+<style>:root { --bg-color: {$config->theme['backgroundColor']}; --accent-color: {$config->theme['accentColor']}; --font-color: {$config->theme['fontColor']}; --accent-radius: {$config->theme['accentRadius']}; }</style>
 
 <link rel='stylesheet' href='assets/thoughts.css'>
 </head>

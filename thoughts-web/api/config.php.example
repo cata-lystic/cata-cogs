@@ -35,10 +35,6 @@ $set['api']['platform'] = 'api'; # Can be set to anything where the request came
 $set['web']['shuffle'] = 1; # Shuffle search results
 $set['web']['showID'] = 0; # Show thought ID before each result
 $set['web']['quotes'] = 'none'; # Quotes around each thought. options: 'none', 'single', 'double', or custom
-$set['web']['backgroundColor'] = '#212121'; # Background color
-$set['web']['fontColor'] = '#e9e5e5'; # Font color
-$set['web']['accentColor'] = '#393939'; # Box accent color
-$set['web']['accentRadius'] = '10px'; # Border radius of boxes
 $set['web']['info'] = 1; # Enable API info box
 $set['web']['infoVisible'] = 1; # Show API info box by default
 $set['web']['create'] = 1; # Enable thought creation box
@@ -53,3 +49,9 @@ $set['web']['versionVisible'] = 1; # Show Thoughts Web version in footer
 $set['web']['js'] = 1; # Use JavaScript for search and other features
 # jQuery.js location. Change from "local" to direct URL or built in CDN options
 $set['web']['jquery'] = 'local'; # options: local, google, jquery, microsoft, cdnjs, jsdelivr, Custom URL
+
+# Theme Settings
+$set['theme']['backgroundColor'] = '#212121'; # Background color
+$set['theme']['fontColor'] = '#e9e5e5'; # Font color
+$set['theme']['accentColor'] = '#393939'; # Box accent color
+$set['theme']['accentRadius'] = '10px'; # Border radius of boxes

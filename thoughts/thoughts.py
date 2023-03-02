@@ -394,7 +394,7 @@ class Thoughts(commands.Cog):
         \rWebsite's background color.
         You can use anything the CSS color tag supports\r
         Example: `.tset web bgcolor #212121`"""
-        await self.changeSetting(ctx, 'web', 'backgroundColor', color)
+        await self.changeSetting(ctx, 'theme', 'backgroundColor', color)
 
     @ts_web_theme.command(name='accent', aliases=['accentcolor'])
     async def ts_web_accentcolor(self, ctx, color):
@@ -402,7 +402,7 @@ class Thoughts(commands.Cog):
         \rWebsite's box color for API info, search, creation.
         You can use anything the CSS color tag supports\r
         Example: `.tset web themeaccent #393939`"""
-        await self.changeSetting(ctx, 'web', 'accentColor', color)
+        await self.changeSetting(ctx, 'theme', 'accentColor', color)
 
     @ts_web_theme.command(name='font', aliases=['fontcolor'])
     async def ts_web_fontcolor(self, ctx, color):
@@ -410,7 +410,7 @@ class Thoughts(commands.Cog):
         \rWebsite's font color.
         You can use anything the CSS color tag supports\r
         Example: `.tset web themefont #e9e5e5`"""
-        await self.changeSetting(ctx, 'web', 'accentColor', color)
+        await self.changeSetting(ctx, 'theme', 'accentColor', color)
 
     @ts_web_theme.command(name='radius', aliases=['accentradius'])
     async def ts_web_accentradius(self, ctx, radius):
@@ -418,7 +418,7 @@ class Thoughts(commands.Cog):
         \rWebsite's box border radius (roundness)
         You can use anything the CSS border-radius tag supports\r
         Example: `.tset web themeradius 10px`"""
-        await self.changeSetting(ctx, 'web', 'accentRadius', radius)
+        await self.changeSetting(ctx, 'theme', 'accentRadius', radius)
 
     @ts_web.command(name='create', aliases=['creation'])
     async def ts_web_create(self, ctx, binary):
