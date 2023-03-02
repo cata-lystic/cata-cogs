@@ -313,7 +313,7 @@ class Thoughts(commands.Cog):
         await self.changeSetting(ctx, 'api', 'ipLog', binary)
 
     @ts_api.command(name='iphash')
-    async def ts_api_iplog(self, ctx, binary):
+    async def ts_api_iphash(self, ctx, binary):
         """Hash IP addresses
         \rValue can be 1 or 0"""
         await self.changeSetting(ctx, 'api', 'ipHash', binary)
