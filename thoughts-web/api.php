@@ -314,9 +314,7 @@ class Config {
 
     // Check if userID is a Mod (use $adminOnly==1 to only check if user is admin.)
     function isMod($id, $adminOnly=null) {
-
         $admins = $_SESSION['admin'];
-
         if ($adminOnly == 1) {
             if (!in_array($id, $admins)) return false;
         } else {
@@ -325,7 +323,6 @@ class Config {
         }
      
         return true; // if no errors
-        
     }
 
     // Shortcut for isMod($id, 1)
@@ -497,7 +494,7 @@ class api extends config {
             // Make sure deleter owns the post
             $posterID = $data[$id]['authorID'];
 
-            if ($deleterID != $posterID) die("You are not the author of this post");
+            if ($deleterID != $posterID && $this->isMod($deleterID) != true) die("You are not the author of this post");
             
             $data[$id]['deleted'] = 1;
             $data[$id]['deleter'] = str_replace("HASHTAG", "#", $deleter);

@@ -25,7 +25,7 @@ $set['api']['createFlood'] = '10s'; # Time between when a user can post again (f
 $set['api']['shuffle'] = 1; # Shuffle search results
 $set['api']['showID'] = 0; # Show thought ID before each result
 $set['api']['quotes'] = 'none'; # Quotes around each thought. options: 'none', 'single', 'double', or custom
-$set['api']['breaks'] = 0; # Use &lt;br /&gt; instead of \n\r in API calls
+$set['api']['breaks'] = 0; # Use <br /> instead of \n\r in API calls
 $set['api']['platform'] = 'api'; # Can be set to anything where the request came from (example: discord)
 
 # Website Settings
