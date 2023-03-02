@@ -234,18 +234,10 @@ class Config {
             // Make sure fontSize at least has 'px' at the end if only a number was supplied
             if ($key2 == 'fontSize' && ctype_digit($newVal)) $newVal .= 'px';
 
-            // Make sure fontColor at least has '#' at the beginning if only a number was supplied
-            if ($key2 == 'fontColor' && ctype_digit($newVal)) $newVal = '#'.$newVal;
-
-            // Make sure backgroundColor at least has '#' at the beginning if only a number was supplied
-            if ($key2 == 'backgroundColor' && ctype_digit($newVal)) $newVal = '#'.$newVal;
-
-            // Make sure accentColor at least has '#' at the beginning if only a number was supplied
-            if ($key2 == 'accentColor' && ctype_digit($newVal)) $newVal = '#'.$newVal;
-
-            // Make sure urlColor at least has '#' at the beginning if only a number was supplied
-            if ($key2 == 'urlColor' && ctype_digit($newVal)) $newVal = '#'.$newVal;
-
+            // Make sure color changes at least have '#' at the beginning if only 6 chars was supplied
+            $colorChanges = array('fontColor', 'backgroundColor', 'accentColor', 'urlColor');
+            if (strlen($newVal) == 6 && in_array($key2, $colorChanges)) $newVal = '#'.$newVal;
+            
             // As far as I know, to do this we have to rewrite the config.php file each time.
             // This will loop through the defaults to get the keys and descriptions to remake the file
             // The user's current config settings will be saved but the requested key will be overwritten
