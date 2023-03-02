@@ -362,7 +362,12 @@ class Thoughts(commands.Cog):
         """Quotes around each thought"""
         await self.changeSetting(ctx, 'web', 'quotes', quotes)
 
-    @ts_web.command(name='themebg', aliases=['bgcolor', 'backgroundcolor'])
+    # Theme Settings
+    @ts_api.group(name='theme')
+    async def ts_web_theme(self, ctx):
+        """Tag settings"""
+
+    @ts_web_theme.command(name='bg', aliases=['bgcolor', 'background', 'backgroundcolor'])
     async def ts_web_bgcolor(self, ctx, color):
         """Background color
         \rWebsite's background color.
@@ -370,7 +375,7 @@ class Thoughts(commands.Cog):
         Example: `.tset web bgcolor #212121`"""
         await self.changeSetting(ctx, 'web', 'backgroundColor', color)
 
-    @ts_web.command(name='themeaccent', aliases=['accent', 'accentcolor'])
+    @ts_web_theme.command(name='accent', aliases=['accentcolor'])
     async def ts_web_accentcolor(self, ctx, color):
         """Accent color
         \rWebsite's box color for API info, search, creation.
@@ -378,7 +383,7 @@ class Thoughts(commands.Cog):
         Example: `.tset web themeaccent #393939`"""
         await self.changeSetting(ctx, 'web', 'accentColor', color)
 
-    @ts_web.command(name='themefont', aliases=['fontcolor'])
+    @ts_web_theme.command(name='font', aliases=['fontcolor'])
     async def ts_web_fontcolor(self, ctx, color):
         """Font color
         \rWebsite's font color.
@@ -386,7 +391,7 @@ class Thoughts(commands.Cog):
         Example: `.tset web themefont #e9e5e5`"""
         await self.changeSetting(ctx, 'web', 'accentColor', color)
 
-    @ts_web.command(name='themeradius', aliases=['accentradius'])
+    @ts_web_theme.command(name='radius', aliases=['accentradius'])
     async def ts_web_accentradius(self, ctx, radius):
         """Accent box border radius
         \rWebsite's box border radius (roundness)
