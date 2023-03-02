@@ -269,7 +269,7 @@ class Thoughts(commands.Cog):
             self.config.reasonDeleteShow.set(binary)
             await ctx.send("Set `bot reasondeleted` to "+binary)
             oktest = self.config.reasonDeleteShow()
-            return await ctx.send("Set it really to "+oktest+"")
+            return await ctx.send("Set it really to "+str(oktest)+"")
         else:
             return await ctx.send("Error: `bot reasondeleted` must be a 1 or 0")
 
