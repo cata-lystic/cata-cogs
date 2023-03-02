@@ -520,13 +520,14 @@ class api extends config {
             // Make sure deleteReason doesn't start with 'wipe'
             if (substr($reason, 0, 4) == 'wipe') {
                 $wipe = 1;
-                $deleteReason = trim(substr($reason, 4)); // remove 'wipe' from front of reason
+                $reason = trim(substr($reason, 4)); // remove 'wipe' from front of reason
             }
 
             $data[$id]['deleteReason'] = $reason;
-            if ($wipe == 1) $data[$id]['msg'] = "DELETED";
+            if ($wipe == 1) $data[$id]['msg'] = "[WIPED]";
             Files::write("app/thoughts.json", json_encode($data, JSON_PRETTY_PRINT));
-            echo "Post #{$id} deleted";
+            $delMethod = ($wipe != 1) ? "deleted" : "wiped";
+            echo "Post #{$id} {$delMethod}";
 
         } else {
             echo "ID DOESNT EXIST";
