@@ -52,8 +52,8 @@ class Thoughts(commands.Cog):
 
             await ctx.send(f"{result}")
 
-    @commands.group(aliases=['thoughts'])
-    async def thought(self, ctx, search='', limit: str='3', shuffle: str='1', showID: str='0'):
+    @commands.command(aliases=['thoughts'])
+    async def thought(self, ctx, search="", limit=3, shuffle=1, showID=0):
         """Gets a thought.
 
         **.thought** - Get random thought
@@ -64,10 +64,9 @@ class Thoughts(commands.Cog):
 
         Create a thought.
         **.tcreate your thought here**
+        Delete a thought
+        **.tdelete id reason**
         """
-
-        if (search == 'create'):
-            return await self.create(self, 'notag')
 
         current_token = await self.config.token()
         
@@ -89,8 +88,8 @@ class Thoughts(commands.Cog):
 
         return await ctx.send(f"{result}")
 
-    @thought.command(aliases=['tcreate'])
-    async def create(self, ctx, tag: str='', *, msg: str=''):
+    @commands.command(aliases=['tcreate'])
+    async def thoughtcreate(self, ctx, tag: str, *, msg: str):
         """Create a thought
         ***.tcreate your thought here"""
         if tag != 'thought' and tag != 'music' and tag != 'spam':
@@ -124,6 +123,31 @@ class Thoughts(commands.Cog):
             return await ctx.send("Oops! Cannot create a thought...")
         
         await ctx.send(f"{result}")
+
+    @commands.command(aliases=['tdel','tdelete'])
+    async def thoughtdelete(self, ctx, id: int, *, reason: str):
+        """Delete a thought
+        \rYou can only delete your own thought!
+        Example: ***.tdelete*** thoughtID reason"""
+        
+        tMsg = html.escape(msg)
+        current_token = await self.config.token()
+        deleter = html.escape(str(ctx.message.author))
+        deleter = deleter.replace("#", "HASHTAG")
+        deleterID = html.escape(str(ctx.message.author.id))
+        reason = reason.replace("#", "HASHTAG")
+        current_url = await self.config.url()
+
+        try:    
+            async with aiohttp.request("GET", current_url+"/api.php?q=delete&token="+current_token+"&platform=discord&id="+str(id)+"&deleterID="+str(deleterID)+"&reason="+reason+"&deleter="+deleter, headers={"Accept": "text/plain"}) as r:
+                if r.status != 200:
+                    return await ctx.send("Oops! Cannot delete a thought...")
+                result = await r.text(encoding="UTF-8")
+        except aiohttp.ClientConnectionError:
+            return await ctx.send("Oops! Cannot delete a thought...")
+        
+        await ctx.send(f"{result}")
+
 
     @commands.group(name="thoughtset", aliases=['tset'])
     @checks.is_owner()
