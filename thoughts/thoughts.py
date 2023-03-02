@@ -416,6 +416,12 @@ class Thoughts(commands.Cog):
         \rValue can be 1 or 0"""
         await self.changeSetting(ctx, 'web', 'createVisible', binary)
 
+    @ts_web.command(name='versionvisible')
+    async def ts_web_createvis(self, ctx, binary):
+        """Show Thoughts Web version in footer
+        \rValue can be 1 or 0"""
+        await self.changeSetting(ctx, 'web', 'versionVisible', binary)
+
     @ts_web.command(name='createflood')
     async def ts_web_createflood(self, ctx, time):
         """Creation flood time limit 
