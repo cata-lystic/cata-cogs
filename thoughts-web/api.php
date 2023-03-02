@@ -761,7 +761,7 @@ class api extends config {
         $userVer = $this->req['version'];
         $latestVer = $this->versions['api'];
         $checkVer = ($requiredVersion != null) ? $requiredVersion : $this->versions['api']; // check if using latest API version if none requested
-        if ($userVer > $latestVer) return "API Version $userVer does not exist";
+        if ($userVer > $latestVer || $userVer < 1) return "API Version $userVer does not exist";
         if ($userVer < $checkVer) return "API Version $userVer does not support this feature. Requires API >= $checkVer";
         return true;
     }
