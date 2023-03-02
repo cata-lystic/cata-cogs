@@ -146,7 +146,7 @@ class Thoughts(commands.Cog):
         current_url = await self.config.url()
 
         try:    
-            async with aiohttp.request("GET", current_url+"/"+str(apiFolder+"?q=create&token="+current_token+"&platform=discord&authorID="+str(tAuthorID)+"&tag="+tag+"&msg="+tBaseString+"&version="+str(self.versionapi)+"&versionbot="+str(self.versionbot)+"&author="+tABaseString, headers={"Accept": "text/plain"}) as r:
+            async with aiohttp.request("GET", current_url+"/"+str(apiFolder)+"?q=create&token="+current_token+"&platform=discord&authorID="+str(tAuthorID)+"&tag="+tag+"&msg="+tBaseString+"&version="+str(self.versionapi)+"&versionbot="+str(self.versionbot)+"&author="+tABaseString, headers={"Accept": "text/plain"}) as r:
                 if r.status != 200:
                     return await ctx.send("Oops! Cannot create a thought...")
                 result = await r.text(encoding="UTF-8")
