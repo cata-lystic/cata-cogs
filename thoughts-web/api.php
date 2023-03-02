@@ -44,6 +44,7 @@ class Config {
             'api' => array(
                 'url' => array('auto', [], 'Change if auto detection fails','#API Settings'),
                 'tags' => array(array('thought', 'music', 'spam'), [], 'Tags that thoughts can be categorized into'),
+                'tagDefault' => array('thought', ['alphanum'], 'Default tag'),
                 'searchLimit' => array(500, ['number'], 'Search results max limit. Cannot be changed by API request'),
                 'searchResults' => array(3, ['number'], 'Default amount of results per search'),
                 'createFlood' => array('10s', ['alphanum'], 'Time between when a user can post again (format: 5s, 3m, 5d, 7w, etc)'),
@@ -740,18 +741,25 @@ class view {
         if ($_SESSION['web']['create'] != 1) return false;
 
         $createVisible = ($_SESSION['web']['createVisible'] == 1) ? "block":"none";
-        return "
+        $createForm = "
         <div id='create' style='display: {$createVisible}'>
         <form id='createForm' method='get' action='index.php'>
             <h1>Create Thought</h1>
             <p><input type='text' id='createUser' name='author' placeholder='Username' value='' /><p>
             <p><input type='text' id='createUserID' name='authorID' placeholder='User ID' value='' /><p>
-            <p><select id='createTag' name='tag'><option>Thought</option><option>Music</option><option>Spam</option></select></p>
+            <p><select id='createTag' name='tag'>";
+            $tags = $_SESSION['api']['tags'];
+            sort($tags); // sort tags alphabetically
+            foreach ($tags as $name) {
+                $createForm .= "<option value='{$name}'>".ucfirst($name)."</option>";
+            }
+            $createForm .= "</select></p>
             <p><input type='text' id='createThought' name='msg' placeholder='Message' value='' /><p>
             <p><input type='submit' id='createSubmit' name='createSubmit' value='Submit Thought' /></p>
             <input type='hidden' id='createTrigger' name='create' value='1' />
         </form>
         </div>";
+        echo $createForm;
     }
 
     // API Info Box
