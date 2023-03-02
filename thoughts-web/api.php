@@ -211,7 +211,7 @@ class Config {
     // Fetch or change a setting
     function set($key1, $key2, $newVal=null) {
 
-        if ($key2 == "public_tokens" || $key2 == "private_tokens") echo "You can't change tokens via the API";
+        //if ($key2 == "public_tokens" || $key2 == "private_tokens") echo "You can't change tokens via the API";
 
         // Only show a config variable, don't overwrite
         if ($newVal == null) {
@@ -221,6 +221,9 @@ class Config {
 
             // Make sure tagDefault is an existing tag
             if ($key2 == 'tagDefault' && $this->isTag($newVal) == false) die("Tag doesn't exist");
+
+            // Make sure createFlood has at least a 's' at the end (for seconds)
+            if ($key2 == 'createFlood' && ctype_digit($newVal)) $newVal .= "s";
             
             // As far as I know, to do this we have to rewrite the config.php file each time.
             // This will loop through the defaults to get the keys and descriptions to remake the file
