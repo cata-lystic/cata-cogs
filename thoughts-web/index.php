@@ -1,16 +1,8 @@
 <?php
-// These are just here for development purposes
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 $apiFolder = 'api'; // Only change this if you've moved the API folder
+
 $web = true; // Let API know this is the website
 require_once("$apiFolder/index.php");
-
-// Get Settings and Thoughts
-$data = Files::read("thoughts.json");
-if (!is_array($data)) $data = []; // Create data array if there are no msgs
 
 // Get possible queries
 $q = $_REQUEST['q'] ?? 'search'; // Query
@@ -24,12 +16,10 @@ $breaks = $_REQUEST['breaks'] ?? $config->api['breaks']; // prefer <br /> over /
 $js = $_REQUEST['js'] ?? $config->web['js']; // web javascript features enabled by default
 $apiRequest = $_REQUEST['api'] ?? null; // API version from requester
 
-$total = count($data); // total thoughts
 if ($platform == "discord") {
   $quotes = "`"; // force Discord thoughts to be in a quote box
   $limit = ($limit > 5) ? 5 : $limit; // Discord limit can't go past 5 for now. until there's a word count
 }
-
 
 echo "<head>
 <title>Thoughts</title>
@@ -44,7 +34,7 @@ echo "<head>
 
 $api->process('web'); // fetch thought from whatever user has requested
 
-$view = new view();
+$view = new view($apiFolder);
 
 echo "</div>"; // end #content div for web
 
@@ -62,6 +52,12 @@ echo $view->js(); // Javascript, if enabled
 
 // View class to get HTML for search, api box, create box, etc
 class view {
+
+  public $apiFolder;
+
+  function __construct($apiFolder) {
+    $this->apiFolder = $apiFolder;
+  }
 
   public function search($args=[]) {
 
@@ -124,7 +120,7 @@ class view {
   public function infoBox() {
       if ($_SESSION['web']['info'] != 1) return false;
       $visible = ($_SESSION['web']['infoVisible'] == 1) ? "block":"none"; // Default visibility
-      $d = $_SESSION['api']['url'];
+      $d = $_SESSION['api']['url']."/{$this->apiFolder}";
       echo "
       <div id='info' style='display: {$visible}'>
           <h1>API</h1>

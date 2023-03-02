@@ -759,8 +759,10 @@ class api extends config {
 
         $info = "Thoughts by Catalyst\nAPI Version: {$this->versions['api']}\nWeb Version: {$this->versions['web']}";
         $botVersion = $this->req['versionbot'] ?? null;
-        if ($botVersion != null)
-            $info .= "\nBot Version: {$botVersion}";
+        if ($botVersion != null) {
+            $botAPIoutdated = ($this->req['version'] < $this->versions['api']) ? "(Outdated)":null;
+            $info .= "\nBot Version: {$botVersion} - Supports API {$this->req['version']} {$botAPIoutdated}";
+        }
         
         $extra1 = null; $extra2 = null;
         if (isset($this->req['platform']) && $this->req['platform'] == 'discord') {
@@ -809,7 +811,7 @@ class tools {
             $url = $_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'];
 
             // Remove the main possible files that could be accessed. Remove them and you have the domain.
-            if (substr($url, -8) == '/api.php') $url = substr($url, 0, -8);
+            if (substr($url, -8) == '/api.php') $url = substr($url, 0, -8); #deprecated
             if (substr($url, -10) == '/index.php') $url = substr($url, 0, -10);
             $url = $protocol.$url;
         }
