@@ -22,18 +22,24 @@ class Thoughts(commands.Cog):
             "url": "",
             "token": "",
             "deletedReason": 1,
-            "deletedBy": 1
+            "deletedBy": 1,
+            "apiFolder" :  "api"
         }
         default_guild = {
             "test": ""
         }
         self.config.register_global(**default_global)
         self.config.register_guild(**default_guild)
+        self.apiFolder = self.config.apiFolder()
 
     async def changeSetting(self, ctx, key1, key2, newVal=''):
         if key2 == 'token':
             await self.config.token.set(newVal)
             return await ctx.send("Token Set! Please delete your last message.")
+        
+        if key2 == 'folder':
+            await self.config.apiFolder.set(newVal)
+            return await ctx.send("API Folder set to `"+str(newVal)+"`")
         
         if key2 == 'url':
             await self.config.url.set(newVal)
@@ -101,7 +107,7 @@ class Thoughts(commands.Cog):
         deleted_by = await self.config.deletedBy() # whether or not to show who deleted post
         
         try:
-            async with aiohttp.request("GET", current_url+"/api.php?q=search&token="+current_token+"&s="+search+"&limit="+str(limit)+"&shuffle="+str(shuffle)+"&showID="+str(showID)+"&reason="+str(deleted_reason)+"&reasonby="+str(deleted_by)+"&platform=discord&version="+str(self.versionapi)+"&versionbot="+str(self.versionbot), headers={"Accept": "text/plain"}) as r:
+            async with aiohttp.request("GET", current_url+"/"+str(self.apiFolder)+"?q=search&token="+current_token+"&s="+search+"&limit="+str(limit)+"&shuffle="+str(shuffle)+"&showID="+str(showID)+"&reason="+str(deleted_reason)+"&reasonby="+str(deleted_by)+"&platform=discord&version="+str(self.versionapi)+"&versionbot="+str(self.versionbot), headers={"Accept": "text/plain"}) as r:
                 if r.status != 200:
                     return await ctx.send("Oops! Cannot get a thought...")
                 result = await r.text(encoding="UTF-8")
@@ -137,7 +143,7 @@ class Thoughts(commands.Cog):
         current_url = await self.config.url()
 
         try:    
-            async with aiohttp.request("GET", current_url+"/api.php?q=create&token="+current_token+"&platform=discord&authorID="+str(tAuthorID)+"&tag="+tag+"&msg="+tBaseString+"&version="+str(self.versionapi)+"&versionbot="+str(self.versionbot)+"&author="+tABaseString, headers={"Accept": "text/plain"}) as r:
+            async with aiohttp.request("GET", current_url+"/api?q=create&token="+current_token+"&platform=discord&authorID="+str(tAuthorID)+"&tag="+tag+"&msg="+tBaseString+"&version="+str(self.versionapi)+"&versionbot="+str(self.versionbot)+"&author="+tABaseString, headers={"Accept": "text/plain"}) as r:
                 if r.status != 200:
                     return await ctx.send("Oops! Cannot create a thought...")
                 result = await r.text(encoding="UTF-8")
@@ -230,6 +236,13 @@ class Thoughts(commands.Cog):
         `.tset setup url https://yourwebsite.com`"""
 
         await self.changeSetting(ctx, 'api', 'token', newToken)
+
+    @ts_setup.command(name='folder')
+    async def ts_setup_folder(self, ctx, apiFolder):
+        """Set API Folder
+        \rIf you have moved the folder your API is in, you'll need to set it here.\r\r
+        Example: `.tset setup folder yourAPIfolder`"""
+        await self.changeSetting(ctx, 'api', 'folder', apiFolder)
 
     @ts_setup.command(name='url')
     async def ts_setup_url(self, ctx, newURL):

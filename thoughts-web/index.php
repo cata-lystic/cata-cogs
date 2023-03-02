@@ -2,11 +2,11 @@
 // These are just here for development purposes
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
-ini_set("memory_limit", 512 * 1024 * 1024); // Set memory limit to 512mb so PHP cURL files successfully download
 error_reporting(E_ALL);
 
+$apiFolder = 'api'; // Only change this if you've moved the API folder
 $web = true; // Let API know this is the website
-require_once("api/index.php");
+require_once("$apiFolder/index.php");
 
 // Get Settings and Thoughts
 $data = Files::read("thoughts.json");
