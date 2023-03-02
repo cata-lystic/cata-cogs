@@ -90,7 +90,7 @@ class Thoughts(commands.Cog):
         return await ctx.send(f"{result}")
 
     @thought.command(aliases=['tcreate'])
-    async def create(self, ctx, tag: str, *, msg: str):
+    async def create(self, ctx, tag: str='', *, msg: str=''):
         """Create a thought
         ***.tcreate your thought here"""
         if tag != 'thought' and tag != 'music' and tag != 'spam':
