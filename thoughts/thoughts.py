@@ -54,6 +54,23 @@ class Thoughts(commands.Cog):
 
             await ctx.send(f"{result}")
 
+    async def changeTag(self, ctx, query, tag1='', tag2=''):
+
+        current_token = await self.config.token()
+        current_url = await self.config.url()
+        authorID = html.escape(str(ctx.message.author.id))
+
+        try:    
+            async with aiohttp.request("GET", current_url+"/api.php?q=tags&s="+str(query)+"&tag="+str(tag1)+"authorID="+str(authorID)+"&rename="+str(tag2)+"&token="+str(current_token), headers={"Accept": "text/plain"}) as r:
+                if r.status != 200:
+                    return await ctx.send("Oops! Cannot make tag request...")
+                result = await r.text(encoding="UTF-8")
+        except aiohttp.ClientConnectionError:
+            return await ctx.send("Oops! Cannot make tag request...")
+
+        await ctx.send(f"{result}")
+
+
     @commands.command(aliases=['thoughts'])
     async def thought(self, ctx, search="", limit=3, shuffle=1, showID=0):
         """Gets a thought.
@@ -268,47 +285,46 @@ class Thoughts(commands.Cog):
         \rExample: `.tset api searchresults 50"""
         await self.changeSetting(ctx, 'api', 'searchResults', newLimit)
 
+    # Set -> API -> tags
     @ts_api.group(name='tags')
     async def ts_api_tags(self, ctx, tag):
-        """Tag settings
-        \rTag that will be used on newly created posts if none is set\r
-        Example: `.tset api tags mytag`"""
-        #await self.changeSetting(ctx, 'api', 'tagDefault', tag)
+        """Tag settings"""
 
     @ts_api_tags.command(name='default')
     async def ts_api_tagdefault(self, ctx, tag):
         """Default tag on new posts
         \rTag that will be used on newly created posts if none is set\r
         Example: `.tset api tagdefault mytag`"""
-        #await self.changeSetting(ctx, 'api', 'tagDefault', tag)
+        await self.changeSetting(ctx, 'api', 'tagDefault', tag)
 
     @ts_api_tags.command(name='add')
     async def ts_api_tagadd(self, ctx, tag):
-        """Default tag on new posts
-        \rTag that will be used on newly created posts if none is set\r
-        Example: `.tset api tagdefault mytag`"""
-        #await self.changeSetting(ctx, 'api', 'tagDefault', tag)
+        """Add tag
+        \rExample: `.tset api tag add newTagName`"""
+        await self.changeTag(ctx, 'add', tag)
 
     @ts_api_tags.command(name='remove')
     async def ts_api_tagremove(self, ctx, tag):
-        """Default tag on new posts
+        """Remove tag
         \rTag that will be used on newly created posts if none is set\r
         Example: `.tset api tagdefault mytag`"""
-        #await self.changeSetting(ctx, 'api', 'tagDefault', tag)
+        #await self.changeTag(ctx, 'api', 'tagDefault', tag)
 
     @ts_api_tags.command(name='list')
     async def ts_api_taglist(self, ctx):
-        """Default tag on new posts
+        """List all tags
         \rTag that will be used on newly created posts if none is set\r
         Example: `.tset api tagdefault mytag`"""
-        #await self.changeSetting(ctx, 'api', 'tagDefault', tag)
+        #await self.changeTag(ctx, 'api', 'tagDefault', tag)
 
     @ts_api_tags.command(name='rename')
     async def ts_api_tagrename(self, ctx, oldTag, newTag):
-        """Default tag on new posts
+        """Rename tag
         \rTag that will be used on newly created posts if none is set\r
         Example: `.tset api tagdefault mytag`"""
-        #await self.changeSetting(ctx, 'api', 'tagDefault', tag)
+        #await self.changeTag(ctx, 'api', 'tagDefault', tag)
+
+    # end Set -> API -> tags
 
     @ts_bot.command(name='deletedreason')
     async def ts_bot_deletedreason(self, ctx, binary):
