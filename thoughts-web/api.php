@@ -29,9 +29,9 @@ class Config {
     function __construct() {
 
         $this->versions = array(
-            'web' => 1.0, // Website version
-            'bot' => 1.0, // Bot version last time website was updated
-            'api' => 1.0 // API version
+            'web' => '1.0', // Website version
+            'bot' => '1.0', // Bot version last time website was updated
+            'api' => '1.0' // API version
         );
 
         // List of config settings. Array includes the follwoing:
@@ -370,17 +370,6 @@ class api extends config {
 
     // Process what has been requested and send to proper function
     function process($source='') {
-
-        // Require API version (?version=) if source isn't web browser
-        if ($source != 'web') {
-            if (!isset($this->req['version']) || $this->req['version'] == '') {
-                die("Please supply your API version in request");
-            } else {
-                if ($this->req['version'] < $this->versions['api']) {
-                    die("API Version {$this->req['version']} is not supported. Latest: {$this->versions['api']}");
-                }
-            }
-        }
 
         // Check if there was a 'q' (query) request
         $func = $this->req['q'] ?? null; // no query = search for random thought
@@ -759,12 +748,23 @@ class api extends config {
         // This function only requires 'read' permissions
         $checkToken = $this->token($this->req['token'], 'read');
         if ($checkToken !== true) die($checkToken);
-        $botVersion = $this->req['botversion'] ?? null;
+        $botVersion = $this->req['versionbot'] ?? null;
         echo "Thoughts by Catalyst\nAPI Version: {$this->versions['api']}\nWeb Version: {$this->versions['web']}";
         if ($botVersion != null)
             echo "\nBot Version: {$botVersion}";
+        echo "\nWebsite: <{$this->api['url']}>";
         echo "\nSource: <https://github.com/cata-lystic/cata-cogs>";
      }
+
+    // Detect if user's API version supports current function
+    function version($requiredVersion=null) {
+        $userVer = $this->req['version'];
+        $latestVer = $this->versions['api'];
+        $checkVer = ($requiredVersion != null) ? $requiredVersion : $this->versions['api']; // check if using latest API version if none requested
+        if ($userVer > $latestVer) return "API Version $userVer does not exist";
+        if ($userVer < $checkVer) return "API Version $userVer does not support this feature. Requires API >= $checkVer";
+        return true;
+    }
 
     // This function is only used for me to test out code.
     function dev() {
