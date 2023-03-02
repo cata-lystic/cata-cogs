@@ -363,7 +363,7 @@ class Thoughts(commands.Cog):
         await self.changeSetting(ctx, 'web', 'quotes', quotes)
 
     # Theme Settings
-    @ts_api.group(name='theme')
+    @ts_web.group(name='theme')
     async def ts_web_theme(self, ctx):
         """Tag settings"""
 
