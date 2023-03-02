@@ -30,7 +30,6 @@ class Thoughts(commands.Cog):
         }
         self.config.register_global(**default_global)
         self.config.register_guild(**default_guild)
-        self.apiFolder = self.config.apiFolder()
 
     async def changeSetting(self, ctx, key1, key2, newVal=''):
         if key2 == 'token':
@@ -105,9 +104,10 @@ class Thoughts(commands.Cog):
         
         deleted_reason = await self.config.deletedReason() # whether or not to show deleted reason
         deleted_by = await self.config.deletedBy() # whether or not to show who deleted post
-        
+        apiFolder = await self.config.apiFolder()
+
         try:
-            async with aiohttp.request("GET", current_url+"/"+str(self.apiFolder)+"?q=search&token="+current_token+"&s="+search+"&limit="+str(limit)+"&shuffle="+str(shuffle)+"&showID="+str(showID)+"&reason="+str(deleted_reason)+"&reasonby="+str(deleted_by)+"&platform=discord&version="+str(self.versionapi)+"&versionbot="+str(self.versionbot), headers={"Accept": "text/plain"}) as r:
+            async with aiohttp.request("GET", current_url+"/"+str(apiFolder)+"?q=search&token="+current_token+"&s="+search+"&limit="+str(limit)+"&shuffle="+str(shuffle)+"&showID="+str(showID)+"&reason="+str(deleted_reason)+"&reasonby="+str(deleted_by)+"&platform=discord&version="+str(self.versionapi)+"&versionbot="+str(self.versionbot), headers={"Accept": "text/plain"}) as r:
                 if r.status != 200:
                     return await ctx.send("Oops! Cannot get a thought...")
                 result = await r.text(encoding="UTF-8")
