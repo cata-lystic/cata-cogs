@@ -448,12 +448,13 @@ class api extends config {
     function delete() {
      
         $id = $this->req['id'] ?? null; // ID of post to be deleted
-        $deleter = $this->req['deleter'] ?? null; // ID of who is requesting delete
+        $deleter = $this->req['deleter'] ?? null; // Name of who is requesting delete
+        $deleterID = $this->req['deleterID'] ?? null; // ID of who is requesting delete
         $reason = $this->req['reason'] ?? null; // Reason this post was deleted
         $wipe = $this->req['wipe'] ?? 0; // Wipe=1 will remove the original text from the .json file instead of just marking it as deleted
         
-        if ($id == null || $deleter == null || $reason == null)
-            die("Missing id, deleter, or reason");
+        if ($id == null || $deleter == null || $deleterID == null || $reason == null)
+            die("Missing id, deleter, deleterID, or reason");
 
         // Load thoughts data
         $data = Files::read("app/thoughts.json");
@@ -466,9 +467,15 @@ class api extends config {
 
             $alreadyDeleted = $data[$id]['deleted'] ?? 0;
             if ($alreadyDeleted == 1) die("#{$id} already deleted");
+
+            // Make sure deleter owns the post
+            $posterID = $data[$id]['authorID'];
+
+            if ($deleterID != $posterID) die("You are not the author of this post");
             
             $data[$id]['deleted'] = 1;
-            $data[$id]['deleter'] = $deleter;
+            $data[$id]['deleter'] = str_replace("HASHTAG", "#", $deleter);
+            $data[$id]['deleterID'] = $deleterID;
             $data[$id]['deleteReason'] = $reason;
             if ($wipe == 1) $data[$id]['msg'] = "DELETED";
             Files::write("app/thoughts.json", json_encode($data, JSON_PRETTY_PRINT));
@@ -501,8 +508,8 @@ class api extends config {
         $quotes = $this->req['quotes'] ?? tools::quotes($_SESSION['api']['quotes']); // no quotes by default
         $breaks = $this->req['breaks'] ?? $_SESSION['api']['breaks']; // prefer <br /> over /n/r (web will overwrite this)
         $apiRequest = $this->req['api'] ?? null; // API version from requester
-        $reason = $this->req['reason'] ?? 0; // Show reason for post deletion
-        $reasonby = $this->req['reasonby'] ?? 0; // Show who deleted post
+        $reason = $this->req['reason'] ?? 1; // Show reason for post deletion
+        $reasonby = $this->req['reasonby'] ?? 1; // Show who deleted post
 
         $total = count($data); // total thoughts
         if ($platform == "discord") {
