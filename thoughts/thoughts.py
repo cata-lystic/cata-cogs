@@ -286,7 +286,7 @@ class Thoughts(commands.Cog):
         await self.changeSetting(ctx, 'api', 'searchResults', newLimit)
 
     # Set -> API -> tags
-    @ts_api.group(name='tags')
+    @ts_api.group(name='tags', aliases=['tag'])
     async def ts_api_tags(self, ctx):
         """Tag settings"""
 
@@ -306,23 +306,20 @@ class Thoughts(commands.Cog):
     @ts_api_tags.command(name='remove')
     async def ts_api_tagremove(self, ctx, tag):
         """Remove tag
-        \rTag that will be used on newly created posts if none is set\r
-        Example: `.tset api tagdefault mytag`"""
-        #await self.changeTag(ctx, 'api', 'tagDefault', tag)
+        \rExample: `.tset api tag remove tagName`"""
+        await self.changeTag(ctx, 'remove', tag)
 
     @ts_api_tags.command(name='list')
     async def ts_api_taglist(self, ctx):
-        """List all tags
-        \rTag that will be used on newly created posts if none is set\r
-        Example: `.tset api tagdefault mytag`"""
-        #await self.changeTag(ctx, 'api', 'tagDefault', tag)
+        """List tags"""
+        await self.changeTag(ctx, 'list')
 
     @ts_api_tags.command(name='rename')
     async def ts_api_tagrename(self, ctx, oldTag, newTag):
         """Rename tag
-        \rTag that will be used on newly created posts if none is set\r
-        Example: `.tset api tagdefault mytag`"""
-        #await self.changeTag(ctx, 'api', 'tagDefault', tag)
+        \rThis will change all posts from one tag to another and remove the old tag.
+        \rExample: `.tset api tag rename oldTag newTag`"""
+        await self.changeTag(ctx, 'rename', oldTag, newTag)
 
     # end Set -> API -> tags
 
