@@ -736,7 +736,6 @@ class view {
     
     // Create Box
     public function create() {
-
         
         if ($_SESSION['web']['create'] != 1) return false;
 
@@ -749,8 +748,10 @@ class view {
             <p><input type='text' id='createUserID' name='authorID' placeholder='User ID' value='' /><p>
             <p><select id='createTag' name='tag'>";
             $tags = $_SESSION['api']['tags'];
+            $createForm .= "<option value='".strtolower($_SESSION['api']['tagDefault'])."'>".ucfirst($_SESSION['api']['tagDefault'])."</option>"; // immediately show the default tag
             sort($tags); // sort tags alphabetically
             foreach ($tags as $name) {
+                if ($name == $_SESSION['api']['tagDefault']) continue; // don't list the default tag
                 $createForm .= "<option value='{$name}'>".ucfirst($name)."</option>";
             }
             $createForm .= "</select></p>
@@ -760,6 +761,7 @@ class view {
         </form>
         </div>";
         echo $createForm;
+
     }
 
     // API Info Box
