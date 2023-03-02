@@ -268,7 +268,14 @@ class Thoughts(commands.Cog):
         \rExample: `.tset api searchresults 50"""
         await self.changeSetting(ctx, 'api', 'searchResults', newLimit)
 
-    @ts_api.command(name='tagdefault')
+    @ts_api.group(name='tags')
+    async def ts_api_tags(self, ctx, tag):
+        """Tag settings
+        \rTag that will be used on newly created posts if none is set\r
+        Example: `.tset api tags mytag`"""
+        #await self.changeSetting(ctx, 'api', 'tagDefault', tag)
+
+    @ts_api_tags.command(name='default')
     async def ts_api_tagdefault(self, ctx, tag):
         """Default tag on new posts
         \rTag that will be used on newly created posts if none is set\r
