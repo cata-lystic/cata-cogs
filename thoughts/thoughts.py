@@ -130,7 +130,7 @@ class Thoughts(commands.Cog):
         \rYou can only delete your own thought!
         Example: ***.tdelete*** thoughtID reason"""
         
-        tMsg = html.escape(msg)
+        reason = html.escape(reason)
         current_token = await self.config.token()
         deleter = html.escape(str(ctx.message.author))
         deleter = deleter.replace("#", "HASHTAG")
