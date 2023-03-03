@@ -400,7 +400,7 @@ class Thoughts(commands.Cog):
     async def ts_web_theme(self, ctx):
         """Tag settings"""
 
-    @ts_web_theme.command(name='bg', aliases=['bgcolor', 'background', 'backgroundcolor'])
+    @ts_web_theme.command(name='bg', aliases=['bgcolor'])
     async def ts_web_bgcolor(self, ctx, color):
         """Background color
         \rWebsite's background color.
