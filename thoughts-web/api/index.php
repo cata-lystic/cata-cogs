@@ -476,7 +476,7 @@ class api extends config {
         // Request Parameters: 'key' => [0] default value, [1] required (binary), [2] type (string, number, etc)
         $params = array(
             'author' => [null, 1, 'string'],
-            'authorID' => [null, 1, 'number'],
+            'authorID' => [null, 1, 'string'],
             'msg' => [null, 1, 'string'],
             'tag' => [$this->api['tagDefault'], 0, 'string'],
             'base64' => [0, 0, 'binary'],
@@ -555,15 +555,17 @@ class api extends config {
         // Make sure token is valid and has the proper permissions
         $checkToken = $this->token($this->req['token'], 'delete');
         if ($checkToken !== true) die($checkToken);
-     
-        $id = $this->req['id'] ?? null; // ID of post to be deleted
-        $deleter = $this->req['deleter'] ?? null; // Name of who is requesting delete
-        $deleterID = $this->req['deleterID'] ?? null; // ID of who is requesting delete
-        $reason = $this->req['reason'] ?? null; // Reason this post was deleted
-        $wipe = $this->req['wipe'] ?? 0; // Wipe=1 will remove the original text from the .json file instead of just marking it as deleted
-        
-        if ($id == null || $deleter == null || $deleterID == null || $reason == null)
-            die("Missing id, deleter, deleterID, or reason");
+
+        // Request Parameters: 'key' => [0] default value, [1] required (binary), [2] type (string, number, etc)
+        $params = array(
+            'id' => [null, 1, 'number'], // ID of post to be deleted
+            'deleter' => [null, 1, 'string'], // Name of who is requesting delete
+            'deleterID' => [null, 1, 'string'], // ID of who is requesting delete
+            'reason' => [null, 1, 'string'], // Reason this post was deleted
+            'wipe' => [0, 0, 'binary'] // Wipe=1 will remove the original text from the .json file instead of just marking it as deleted
+        );
+
+        $p = $this->processParams($params); // Process params into an array. Give error (and optional params) if missing required params
 
         // Load thoughts data
         $data = Files::read("thoughts.json");
