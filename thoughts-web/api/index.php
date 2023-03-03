@@ -574,6 +574,7 @@ class api extends config {
         if ($total == 0) return "There are no thoughts to delete";
 
         // Get data about requested ID
+        $id = $p['id'];
         if (isset($data[$id])) {
 
             $alreadyDeleted = $data[$id]['deleted'] ?? 0;
@@ -582,16 +583,16 @@ class api extends config {
             // Make sure deleter owns the post
             $posterID = $data[$id]['authorID'];
 
-            if ($deleterID != $posterID && $this->isMod($deleterID) != true) die("You are not the author of this post");
+            if ($p['deleterID'] != $posterID && $this->isMod($p['deleterID']) != true) die("You are not the author of this post");
             
             $data[$id]['deleted'] = 1;
-            $data[$id]['deleter'] = str_replace("HASHTAG", "#", $deleter);
-            $data[$id]['deleterID'] = $deleterID;
+            $data[$id]['deleter'] = str_replace("HASHTAG", "#", $p['deleter']);
+            $data[$id]['deleterID'] = $p['deleterID'];
 
             // Make sure deleteReason doesn't start with 'wipe'
-            if (substr($reason, 0, 4) == 'wipe') {
+            if (substr($p['reason'], 0, 4) == 'wipe') {
                 $wipe = 1;
-                $reason = trim(substr($reason, 4)); // remove 'wipe' from front of reason
+                $reason = trim(substr($p['reason'], 4)); // remove 'wipe' from front of reason
             }
 
             $data[$id]['deleteReason'] = $reason;
