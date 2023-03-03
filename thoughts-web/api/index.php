@@ -436,24 +436,25 @@ class api extends config {
         $checkToken = $this->token($this->req['token'], 'config');
         if ($checkToken !== true) die($checkToken);
 
-        $key1 = $this->req['key1'] ?? null;
-        $key2 = $this->req['key2'] ?? null;
-        $val = $this->req['val'] ?? null;
+        // Request Parameters: 'key' => [0] default value, [1] required (binary), [2] type (string, number, etc)
+        $params = array(
+            'key1' => [null, 1, 'string'],
+            'key2' => [null, 1, 'string'],
+            'val' => [null, 1, 'string']
+        );
 
-        // All fields required
-        if (empty($key1) || empty($key2) || $val == null || empty($this->req['token']))
-            die("Missing key1, key2, val, or token");
+        $p = $this->processParams($params); // Process params into an array. Give error (and optional params) if missing required params
     
         // Can't change token from API
-        if ($key1 == "token")
+        if ($p['key1'] == 'token')
             die("You can't change the web tokens from the API");
 
-        $val = str_replace("HASHTAG", "#", $val); // convert HASHTAG to #
+        $val = str_replace("HASHTAG", "#", $p['val']); // convert HASHTAG to #
         
-        $changeSetting = $this->set($key1, $key2, $val);
+        $changeSetting = $this->set($p['key1'], $p['key2'], $p['val']);
         
         if ($changeSetting == "OK") {
-            echo "Changed `{$key1} {$key2}` to `{$val}`";
+            echo "Changed `{$p['key1']} {$p['key2']}` to `{$p['val']}`";
         } else {
             echo $changeSetting;
         }
