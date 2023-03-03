@@ -1,5 +1,6 @@
 <?php
 session_start();
+session_destroy();
 
 // These are just here for development purposes
 ini_set('display_errors', 1);

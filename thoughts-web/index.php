@@ -1,6 +1,4 @@
 <?php
-
-
 $webVersion = '1.0'; // Website version. This also lets API know you're using the web platform
 $webAPI = '1.0'; // latest version of API this web frontend uses
 $apiFolder = 'api'; // Only change this if you've moved the API folder
