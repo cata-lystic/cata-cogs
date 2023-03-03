@@ -32,7 +32,7 @@ class Config {
         $this->versions = array(
             'web' => '1.0', // Website version
             'bot' => '1.0', // Bot version last time website was updated
-            'api' => '1.0' // API version
+            'api' => '1.3' // API version
         );
 
         // List of config settings. Array includes the follwoing:
@@ -401,8 +401,36 @@ class api extends config {
 
     }
 
+    // Request Parameters: 'key' => [0] default value, [1] required (binary), [2] type (string, number, etc)
+    function processParams($params, $showOptional=1) {
+        // Loop through $params and create variables for each one. Check requirements
+        $missing = ''; // keep track of missing required parameters
+        $optional  = ''; // keep track of optional parameters
+        $processed = [];
+        foreach($params as $key => $val) {
+            if (isset($this->req[$key])) {
+                $processed[$key] = $this->req[$key]; // use user provided value
+            } else {
+                $processed[$key] = $val[0]; // use default value if req doesn't exist
+                if ($val[1] == 1) $missing .= $key.', '; // add to missing if this was a required param
+            }
+            if ($val[1] == 0) $optional .= $key.', '; // if optional, add to optional params to send along with missing
+        }
+
+        if ($missing != '') {
+            $opt = ($showOptional == 1) ? "| Optional: ".rtrim($optional, ', ') : null;  // only show optional if 
+            $mis = rtrim($missing, ', ');
+            echo rtrim("Missing parameters: {$mis} {$opt}");
+            die();
+        } else {
+            return $processed; // return array of processed values
+        }
+    }
+
     // Change a setting in config.php
     function config() {
+
+        $checkAPI = $this->version(1.0); // no optional parameter so it will kill script if fails
 
         // Make sure token is valid and has the proper permissions
         $checkToken = $this->token($this->req['token'], 'config');
@@ -432,16 +460,29 @@ class api extends config {
         die();
     }
 
+
     function create() {
+
+        $checkAPI = $this->version(1.0); // no optional parameter so it will kill script if fails
+
+        // Make sure 'api create' is enabled
+        if ($this->api['create'] == 0 && $this->isMod($this->req['authorID']) == false) die("Post creation is currently disabled");
 
         // Make sure token is valid and has the proper permissions
         $checkToken = $this->token($this->req['token'], 'create');
         if ($checkToken !== true) die($checkToken);
 
-        $author = $this->req['author'] ?? null;
-        $authorID = $this->req['authorID'] ?? null;
+        // Request Parameters: 'key' => [0] default value, [1] required (binary), [2] type (string, number, etc)
+        $params = array(
+            'author' => [null, 1, 'string'],
+            'authorID' => [null, 1, 'number'],
+            'msg' => [null, 1, 'string'],
+            'tag' => [$this->api['tagDefault'], 0, 'string'],
+            'base64' => [0, 0, 'binary'],
+            'platform' => ['api', 0, 'string']
+        );
 
-        if ($this->api['create'] == 0 && $this->isMod($authorID) == false) die("Post creation is currently disabled");
+        $p = $this->processParams($params); // Process params into an array. Give error (and optional params) if missing required params
 
         $data = Files::read("thoughts.json");
         if (!is_array($data)) $data = []; // Create data array if there are no msgs
@@ -455,10 +496,6 @@ class api extends config {
             $total = 0;
             $nextID = "1";
         }
-        $cMsg = $this->req['msg'] ?? null;
-        $cTag = $this->req['tag'] ?? null;
-        $cBase = $this->req['base64'] ?? null; // created msg and author may be in base64
-        $platform = $this->req['platform'] ?? "api";
 
         // Process IP address if necessary
         if ($this->api['ipLog'] == 1) {
@@ -467,29 +504,24 @@ class api extends config {
             $ip = null;
         }
 
-        if ($author == null || $authorID == null || $cMsg == null || $cTag == null) {
-            echo ("SOMETHING IS MISSING | Author: ".$author." | ID: ".$authorID." | Tag: ".$cTag." | Msg: ".$cMsg);
-            die();
-        }
-
         // Only certain tags are allowed
-        if ($this->isTag(strtolower($cTag)) == false) {
+        if ($this->isTag(strtolower($p['tag'])) == false) {
             echo "Invalid tag";
             die();
         }
 
         // Decode Base64 if requested
-        if ($cBase == 1) {
-            $cMsg = base64_decode($cMsg);
-            $author = base64_decode($author);
+        if ($p['base64'] == 1) {
+            $msg = base64_decode($p['msg']);
+            $author = base64_decode($p['author']);
         }
 
         // Make sure the author isn't flooding (if they're not a mod)
         $lastPost = 0;
-        if ($this->isMod($authorID) == false) {
+        if ($this->isMod($p['author']) == false) {
             // Loop through the thoughts and find the author's latest post
             foreach ($data as $id => $val) {
-                if ($val['authorID'] == $authorID) {
+                if ($val['authorID'] == $p['authorID']) {
                     $lastPost = $val['timestamp'];
                 }
             }
@@ -504,10 +536,10 @@ class api extends config {
         }
 
         // All is well, post results
-        echo "`".ucfirst($cTag)." posted!` {$_SESSION['api']['url']}?s={$nextID}";
+        echo "`".ucfirst($p['tag'])." posted!` {$_SESSION['api']['url']}?s={$nextID}";
 
         // Add this to the thoughts.json
-        $data[$nextID] = array("msg" => $cMsg, "tag" => $cTag, "author" => str_replace("HASHTAG", "#", $author), "authorID" => $authorID, "timestamp" => time(), "source" => $platform);
+        $data[$nextID] = array("msg" => $p['msg'], "tag" => $p['tag'], "author" => str_replace("HASHTAG", "#", $p['author']), "authorID" => $p['authorID'], "timestamp" => time(), "source" => $p['platform']);
         if ($ip != null) $data[$nextID]['ip'] = $ip;
         Files::write("thoughts.json", json_encode($data, JSON_PRETTY_PRINT));
         die();
@@ -516,6 +548,8 @@ class api extends config {
 
     // Delete thought
     function delete() {
+
+        $checkAPI = $this->version(1.0); // no optional parameter so it will kill script if fails
 
         // Make sure token is valid and has the proper permissions
         $checkToken = $this->token($this->req['token'], 'delete');
@@ -571,11 +605,14 @@ class api extends config {
     
     // List all posts
     function list() {
+        $checkAPI = $this->version(1.0); // no optional parameter so it will kill script if fails
         $this->req['s'] = 'list'; // change search result to 'list' (this needs to be fixed)
         $this->search();
     }
 
     function search() {
+
+        $checkAPI = $this->version(1.0); // no optional parameter so it will kill script if fails
 
         // Make sure token is valid and has the proper permissions
         $checkToken = $this->token($this->req['token'], 'read');
@@ -688,6 +725,8 @@ class api extends config {
     // List and manage Tags
     function tags() {
 
+        $checkAPI = $this->version(1.0); // no optional parameter so it will kill script if fails
+        
         $s = $this->req['s'] ?? 'list';
         $tag = $this->req['tag'] ?? null; // Tag user is requesting
         $tagRename = $this->req['rename'] ?? null; // User may be requesting to edit tag's name
@@ -771,6 +810,15 @@ class api extends config {
     // Display info about Thoughts and each version
     function info() {
 
+        $checkAPI = $this->version(1.0); // no optional parameter so it will kill script if fails
+
+        $testing = $_REQUEST['testing'] ?? 'none';
+
+        if ($testing != 'none') {
+            $checkAPI = $this->version(1.1);
+            echo 'only version 1.1 and up can see this';
+        }
+
         // This function only requires 'read' permissions
         $checkToken = $this->token($this->req['token'], 'read');
         if ($checkToken !== true) die($checkToken);
@@ -795,13 +843,18 @@ class api extends config {
      }
 
     // Detect if user's API version supports current function
-    function version($requiredVersion=null) {
-        $userVer = $this->req['version'];
+    function version($requiredVersion=null, $dieOnFail=1) {
+        $userVer = $this->req['version'] ?? 0;
         $latestVer = $this->versions['api'];
         $checkVer = ($requiredVersion != null) ? $requiredVersion : $this->versions['api']; // check if using latest API version if none requested
-        if ($userVer > $latestVer || $userVer < 1) return "API Version $userVer does not exist";
-        if ($userVer < $checkVer) return "API Version $userVer does not support this feature. Requires API >= $checkVer";
-        return true;
+        if ($userVer > $latestVer || $userVer < 1) $error = "API Version $userVer does not exist";
+        if ($userVer < $checkVer) $error = "API Version $userVer does not support this feature. Requires API >= $checkVer";
+        if (isset($error)) {
+            if ($dieOnFail == 1) die($error); // kill script instead of return if called
+            else return $error; // return error normally if not
+        } else {
+            return true;
+        }
     }
 
     // This function is only used for me to test out code.
@@ -902,6 +955,30 @@ class tools {
         } else {
             return $word;
         }
+    }
+
+}
+
+
+// Secret Post encryption/decryption
+class Secret {
+
+    function __construct() {
+    }
+
+    function encrypt($encryptionKey, $data) {
+        $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length('aes-256-gcm'));
+        $encrypted = openssl_encrypt($data, 'aes-256-gcm', $encryptionKey, OPENSSL_RAW_DATA, $iv, $tag);
+        return base64_encode($iv . $tag . $encrypted);
+    }
+    
+    function decrypt($encryptionKey, $data) {
+        $c = base64_decode($data);
+        $ivlen = openssl_cipher_iv_length($cipher="AES-256-GCM");
+        $iv = substr($c, 0, $ivlen);
+        $tag = substr($c, $ivlen, $taglen=16);
+        $ciphertext_raw = substr($c, $ivlen+$taglen);
+        return openssl_decrypt($ciphertext_raw, 'aes-256-gcm', $encryptionKey, OPENSSL_RAW_DATA, $iv, $tag);
     }
 
 }
