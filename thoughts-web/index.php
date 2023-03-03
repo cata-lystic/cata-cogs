@@ -2,6 +2,7 @@
 $apiFolder = 'api'; // Only change this if you've moved the API folder
 
 $web = true; // Let API know this is the website
+$apiVersion = 1.0; // latest version of API this web frontend uses
 require_once("$apiFolder/index.php");
 
 // Get possible queries
@@ -32,7 +33,7 @@ echo "<head>
 
 <div id='content'>"; // create the content div for web for javascript search
 
-$api->process('web'); // fetch thought from whatever user has requested
+$api->process('web', $apiVersion); // fetch thought from requests. provide API version web uses
 
 $view = new view($apiFolder);
 

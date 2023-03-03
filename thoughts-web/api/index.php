@@ -385,7 +385,7 @@ class api extends config {
     }
 
     // Process what has been requested and send to proper function
-    function process($source='') {
+    function process($source='', $apiVersion=null) {
 
         $this->source = ($source != '') ? $source : 'api'; // API is default source
 
@@ -395,6 +395,9 @@ class api extends config {
 
         // Make sure this is a valid function
         if (!in_array($func, $this->allowedFunctions)) die("Invalid function");
+
+        // If $apiversion is set, place this as the user's api version
+        if ($apiVersion != null) $this->req['version'] = $apiVersion;
 
         // Run requested function
         $this->$func();
@@ -418,7 +421,7 @@ class api extends config {
         }
 
         if ($missing != '') {
-            $opt = ($showOptional == 1) ? "| Optional: ".rtrim($optional, ', ') : null;  // only show optional if 
+            $opt = ($showOptional == 1 && $optional != '') ? "| Optional: ".rtrim($optional, ', ') : null;  // only show optional if 
             $mis = rtrim($missing, ', ');
             echo rtrim("Missing parameters: {$mis} {$opt}");
             die();
@@ -848,7 +851,7 @@ class api extends config {
 
     // Detect if user's API version supports current function
     function version($requiredVersion=null, $dieOnFail=1) {
-        $userVer = $this->req['version'] ?? 0;
+        $userVer = $this->req['version'] ?? 1.0; // if no API is set, just provide 1.0
         $latestVer = $this->versions['api'];
         $checkVer = ($requiredVersion != null) ? $requiredVersion : $this->versions['api']; // check if using latest API version if none requested
         if ($userVer > $latestVer || $userVer < 1) $error = "API Version $userVer does not exist";
