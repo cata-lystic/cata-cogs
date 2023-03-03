@@ -18,26 +18,29 @@ boxes.forEach(box => {
 /*document.addEventListener('submit', function (event) {
 	//event.preventDefault();
 } */
-
+/*
+headers: {
+			'Content-type': 'application/json; charset=UTF-8'
+		}*/
 function search() {
   let formBox = document.getElementById('searchForm')
+  let searchData = new FormData(formBox)
+
 	fetch('api.php', {
 		method: 'POST',
-		body: JSON.stringify(Object.fromEntries(new FormData(formBox))),
-		headers: {
-			'Content-type': 'application/json; charset=UTF-8'
-		}
+		body: searchData
 	}).then(function (response) {
-		if (response.ok) {
-			//return response.json();
-      return response
-		}
-		return Promise.reject(response);
-	}).then(function (data) {
-		console.log(data);
-	}).catch(function (error) {
-		console.warn(error);
-	});
+    // The API call was successful!
+    return response.text();
+  }).then(function (html) {
+    // This is the HTML from our response as a text string
+    console.log(html);
+    document.getElementById('content').innerHTML = html
+  }).catch(function (err) {
+    // There was an error
+    console.warn('Something went wrong.', err);
+  });
+
 }
 
 function ChangeUrl(title, url) {
