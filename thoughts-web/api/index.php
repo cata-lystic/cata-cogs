@@ -1,16 +1,5 @@
 <?php
-// Clear the current session config in case something has changed
-if (isset($_SESSION['api']['url'])) {
-    session_destroy();
-}
-
-
 session_start();
-
-
-$protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']) ? 'https://' : 'http://'; 
-$url = $_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'];
-echo tools::detectURL();
 
 // These are just here for development purposes
 ini_set('display_errors', 1);
