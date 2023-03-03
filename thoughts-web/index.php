@@ -1,8 +1,10 @@
 <?php
+
+
+$webVersion = '1.0'; // Website version. This also lets API know you're using the web platform
+$webAPI = '1.0'; // latest version of API this web frontend uses
 $apiFolder = 'api'; // Only change this if you've moved the API folder
 
-$web = true; // Let API know this is the website
-$apiVersion = 1.0; // latest version of API this web frontend uses
 require_once("$apiFolder/index.php");
 
 // Get possible queries
@@ -33,9 +35,9 @@ echo "<head>
 
 <div id='content'>"; // create the content div for web for javascript search
 
-$api->process('web', $apiVersion); // fetch thought from requests. provide API version web uses
+$api->process('web', $webAPI); // fetch thought from requests. provide API version web uses
 
-$view = new view($apiFolder);
+$view = new view($apiFolder, $webAPI, $webVersion);
 
 echo "</div>"; // end #content div for web
 
@@ -55,9 +57,13 @@ echo $view->js(); // Javascript, if enabled
 class view {
 
   public $apiFolder;
+  public $apiVersion;
+  public $webVersion;
 
-  function __construct($apiFolder) {
+  function __construct($apiFolder, $apiVersion, $webVersion) {
     $this->apiFolder = $apiFolder;
+    $this->apiVersion = $apiVersion;
+    $this->webVersion = $webVersion;
   }
 
   public function search($args=[]) {
@@ -121,7 +127,7 @@ class view {
   public function infoBox() {
       if ($_SESSION['web']['info'] != 1) return false;
       $visible = ($_SESSION['web']['infoVisible'] == 1) ? "block":"none"; // Default visibility
-      $d = $_SESSION['api']['url']."/{$this->apiFolder}";
+      $d = $_SESSION['api']['url']."/".$this->apiFolder."/".$this->apiVersion."/";
       echo "
       <div id='info' style='display: {$visible}'>
           <h1>API</h1>
@@ -143,7 +149,7 @@ class view {
       </div>";
   }
   
-  public static function footer() {
+  function footer() {
       $ret = array(null,null,null,null); // Return variables
 
       if ($_SESSION['web']['create'] == 1)
@@ -159,7 +165,7 @@ class view {
           $ret[3] = "<a href='https://github.com/cata-lystic/redbot-cogs/tree/main/thoughts' target='_blank'>GitHub</a>&nbsp;&nbsp;&nbsp;";
 
       if ($_SESSION['web']['versionVisible'] == 1)
-          $ret[4] = "<span title='API Version: ".$_SESSION['versions']['api']."'>Thoughts {$_SESSION['versions']['web']}</span>";
+          $ret[4] = "<span title='API Version: ".$this->apiVersion."'>Thoughts ".$this->webVersion."</span>";
 
       return "
       <div id='footer'>

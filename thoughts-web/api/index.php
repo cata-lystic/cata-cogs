@@ -1,10 +1,16 @@
 <?php
 // Clear the current session config in case something has changed
 if (isset($_SESSION['api']['url'])) {
-    $_SESSION['api'] = array();
-    $_SESSION['web'] = array();
+    session_destroy();
 }
+
+
 session_start();
+
+
+$protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']) ? 'https://' : 'http://'; 
+$url = $_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'];
+echo tools::detectURL();
 
 // These are just here for development purposes
 ini_set('display_errors', 1);
@@ -15,9 +21,8 @@ error_reporting(E_ALL);
 $config = new Config();
 $api = new api();
 
-
-// Process the request immediately if just the api.php is being loaded
-if (!isset($web)) $api->process();
+// Process the request immediately if just the api is being loaded
+if (!isset($webVersion)) $api->process();
 
 
 class Config {
@@ -30,9 +35,9 @@ class Config {
     function __construct() {
 
         $this->versions = array(
-            'web' => '1.0', // Website version
-            'bot' => '1.0', // Bot version last time website was updated
-            'api' => '1.3' // API version
+            'api' => '1.0', // Current API version
+            'web' => '1.0', // Website version last time API was updated
+            'bot' => '1.0' // Bot version last time API was updated
         );
 
         // List of config settings. Array includes the follwoing:
@@ -832,7 +837,7 @@ class api extends config {
 
         $break = $this->req['break'] ?? 0; // User can also request breaks via API instead of platform=web
 
-        $info = "Thoughts by Catalyst\nAPI Version: {$this->versions['api']}\nWeb Version: {$this->versions['web']}";
+        $info = "Thoughts by Catalyst\nAPI Version: {$this->versions['api']}";
         $botVersion = $this->req['versionbot'] ?? null;
         if ($botVersion != null) {
             $botAPIoutdated = ($this->req['version'] < $this->versions['api']) ? "(Outdated)":null;
@@ -889,9 +894,8 @@ class tools {
         if ($url == '' || $url == 'auto') {
             $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']) ? 'https://' : 'http://'; 
             $url = $_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'];
-
             // Remove the main possible files that could be accessed. Remove them and you have the domain.
-            if (substr($url, -8) == '/api.php') $url = substr($url, 0, -8); #deprecated
+            if (substr($url, -14) == '/api/index.php') $url = substr($url, 0, -14);
             if (substr($url, -10) == '/index.php') $url = substr($url, 0, -10);
             $url = $protocol.$url;
         }
