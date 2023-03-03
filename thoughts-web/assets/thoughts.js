@@ -1,47 +1,43 @@
-$(document).ready(function() {
-  $("#searchSubmit").hide() // hide search button
-})
-
-// Make jQuery :contains case-insensitive
-/*
-$.expr[":"].contains = $.expr.createPseudo(function(arg) {
-  return function( elem ) {
-      return $(elem).text().toUpperCase().indexOf(arg.toUpperCase()) >= 0;
-  };
-});*/
-
 // Search form elements changed
-$(document).on("click", ".divToggle", function(e) {
-  var clicked = $(this).attr("data-toggle")
-  $(clicked).slideToggle()
-  
-})
+"keyup change".split(" ").forEach(function(e){
+  document.getElementById('searchForm').addEventListener(e,search,false);
+});
 
-// Search each time search bar changes
-$(document).on("keyup change", "#searchbox", function(e) { search() })
+const boxes = document.querySelectorAll('.divToggle');
+boxes.forEach(box => {
+  box.addEventListener('click', function handleClick(event) {
+    console.log('box clicked', event);
+
+    let something = box.getAttribute('data-toggle');
+    let boxToggle = document.getElementById(something)
+    boxToggle.classList.toggle('fade');
+
+  });
+});
+
+/*document.addEventListener('submit', function (event) {
+	//event.preventDefault();
+} */
 
 function search() {
-
-  var serial = $('#searchForm').serialize();
-  $("#content").append(serial)
-  return false;
-  let searchQuery = $("#searchbox").val()
-  let limit = $("#searchLimit").val()
-  let quotes = $("#searchQuotes").val()
-  let shuffle = ($("#searchShuffle").prop("checked")) ? 1 : 0 
-  let showID = ($("#searchShowID").prop("checked")) ? 1 : 0
-  let platform = "api"
-  if (searchQuery == "") searchQuery = "list"
-  $.ajax({
-    type: "GET",
-    url: "api.php?q=search&s="+searchQuery+"&limit="+limit+"&shuffle="+shuffle+"&showID="+showID+"&quotes="+quotes+"&platform="+platform+"&breaks=1",
-    cache: false,
-    success: function (data, textStatus, errorThrown) {
-      $("#content").html(data)
-      // Change the URL for easy copy/pasting
-      ChangeUrl("test", "?q=search&s="+searchQuery+"&limit="+limit+"&shuffle="+shuffle+"&showID="+showID+"&quotes="+quotes+"&breaks=1")
-    }
-  })
+  let formBox = document.getElementById('searchForm')
+	fetch('api.php', {
+		method: 'POST',
+		body: JSON.stringify(Object.fromEntries(new FormData(formBox))),
+		headers: {
+			'Content-type': 'application/json; charset=UTF-8'
+		}
+	}).then(function (response) {
+		if (response.ok) {
+			//return response.json();
+      return response
+		}
+		return Promise.reject(response);
+	}).then(function (data) {
+		console.log(data);
+	}).catch(function (error) {
+		console.warn(error);
+	});
 }
 
 function ChangeUrl(title, url) {

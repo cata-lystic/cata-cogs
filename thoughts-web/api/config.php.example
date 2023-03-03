@@ -2,19 +2,20 @@
 #  API Setup
 # Make unique and secure tokens. Must be at least 8 characters in length with no spaces.
 # You may create multiple tokens with different permissions
-# Permissions: admin, config, create, delete, list, search
+# Permissions: admin, config, create, delete, list, read, search, tags
 # 'admin' permission has full access to all commands. Only give these tokens to people you trust that will help you manage the API and website
 # Do not delete the 'default' token. This is used for when your API is accessed with no other request.
-# The default token should only be used for 'search' and 'list' (maybe 'create' if you want creation public)
+# All other tokens will inherit 'default' token's permissions
+# The default token permissions should generally not be changed unless you want to prevent public post creation.
 # When config is complete, give an admin token to your Discord Bot with: [p]thoughtset setup api yourAdminToken
 
 # Tokens
 $set['token']['changeThisAdminToken'] = ['admin'];
-$set['token']['changeThisCustomToken'] = ['search', 'list', 'create', 'delete'];
-$set['token']['default'] = ['search', 'list'];
+$set['token']['changeThisCustomToken'] = ['delete'];
+$set['token']['default'] = ['read', 'create'];
 
 # Admins and Mods
-$set['admin'] = ['1111111111']; // Discord IDs of those that can do anything
+$set['admin'] = ['514556311573364746']; # Discord IDs of those that can do anything
 $set['mod'] = ['2222222222', '3333333333']; # Discord IDs of those that can mod posts
 
 # API Settings
@@ -27,7 +28,7 @@ $set['api']['create'] = 1; # Allow new post creation to non-mods via API
 $set['api']['createFlood'] = '10s'; # Time between when a user can post again (format: 5s, 3m, 5d, 7w, etc)
 $set['api']['shuffle'] = 1; # Shuffle search results
 $set['api']['showID'] = 0; # Show thought ID before each result
-$set['api']['quotes'] = 'none'; # Quotes around each thought. options: 'none', 'single', 'double', or custom
+$set['api']['wrap'] = 'none'; # Wrap (quotes) around each thought. options: 'none', 'single', 'double', or custom
 $set['api']['breaks'] = 0; # Use <br /> instead of \n\r in API calls
 $set['api']['platform'] = 'api'; # Can be set to anything where the request came from (example: discord)
 $set['api']['ipLog'] = 1; # Log IP address of post creator
@@ -36,7 +37,7 @@ $set['api']['ipHash'] = 1; # Hash IP addresses
 # Website Settings
 $set['web']['shuffle'] = 1; # Shuffle search results
 $set['web']['showID'] = 0; # Show thought ID before each result
-$set['web']['quotes'] = 'none'; # Quotes around each thought. options: 'none', 'single', 'double', or custom
+$set['web']['wrap'] = 'none'; # Wrap (quotes) around each thought. options: 'none', 'single', 'double', or custom
 $set['web']['info'] = 1; # Enable API info box
 $set['web']['infoVisible'] = 1; # Show API info box by default
 $set['web']['create'] = 1; # Enable thought creation box
@@ -55,7 +56,7 @@ $set['web']['jquery'] = 'local'; # options: local, google, jquery, microsoft, cd
 # Theme Settings
 $set['theme']['backgroundColor'] = '#212121'; # Background color
 $set['theme']['fontColor'] = '#e9e5e5'; # Font color
-$set['theme']['fontSize'] = '1em'; # Font Size
+$set['theme']['fontSize'] = '1em'; # Font size
 $set['theme']['accentColor'] = '#393939'; # Box accent color
 $set['theme']['accentRadius'] = '10px'; # Border radius of boxes
 $set['theme']['urlColor'] = '#e9e5e5'; # URL color

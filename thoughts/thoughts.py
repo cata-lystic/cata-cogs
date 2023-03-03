@@ -268,10 +268,10 @@ class Thoughts(commands.Cog):
         \rValue can be 1 or 0"""
         await self.changeSetting(ctx, 'api', 'showID', binary)
 
-    @ts_api.command(name='quotes')
-    async def ts_api_quotes(self, ctx, quotes):
-        """Quotes around each thought"""
-        await self.changeSetting(ctx, 'api', 'quotes', quotes)
+    @ts_api.command(name='wrap')
+    async def ts_api_wrap(self, ctx, wrap):
+        """Wrap (quotes) around each thought"""
+        await self.changeSetting(ctx, 'api', 'wrap', wrap)
 
     @ts_api.command(name='breaks')
     async def ts_api_breaks(self, ctx, binary):
@@ -390,10 +390,10 @@ class Thoughts(commands.Cog):
         \rValue can be 1 or 0"""
         await self.changeSetting(ctx, 'web', 'showID', binary)
 
-    @ts_web.command(name='quotes')
-    async def ts_web_quotes(self, ctx, quotes):
-        """Quotes around each thought"""
-        await self.changeSetting(ctx, 'web', 'quotes', quotes)
+    @ts_web.command(name='wrap')
+    async def ts_web_wrap(self, ctx, wrap):
+        """Wrap (quotes) around each thought"""
+        await self.changeSetting(ctx, 'web', 'wrap', wrap)
 
     # Theme Settings
     @ts_web.group(name='theme')

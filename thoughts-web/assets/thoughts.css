@@ -64,3 +64,14 @@ a {
 h1 {
     margin-top: 10px;
 }
+
+.fadeBox {
+    transition: 1s opacity, 1s visibility;
+    opacity: 1;
+}
+
+.fade{
+    opacity: 0;
+    visibility: hidden;
+    transition: 1s opacity, 1s visibility;
+}

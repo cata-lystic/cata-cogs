@@ -47,7 +47,7 @@ class Config {
                 'createFlood' => array('10s', ['alphanum'], 'Time between when a user can post again (format: 5s, 3m, 5d, 7w, etc)'),
                 'shuffle' => array(1, ['binary'], 'Shuffle search results'),
                 'showID' => array(0, ['binary'], 'Show thought ID before each result'),
-                'quotes' => array('none', [], 'Quotes around each thought. options: \'none\', \'single\', \'double\', or custom'),
+                'wrap' => array('none', [], 'Wrap (quotes) around each thought. options: \'none\', \'single\', \'double\', or custom'),
                 'breaks' => array(0, ['binary'], 'Use <br /> instead of \n\r in API calls'),
                 'platform' => array('api', ['alpha'], 'Can be set to anything where the request came from (example: discord)'),
                 'ipLog' => array(1, ['binary'], 'Log IP address of post creator'),
@@ -55,7 +55,7 @@ class Config {
             "web" => array(
                 'shuffle' => array(1, ['binary'], 'Shuffle search results', '#Website Settings'),
                 'showID' => array(0, ['binary'], 'Show thought ID before each result'),
-                'quotes' => array('none', [], 'Quotes around each thought. options: \'none\', \'single\', \'double\', or custom'),
+                'wrap' => array('none', [], 'Wrap (quotes) around each thought. options: \'none\', \'single\', \'double\', or custom'),
                 'info' => array(1, ['binary'], 'Enable API info box'),
                 'infoVisible' => array(1, ['binary'], 'Show API info box by default'),
                 'create' => array(1, ['binary'], 'Enable thought creation box'),
@@ -277,7 +277,7 @@ class Config {
                     // $finalVal is the $newVal if this is the changed setting
                     $finalVal = ($oldCategory == $key1 && $oldKey == $key2) ? str_replace("HASHTAG", "#", $this->arrayToString($newVal)) : $this->arrayToString($set[$oldCategory][$oldKey]); 
                         
-                    // Don't includes quotes around the val if it's meant to be a number
+                    // Don't includes wrap around the val if it's meant to be a number
                     $reqs = $this->defaults[$oldCategory][$oldKey][1];
                     $quote = (substr($finalVal, 0, 1) == '[' || in_array("number", $reqs) || in_array("binary", $reqs)) ? null : "'";
                     
@@ -630,7 +630,7 @@ class api extends config {
         $shuffle = $this->req['shuffle'] ?? $_SESSION['api']['shuffle']; // shuffle search results
         $showID = $this->req['showID'] ?? $_SESSION['api']['showID']; // show unique ID before each thought
         $platform = $this->req['platform'] ?? 'web'; // anything besides "web" will be plain text mode
-        $quotes = $this->req['quotes'] ?? tools::quotes($_SESSION['api']['quotes']); // no quotes by default
+        $wrap = $this->req['wrap'] ?? tools::wrap($_SESSION['api']['wrap']); // no wrap by default
         $breaks = $this->req['breaks'] ?? $_SESSION['api']['breaks']; // prefer <br /> over /n/r (web will overwrite this)
         $apiRequest = $this->req['api'] ?? null; // API version from requester
         $reason = $this->req['reason'] ?? 1; // Show reason for post deletion
@@ -638,7 +638,7 @@ class api extends config {
 
         $total = count($data); // total thoughts
         if ($platform == "discord") {
-            $quotes = "`"; // force Discord thoughts to be in a quote box
+            $wrap = "`"; // force Discord thoughts to be in a quote box
             $limit = ($limit > 5) ? 5 : $limit; // Discord limit can't go past 5 for now. until there's a word count
         }
 
@@ -686,7 +686,7 @@ class api extends config {
             $isDeleted = isset($data[$s]['deleted']) ?? 0;
             if ($isDeleted == 0) { // Check if post has been deleted (show that it has if the post was directly requested)
                 $thisID = ($showID == 1) ? "#".$s.": " : null;
-                echo $thisID."{$quotes}".$data[$s]['msg']."{$quotes} -".$data[$s]['author'];
+                echo $thisID."{$wrap}".$data[$s]['msg']."{$wrap} -".$data[$s]['author'];
             } else {
                 echo "`Post deleted.`";
                 if ($reasonby == 1) echo " Deleted by: ".str_replace("HASHTAG", "#", $data[$s]['deleter']).".";
@@ -714,7 +714,7 @@ class api extends config {
                     if ($results > $limit-1) break; // stop after the $limit
                     if ($results > 0) echo ($platform == "web" || $breaks == 1) ? "<br />" : "\n\r"; // different line breaks per platform
                     $thisID = ($showID == 1) ? "#".$ids.": " : null;
-                    echo "{$thisID}{$quotes}{$vals}{$quotes}";
+                    echo "{$thisID}{$wrap}{$vals}{$wrap}";
                     $results++;
                 }
             }
@@ -934,8 +934,8 @@ class tools {
         return $time;
     }
 
-    // Process quotes (convert single or double to ' or "")
-    public static function quotes($str) {
+    // Process wrap (convert single or double to ' or "")
+    public static function wrap($str) {
         if ($str == "none") {
             $quote = "";
         } else if ($str == "single") {

@@ -12,17 +12,18 @@ $limit = $_REQUEST['limit'] ?? $config->web['searchLimit']; // amount of search 
 $shuffle = $_REQUEST['shuffle'] ?? $config->web['shuffle']; // shuffle search results
 $showID = $_REQUEST['showID'] ?? $config->web['showID']; // show unique ID before each thought
 $platform = $_REQUEST['platform'] ?? 'web'; // anything besides "web" will be plain text mode
-$quotes = $_REQUEST['quotes'] ?? tools::quotes($config->web['quotes']); // no quotes by default
+$wrap = $_REQUEST['wrap'] ?? tools::wrap($config->web['wrap']); // no wrap by default
 $breaks = $_REQUEST['breaks'] ?? $config->api['breaks']; // prefer <br /> over /n/r (web will overwrite this)
 $js = $_REQUEST['js'] ?? $config->web['js']; // web javascript features enabled by default
 $apiRequest = $_REQUEST['api'] ?? null; // API version from requester
 
 if ($platform == "discord") {
-  $quotes = "`"; // force Discord thoughts to be in a quote box
+  $wrap = "`"; // force Discord thoughts to be in a quote box
   $limit = ($limit > 5) ? 5 : $limit; // Discord limit can't go past 5 for now. until there's a word count
 }
 
-echo "<head>
+echo "<!DOCTYPE html>
+<head>
 <title>Thoughts</title>
 
 <style>:root { --bg-color: {$config->theme['backgroundColor']}; --accent-color: {$config->theme['accentColor']}; --font-color: {$config->theme['fontColor']}; --accent-radius: {$config->theme['accentRadius']}; --font-size: {$config->theme['fontSize']}; --url-color: {$config->theme['urlColor']}; }</style>
@@ -44,7 +45,7 @@ echo $view->create(); // Create Box
 echo $view->infoBox(); // API Info Box
 
 // Search Bar for Web  
-echo $view->search(array('s'=>$s, 'limit'=>$limit, 'quotes'=>$quotes, 'shuffle'=>$shuffle, 'showID'=>$showID));
+echo $view->search(array('s'=>$s, 'limit'=>$limit, 'wrap'=>$wrap, 'shuffle'=>$shuffle, 'showID'=>$showID));
 
 echo $view->footer(); // Footer  
 
@@ -70,21 +71,22 @@ class view {
 
       $s = $args['s'] ?? ''; // Search query
       $limit = $args['limit'] ?? '';
-      $quotes = $args['quotes'] ?? '';
+      $wrap = $args['wrap'] ?? '';
       $showID = $args['showID'] ?? '';
       $shuffle = $args['shuffle'] ?? '';
       $shuffleChecked = ($shuffle == 1) ? "checked" : null;
       $showIDChecked = ($showID == 1) ? "check" : null;
       $submitVisible = ($_SESSION['web']['js'] != 1) ? "<input id='searchSubmit' type='submit' value='Search' />":null; // Submit button only needs to be shown if javascript is disabled
-      $searchVisible = ($_SESSION['web']['searchVisible'] == 1) ? "block":"none";
+      $searchVisible = ($_SESSION['web']['searchVisible'] == 1) ? null:"fade";
       return "
-      <div id='search' style='display: {$searchVisible}'>
+      <div id='search' class='fadeBox {$searchVisible}'>
       <form id='searchForm' method='get' action='index.php'>
         <input type='hidden' name='q' value='search'>
           <p><input type='text' id='searchbox' name='s' placeholder='Search...' value='{$s}' /><p>
-          <p><label>Limit: <input type='number' id='searchLimit' name='limit' value='{$limit}' size='4' /></label> <label>Quotes: <input type='text' id='searchQuotes' name='quotes' value='{$quotes}' size='3'></label></p>
-          <p><label><input type='checkbox' id='searchShuffle' name='shuffle' value='1' {$shuffleChecked} /> Shuffle</label> <label><input type='checkbox' id='searchShowID' name='showID' {$showIDChecked} /> Show ID</label></p> {$submitVisible}
-          <input type='hidden' id='searchJS' name='js' value='0' />
+          <p><label>Limit: <input type='number' name='limit' value='{$limit}' size='4' /></label> <label>wrap: <input type='text' name='wrap' value='{$wrap}' size='3'></label></p>
+          <p><label><input type='checkbox' name='shuffle' value='1' {$shuffleChecked} /> Shuffle</label> <label><input type='checkbox' name='showID' {$showIDChecked} /> Show ID</label></p> {$submitVisible}
+          <input type='hidden' name='breaks' value='1' />
+          <input type='hidden' id='searchJS' name='js' value='1' />
           <input type='hidden' id='showAPI' name='showAPI' value='1' />
           <input type='hidden' id='showSearch' name='showSearch' value='1' />
           <input type='hidden' name='version' value='{$this->apiVersion}' />
@@ -97,9 +99,9 @@ class view {
       
       if ($_SESSION['web']['create'] != 1 || $_SESSION['api']['create'] != 1) return false;
 
-      $createVisible = ($_SESSION['web']['createVisible'] == 1) ? "block":"none";
+      $createVisible = ($_SESSION['web']['createVisible'] == 1) ? null:"fade";
       $createForm = "
-      <div id='create' style='display: {$createVisible}'>
+      <div id='create' class='fadeBox {$createVisible}'>
       <form id='createForm' method='get' action='index.php'>
           <input type='hidden' name='q' value='create' />
           <h1>Create Thought</h1>
@@ -126,10 +128,10 @@ class view {
   // API Info Box
   public function infoBox() {
       if ($_SESSION['web']['info'] != 1) return false;
-      $visible = ($_SESSION['web']['infoVisible'] == 1) ? "block":"none"; // Default visibility
+      $visible = ($_SESSION['web']['infoVisible'] == 1) ? null:"fade"; // Default visibility
       $d = $_SESSION['api']['url']."/".$this->apiFolder."/".$this->apiVersion."/";
       echo "
-      <div id='info' style='display: {$visible}'>
+      <div id='info' class='fadeBox {$visible}'>
           <h1>API</h1>
           <p>Random Thought<br />
           <a href='{$d}'>{$d}</a></p>
@@ -144,7 +146,7 @@ class view {
           <p>Other flags<br />
           &js=1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Javascript on web page<br />
           &showID=0&nbsp;&nbsp;&nbsp;&nbsp;Show ID of thought<br />
-          &amp;quotes=&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mark to put around each thought (single, double, none)<br />
+          &amp;wrap=&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mark to put around each thought (single, double, none)<br />
           &breaks=0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Return &lt;br /&gt; instead of \\n\\r</p>
       </div>";
   }
@@ -153,13 +155,13 @@ class view {
       $ret = array(null,null,null,null); // Return variables
 
       if ($_SESSION['web']['create'] == 1)
-          $ret[0] = "<a href='#' data-toggle='#create' class='divToggle'>Create</a>&nbsp;&nbsp;&nbsp;";
+          $ret[0] = "<a href='#' data-toggle='create' class='divToggle'>Create</a>&nbsp;&nbsp;&nbsp;";
 
       if ($_SESSION['web']['search'] == 1)
-          $ret[1] = "<a href='#' data-toggle='#search' class='divToggle'>Search</a>&nbsp;&nbsp;&nbsp;";
+          $ret[1] = "<a href='#' data-toggle='search' class='divToggle'>Search</a>&nbsp;&nbsp;&nbsp;";
 
       if ($_SESSION['web']['info'] == 1)
-          $ret[2] = "<a href='#' data-toggle='#info' class='divToggle'>API</a>&nbsp;&nbsp;&nbsp;";
+          $ret[2] = "<a href='#' data-toggle='info' class='divToggle'>API</a>&nbsp;&nbsp;&nbsp;";
 
       if ($_SESSION['web']['github'] == 1)
           $ret[3] = "<a href='https://github.com/cata-lystic/redbot-cogs/tree/main/thoughts' target='_blank'>GitHub</a>&nbsp;&nbsp;&nbsp;";
@@ -176,6 +178,7 @@ class view {
   }
 
   // Detect which Javascript and jQuery file to use (or not use)
+  // (jQuery is not currently in use and may be removed soon)
   public function js() {
 
       if ($_SESSION['web']['js'] != 1 || isset($_REQUEST['js']) && $_REQUEST['js'] == 0) return false;
@@ -194,9 +197,8 @@ class view {
       // If $jq is in the CDNs array, use it. If not, use what URL the user hopeufully supplied
       $jquery = (isset($cdns[$jq])) ? $cdns[$jq] : $jq;
 
-      return "
-      <script src='assets/zepto.min.js'></script>
-      <script src='assets/thoughts.js'></script>";
+      return "<script src='assets/thoughts.js'></script>";
   }
 
 }
+?>
