@@ -3,11 +3,12 @@ $(document).ready(function() {
 })
 
 // Make jQuery :contains case-insensitive
+/*
 $.expr[":"].contains = $.expr.createPseudo(function(arg) {
   return function( elem ) {
       return $(elem).text().toUpperCase().indexOf(arg.toUpperCase()) >= 0;
   };
-});
+});*/
 
 // Search form elements changed
 $(document).on("click", ".divToggle", function(e) {
@@ -20,6 +21,10 @@ $(document).on("click", ".divToggle", function(e) {
 $(document).on("keyup change", "#searchbox", function(e) { search() })
 
 function search() {
+
+  var serial = $('#searchForm').serialize();
+  $("#content").append(serial)
+  return false;
   let searchQuery = $("#searchbox").val()
   let limit = $("#searchLimit").val()
   let quotes = $("#searchQuotes").val()
@@ -30,11 +35,12 @@ function search() {
   $.ajax({
     type: "GET",
     url: "api.php?q=search&s="+searchQuery+"&limit="+limit+"&shuffle="+shuffle+"&showID="+showID+"&quotes="+quotes+"&platform="+platform+"&breaks=1",
-    cache: false
-  }).done(function (data, textStatus, errorThrown) {
-    $("#content").html(data)
-    // Change the URL for easy copy/pasting
-    ChangeUrl("test", "?q=search&s="+searchQuery+"&limit="+limit+"&shuffle="+shuffle+"&showID="+showID+"&quotes="+quotes+"&breaks=1")
+    cache: false,
+    success: function (data, textStatus, errorThrown) {
+      $("#content").html(data)
+      // Change the URL for easy copy/pasting
+      ChangeUrl("test", "?q=search&s="+searchQuery+"&limit="+limit+"&shuffle="+shuffle+"&showID="+showID+"&quotes="+quotes+"&breaks=1")
+    }
   })
 }
 

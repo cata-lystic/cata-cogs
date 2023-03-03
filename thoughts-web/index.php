@@ -80,12 +80,14 @@ class view {
       return "
       <div id='search' style='display: {$searchVisible}'>
       <form id='searchForm' method='get' action='index.php'>
-          <p><input type='text' id='searchbox' name='q' placeholder='Search...' value='{$s}' /><p>
+        <input type='hidden' name='q' value='search'>
+          <p><input type='text' id='searchbox' name='s' placeholder='Search...' value='{$s}' /><p>
           <p><label>Limit: <input type='number' id='searchLimit' name='limit' value='{$limit}' size='4' /></label> <label>Quotes: <input type='text' id='searchQuotes' name='quotes' value='{$quotes}' size='3'></label></p>
           <p><label><input type='checkbox' id='searchShuffle' name='shuffle' value='1' {$shuffleChecked} /> Shuffle</label> <label><input type='checkbox' id='searchShowID' name='showID' {$showIDChecked} /> Show ID</label></p> {$submitVisible}
           <input type='hidden' id='searchJS' name='js' value='0' />
           <input type='hidden' id='showAPI' name='showAPI' value='1' />
           <input type='hidden' id='showSearch' name='showSearch' value='1' />
+          <input type='hidden' name='version' value='{$this->apiVersion}' />
       </form>
       </div>";
   }
@@ -193,7 +195,7 @@ class view {
       $jquery = (isset($cdns[$jq])) ? $cdns[$jq] : $jq;
 
       return "
-      <script src='{$jquery}'></script>
+      <script src='assets/zepto.min.js'></script>
       <script src='assets/thoughts.js'></script>";
   }
 
