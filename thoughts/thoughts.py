@@ -24,7 +24,7 @@ class Thoughts(commands.Cog):
             "deletedReason": 1,
             "deletedBy": 1,
             "apiFolder" :  "api",
-            "searchLimit": 3,
+            "limit": 3, # also known as searchResults
             "shuffle": 0,
             "showAuthor": 1,
             "showID": 0
@@ -83,7 +83,7 @@ class Thoughts(commands.Cog):
 
 
     @commands.command(aliases=['thoughts'])
-    async def thought(self, ctx, search="", limit=3, shuffle=1, showID=0, showAuthor=1):
+    async def thought(self, ctx, search=""):
         """Gets a thought.
 
         **.thought** - Get random thought
@@ -107,6 +107,7 @@ class Thoughts(commands.Cog):
         shuffle = await self.config.shuffle()
         showAuthor = await self.config.showAuthor()
         showID = await self.config.showID()
+        limit = await self.config.limit()
 
         if current_url == '':
             return await ctx.send("You need to set an API URL. Type `.tset setup url`")
