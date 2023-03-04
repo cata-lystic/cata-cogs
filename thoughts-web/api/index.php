@@ -2,98 +2,6 @@
 session_start();
 session_destroy();
 
-// Thoughts API -> Command Line Interface (CLI)
-if (tools::isCLI() == true) {
-
-    $cliShortOptions = "f:hs:a:i:m:r:t:vb:w:l"; // q=query: h=help:: s=search:: a=author:: i=authorID:: m=msg:: r=searchResults:: t=token:: v=version::
-
-    $cliLongOptions = ['function:', 'help', 'search:', 'author:', 'authorID:', 'shuffle:', 'searchResults:', 'token:', 'version', 'man', 'key1:', 'key2:', 'val:', 'apiversion:', 'botversion:', 'break:', 'showID:', 'wrap:', 'id:', 'list'];
-
-    $options = getopt($cliShortOptions, $cliLongOptions);
-    //$firstArg = $argv[1] ?? null; // First arg in case they want to skip using -q (coming later)
-    // ^ maybe have list of API functions (create, search, etc) and if a non-optional/non-required flag of that is found, set f=whatever. would have to only do it for the first one found... work in progress
-
-    // Convert all CLI to the proper $_REQUEST they would match
-    $optionToVar = [
-        'function' => 'f',
-        'search' => 's',
-        'a' => 'author',
-        'i' => 'authorID',
-        'm' => 'msg',
-        'r' => 'searchResults',
-        't' => 'token',
-        'b' => 'break',
-        'w' => 'wrap',
-        'l' => 'list',
-        'apiversion' => 'version' // this needs to be changed to apiversion as the main API flag
-    ];
-    foreach ($optionToVar as $key => $val) {
-        if (isset($options[$key])) {
-            $options[$val] = $options[$key]; // val is the new key
-            unset($options[$key]); // remove the old one
-        }
-    }
-
-    // Just show the API version
-    if (isset($options['v']) || isset($options['version'])) {
-        $config = new Config();
-        echo PHP_EOL."Thoughts API. Version {$config->versions['api']}".PHP_EOL.PHP_EOL;
-        die();
-    }
-
-    // Just show the help
-    if (isset($options['h']) || isset($options['help']) || isset($options['man'])) {
-        $config = new Config();
-        $n = PHP_EOL;
-        echo "
-        Thoughts {$config->versions['api']}
-        Required
-          -f --function    str  Main API function you want to run (search, create, info, etc)
-        Optional
-          -t --token       str  API Token. Will use 'default' if none given
-          --apiversion     num  API version you'd like to make this call with
-          --botversion     num  Bot version you'd like to make this call with
-
-        Search Parameters
-          -s --search      str  Search query (put multiple words in quotes)
-          --id             num  Fetch direct post ID
-          -l --list             List all posts (ignores -s and --id)
-          --shuffle        bin  Shuffle search results
-          --searchResults  num  Max number of search results to return
-          --showID         bin  Show ID # of each post
-          -b --break       bin  Show <br /> instead of \\n
-          -w --wrap        bin  Wrap (quotes) to use around each result
-
-        Create Parameters
-          -a --author      str  Post author
-          -i --authorID    str  Post author's full ID (usually Discord ID)
-          -m --msg         str  Post message contents
-          --tag            str  Post's tag (will default to config setting)
-
-        Config Parameters
-          --key1           str  Config setting category to change
-          --key2           str  Config setting to change
-          --val            str  New config setting value
-          -l --list             List current config settings
-
-        Info:
-          -h --help             Show this help menu
-          -v --version          Show API version
-        ";
-        die();
-    }
-
-    // Loop through each options (if set) and turn them into the $_REQUESTS
-    foreach ($options as $key => $val) {
-        $_REQUEST[$key] = $val;
-    }
-    //if (substr($argv[1], 0, 1) == '?') $_REQUEST['f'] = $argv[1]; // if this doesn't start with ?, replace the query with first arg
-}
-
-
-
-
-
 // These are just here for development purposes
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -105,7 +13,6 @@ $api = new api();
 
 // Process the request immediately if just the api is being loaded
 if (!isset($webVersion)) $api->process();
-
 
 class Config {
 
@@ -463,6 +370,9 @@ class api extends config {
         Config::__construct();
 
         $this->allowedFunctions = ['config', 'create', 'delete', 'list', 'search', 'tags', 'info', 'dev', 'new'];
+
+        // If script is ran via CLI, overwrite $_REQUESTs from the params
+        if (tools::isCLI()) $this->cli();
 
         // Get all request variables and put them in an array
         foreach($_REQUEST as $key => $val) {
@@ -928,6 +838,94 @@ class api extends config {
 
         }
 
+    }
+
+    // Setup the CLI params into $_REQUESTs
+    function cli() {
+    
+        $cliShortOptions = "f:hs:a:i:m:r:t:vb:w:l"; // q=query: h=help:: s=search:: a=author:: i=authorID:: m=msg:: r=searchResults:: t=token:: v=version::
+
+        $cliLongOptions = ['function:', 'help', 'search:', 'author:', 'authorID:', 'shuffle:', 'searchResults:', 'token:', 'version', 'man', 'key1:', 'key2:', 'val:', 'apiversion:', 'botversion:', 'break:', 'showID:', 'wrap:', 'id:', 'list'];
+
+        $options = getopt($cliShortOptions, $cliLongOptions);
+        
+        //$firstArg = $argv[1] ?? null; // First arg in case they want to skip using -q (coming later)
+        // ^ maybe have list of API functions (create, search, etc) and if a non-optional/non-required flag of that is found, set f=whatever. would have to only do it for the first one found... work in progress
+
+        // Convert all CLI to the proper $_REQUEST they would match
+        $optionToVar = [
+            'function' => 'f',
+            'search' => 's',
+            'a' => 'author',
+            'i' => 'authorID',
+            'm' => 'msg',
+            'r' => 'searchResults',
+            't' => 'token',
+            'b' => 'break',
+            'w' => 'wrap',
+            'l' => 'list',
+            'apiversion' => 'version' // this needs to be changed to apiversion as the main API flag
+        ];
+        foreach ($optionToVar as $key => $val) {
+            if (isset($options[$key])) {
+                $options[$val] = $options[$key]; // val is the new key
+                unset($options[$key]); // remove the old one
+            }
+        }
+
+        // Just show the API version
+        if (isset($options['v']) || isset($options['version'])) {
+            $config = new Config();
+            echo PHP_EOL."Thoughts API. Version {$config->versions['api']}".PHP_EOL.PHP_EOL;
+            die();
+        }
+
+        // Just show the help
+        if (isset($options['h']) || isset($options['help']) || isset($options['man'])) {
+            $config = new Config();
+            $n = PHP_EOL;
+            echo "
+            Thoughts {$config->versions['api']}
+            Required
+            -f --function    str  Main API function you want to run (search, create, info, etc)
+            Optional
+            -t --token       str  API Token. Will use 'default' if none given
+            --apiversion     num  API version you'd like to make this call with
+            --botversion     num  Bot version you'd like to make this call with
+
+            Search Parameters
+            -s --search      str  Search query (put multiple words in quotes)
+            --id             num  Fetch direct post ID
+            -l --list             List all posts (ignores -s and --id)
+            --shuffle        bin  Shuffle search results
+            --searchResults  num  Max number of search results to return
+            --showID         bin  Show ID # of each post
+            -b --break       bin  Show <br /> instead of \\n
+            -w --wrap        bin  Wrap (quotes) to use around each result
+
+            Create Parameters
+            -a --author      str  Post author
+            -i --authorID    str  Post author's full ID (usually Discord ID)
+            -m --msg         str  Post message contents
+            --tag            str  Post's tag (will default to config setting)
+
+            Config Parameters
+            --key1           str  Config setting category to change
+            --key2           str  Config setting to change
+            --val            str  New config setting value
+            -l --list             List current config settings
+
+            Info:
+            -h --help             Show this help menu
+            -v --version          Show API version
+            ";
+            die();
+        }
+
+        // Loop through each options (if set) and turn them into the $_REQUESTS
+        foreach ($options as $key => $val) {
+            $_REQUEST[$key] = $val;
+        }
     }
 
     // Display info about Thoughts and each version
