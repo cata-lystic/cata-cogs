@@ -229,6 +229,12 @@ class Thoughts(commands.Cog):
         `.tset bot`"""
         pass
 
+    @thoughtset.command(name='list')
+    async def ts_list(self, ctx):
+        """List all config settings"""
+        await self.changeSetting(ctx, 'list', 'none')
+        pass
+
     @ts_setup.command(name='token')
     async def ts_setup_token(self, ctx, newToken):
         """Set API Token
