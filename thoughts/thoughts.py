@@ -521,13 +521,42 @@ class Thoughts(commands.Cog):
         Example: `.tset web theme fontsize #e9e5e5`"""
         await self.changeSetting(ctx, 'theme', 'fontSize', size)
 
-    @ts_web_theme.command(name='radius', aliases=['accentRadius'])
+    @ts_web_theme.command(name='accentRadius')
     async def ts_web_accentradius(self, ctx, radius):
         """Accent box border radius
         \rWebsite's box border radius (roundness)
         You can use anything the CSS border-radius tag supports\r
-        Example: `.tset web theme radius 10px`"""
+        Example: `.tset web theme accentRadius 10px`"""
         await self.changeSetting(ctx, 'theme', 'accentRadius', radius)
+
+    @ts_web_theme.command(name='postRadius')
+    async def ts_web_postradius(self, ctx, radius):
+        """Post box border radius
+        \rPost box border radius (roundness)
+        You can use anything the CSS border-radius tag supports\r
+        Example: `.tset web theme postRadius 10px`"""
+        await self.changeSetting(ctx, 'theme', 'postRadius', radius)
+
+    @ts_web_theme.command(name='postBg', aliases=['postBackground'])
+    async def ts_web_postbg(self, ctx, color):
+        """Post's background color
+        \nYou can use anything the CSS color tag supports\r
+        Example: `.tset web theme postBg #e9e5e5`"""
+        await self.changeSetting(ctx, 'theme', 'postBg', color)
+
+    @ts_web_theme.command(name='postColor', aliases=['postfontcolor'])
+    async def ts_web_postcolor(self, ctx, color):
+        """Post's font color
+        \nYou can use anything the CSS color tag supports\r
+        Example: `.tset web theme postFontColor #e9e5e5`"""
+        await self.changeSetting(ctx, 'theme', 'postFontColor', color)
+
+    @ts_web_theme.command(name='postWidth')
+    async def ts_web_postwidth(self, ctx, width):
+        """Post's box width
+        \nYou can use anything the CSS width tag supports\r
+        Example: `.tset web theme postWidth 50%`"""
+        await self.changeSetting(ctx, 'theme', 'postWidth', width)
 
     @ts_web.command(name='enable')
     async def ts_web_enable(self, ctx, binary):

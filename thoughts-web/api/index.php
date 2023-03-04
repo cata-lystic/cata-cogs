@@ -25,8 +25,11 @@ class Config {
 
         $this->versions = array(
             'api' => '1.0', // Current API version
+            'apiMin' => '1.0', // Minimum supported API version
             'web' => '1.0', // Website version last time API was updated
-            'bot' => '1.0' // Bot version last time API was updated
+            'webMin' => '1.0', // Minimum supported Website version
+            'bot' => '1.0', // Bot version last time API was updated
+            'botMin' => '1.0'
         );
 
         // List of config settings. Array includes the follwoing:
@@ -77,6 +80,10 @@ class Config {
                 'backgroundColor' => array('#212121', [], 'Background color', '#Theme Settings'),
                 'fontColor' => array('#e9e5e5', [], 'Font color'),
                 'fontSize' => array('1em', [], 'Font size'),
+                'postBg' => array('#393939', [], 'Post background color'),
+                'postFontColor' => array('#e9e5e5', [], 'Post font color'),
+                'postRadius' => array("10px", [], 'Post border radius'),
+                'postWidth' => array('50%', [], 'Post width'),
                 'accentColor' => array('#393939', [], 'Box accent color'),
                 'accentRadius' => array("10px", [], 'Border radius of boxes'),
                 'urlColor' => array("#e9e5e5", [], 'URL color'))
@@ -231,11 +238,12 @@ class Config {
             // Make sure createFlood has at least a 's' at the end (for seconds)
             if ($key2 == 'createFlood' && ctype_digit($newVal)) $newVal .= 's';
 
-            // Make sure fontSize at least has 'px' at the end if only a number was supplied
-            if ($key2 == 'fontSize' && ctype_digit($newVal)) $newVal .= 'px';
+            // Make sure some things at least have 'px' at the end if only a number was supplied
+            $sizeChanges = array('fontSize', 'postWidth', 'accentRadius', 'postRadius');
+            if (in_array($key2, $sizeChanges) && ctype_digit($newVal)) $newVal .= 'px';
 
             // Make sure color changes at least have '#' at the beginning if only 6 chars was supplied
-            $colorChanges = array('fontColor', 'backgroundColor', 'accentColor', 'urlColor');
+            $colorChanges = array('fontColor', 'backgroundColor', 'postBg', 'postFontColor', 'accentColor', 'urlColor');
             if (in_array($key2, $colorChanges) && strlen($newVal) == 6) $newVal = '#'.$newVal;
 
             // Make user use the --confirm flag if trying to disable CLI from the CLI
