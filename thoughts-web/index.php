@@ -6,7 +6,7 @@ $apiFolder = 'api'; // Only change this if you've moved the API folder
 require_once("$apiFolder/index.php");
 
 // Get possible queries
-$q = $_REQUEST['q'] ?? 'search'; // Query
+$f = $_REQUEST['f'] ?? 'search'; // API Function
 $s = $_REQUEST['s'] ?? null; // allow a specific ID to be fetched
 $limit = $_REQUEST['limit'] ?? $config->web['searchLimit']; // amount of search results to return
 $shuffle = $_REQUEST['shuffle'] ?? $config->web['shuffle']; // shuffle search results
@@ -84,7 +84,7 @@ class view {
       return "
       <div id='search' class='fadeBox {$searchVisible}'>
       <form id='searchForm' method='get' action='index.php'>
-        <input type='hidden' name='q' value='search'>
+        <input type='hidden' name='f' value='search'>
           <p><input type='text' id='searchbox' name='s' placeholder='Search...' value='{$s}' /><p>
           <p><label>Limit: <input type='number' name='limit' value='{$limit}' size='4' /></label> <label>wrap: <input type='text' name='wrap' value='{$wrap}' size='3'></label></p>
           <p><label><input type='checkbox' name='shuffle' value='1' {$shuffleChecked} /> Shuffle</label> <label><input type='checkbox' name='showAuthor' {$showAuthorChecked} /> Author</label> <label><input type='checkbox' name='showID' {$showIDChecked} /> ID</label></p> {$submitVisible}
@@ -106,7 +106,7 @@ class view {
       $createForm = "
       <div id='create' class='fadeBox {$createVisible}'>
       <form id='createForm' method='get' action='index.php'>
-          <input type='hidden' name='q' value='create' />
+          <input type='hidden' name='f' value='create' />
           <h1>Create Thought</h1>
           <p><input type='text' id='createUser' name='author' placeholder='Username' value='' /><p>
           <p><input type='text' id='createUserID' name='authorID' placeholder='User ID' value='' /><p>

@@ -2,18 +2,20 @@
 session_start();
 session_destroy();
 
-// Thoughts API is reachable through the CLI. Work in progress.
+// Thoughts API -> Command Line Interface (CLI)
 if (tools::isCLI() == true) {
 
-    $cliShortOptions = "q:hs:a:i:m:r:t:vb:w:l"; // q=query: h=help:: s=search:: a=author:: i=authorID:: m=msg:: r=searchResults:: t=token:: v=version::
+    $cliShortOptions = "f:hs:a:i:m:r:t:vb:w:l"; // q=query: h=help:: s=search:: a=author:: i=authorID:: m=msg:: r=searchResults:: t=token:: v=version::
 
-    $cliLongOptions = ['help', 'search:', 'author:', 'authorID:', 'shuffle:', 'searchResults:', 'token:', 'version', 'man', 'key1:', 'key2:', 'val:', 'apiversion:', 'botversion:', 'break:', 'showID:', 'wrap:', 'id:', 'list'];
+    $cliLongOptions = ['function:', 'help', 'search:', 'author:', 'authorID:', 'shuffle:', 'searchResults:', 'token:', 'version', 'man', 'key1:', 'key2:', 'val:', 'apiversion:', 'botversion:', 'break:', 'showID:', 'wrap:', 'id:', 'list'];
 
     $options = getopt($cliShortOptions, $cliLongOptions);
     //$firstArg = $argv[1] ?? null; // First arg in case they want to skip using -q (coming later)
+    // ^ maybe have list of API functions (create, search, etc) and if a non-optional/non-required flag of that is found, set f=whatever. would have to only do it for the first one found... work in progress
 
     // Convert all CLI to the proper $_REQUEST they would match
     $optionToVar = [
+        'function' => 'f',
         'search' => 's',
         'a' => 'author',
         'i' => 'authorID',
@@ -46,7 +48,7 @@ if (tools::isCLI() == true) {
         echo "
         Thoughts {$config->versions['api']}
         Required
-          -q               str  Main API function you want to run (search, create, info, etc)
+          -f --function    str  Main API function you want to run (search, create, info, etc)
         Optional
           -t --token       str  API Token. Will use 'default' if none given
           --apiversion     num  API version you'd like to make this call with
@@ -85,7 +87,7 @@ if (tools::isCLI() == true) {
     foreach ($options as $key => $val) {
         $_REQUEST[$key] = $val;
     }
-    if (substr($argv[1], 0, 1) == '?') $_REQUEST['q'] = $argv[1]; // if this doesn't start with ?, replace the query with first arg
+    //if (substr($argv[1], 0, 1) == '?') $_REQUEST['f'] = $argv[1]; // if this doesn't start with ?, replace the query with first arg
 }
 
 
@@ -370,9 +372,9 @@ class Config {
                         
                     // Don't includes wrap around the val if it's meant to be a number
                     $reqs = $this->defaults[$oldCategory][$oldKey][1];
-                    $quote = (substr($finalVal, 0, 1) == '[' || in_array("number", $reqs) || in_array("binary", $reqs)) ? null : "'";
+                    $wrap = (substr($finalVal, 0, 1) == '[' || in_array("number", $reqs) || in_array("binary", $reqs)) ? null : "'";
                     
-                    $result .= "\$set['$oldCategory']['$oldKey'] = {$quote}{$finalVal}{$quote}; # {$this->defaults[$oldCategory][$oldKey][2]}\n";
+                    $result .= "\$set['$oldCategory']['$oldKey'] = {$wrap}{$finalVal}{$wrap}; # {$this->defaults[$oldCategory][$oldKey][2]}\n";
 
                 }
             }
@@ -475,8 +477,8 @@ class api extends config {
 
         $this->source = ($source != '') ? $source : 'api'; // API is default source
 
-        // Check if there was a 'q' (query) request
-        $func = $this->req['q'] ?? null; // no query = search for random thought
+        // Check if there was a 'f' (query) request
+        $func = $this->req['f'] ?? null; // no query = search for random thought
         if (empty($func)) $func = 'search';
 
         // Make sure this is a valid function
@@ -1056,15 +1058,15 @@ class tools {
     // Process wrap (convert single or double to ' or "")
     public static function wrap($str) {
         if ($str == "none") {
-            $quote = "";
+            $wrap = "";
         } else if ($str == "single") {
-            $quote = "'";
+            $wrap = "'";
         } else if ($str == "double") {
-            $quote = '"';
+            $wrap = '"';
         } else {
-            $quote = $str;
+            $wrap = $str;
         }
-        return $quote;
+        return $wrap;
     }
 
     // Plural. Check if word (like Days) needs an 's' at the end.

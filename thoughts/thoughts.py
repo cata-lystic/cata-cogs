@@ -51,7 +51,7 @@ class Thoughts(commands.Cog):
             newVal = newVal.replace("#", "HASHTAG")
             apiFolder = await self.config.apiFolder()
             try:    
-                async with aiohttp.request("GET", current_url+"/"+str(apiFolder)+"?q=config&key1="+key1+"&key2="+key2+"&val="+newVal+"&version="+str(self.versionapi)+"&versionbot="+str(self.versionbot)+"&platform=discord&token="+str(current_token), headers={"Accept": "text/plain"}) as r:
+                async with aiohttp.request("GET", current_url+"/"+str(apiFolder)+"?f=config&key1="+key1+"&key2="+key2+"&val="+newVal+"&version="+str(self.versionapi)+"&versionbot="+str(self.versionbot)+"&platform=discord&token="+str(current_token), headers={"Accept": "text/plain"}) as r:
                     if r.status != 200:
                         return await ctx.send("Oops! Cannot change setting...")
                     result = await r.text(encoding="UTF-8")
@@ -68,7 +68,7 @@ class Thoughts(commands.Cog):
         apiFolder = await self.config.apiFolder()
 
         try:    
-            async with aiohttp.request("GET", current_url+"/"+str(apiFolder)+"?q=tags&s="+str(query)+"&tag="+str(tag1)+"&authorID="+str(authorID)+"&rename="+str(tag2)+"&version="+str(self.versionapi)+"&versionbot="+str(self.versionbot)+"&platform=discord&token="+str(current_token), headers={"Accept": "text/plain"}) as r:
+            async with aiohttp.request("GET", current_url+"/"+str(apiFolder)+"?f=tags&s="+str(query)+"&tag="+str(tag1)+"&authorID="+str(authorID)+"&rename="+str(tag2)+"&version="+str(self.versionapi)+"&versionbot="+str(self.versionbot)+"&platform=discord&token="+str(current_token), headers={"Accept": "text/plain"}) as r:
                 if r.status != 200:
                     return await ctx.send("Oops! Cannot make tag request...")
                 result = await r.text(encoding="UTF-8")
@@ -109,7 +109,7 @@ class Thoughts(commands.Cog):
         apiFolder = await self.config.apiFolder()
 
         try:
-            async with aiohttp.request("GET", current_url+"/"+str(apiFolder)+"?q=search&token="+current_token+"&s="+search+"&limit="+str(limit)+"&shuffle="+str(shuffle)+"&showID="+str(showID)+"&reason="+str(deleted_reason)+"&reasonby="+str(deleted_by)+"&platform=discord&version="+str(self.versionapi)+"&versionbot="+str(self.versionbot), headers={"Accept": "text/plain"}) as r:
+            async with aiohttp.request("GET", current_url+"/"+str(apiFolder)+"?f=search&token="+current_token+"&s="+search+"&limit="+str(limit)+"&shuffle="+str(shuffle)+"&showID="+str(showID)+"&reason="+str(deleted_reason)+"&reasonby="+str(deleted_by)+"&platform=discord&version="+str(self.versionapi)+"&versionbot="+str(self.versionbot), headers={"Accept": "text/plain"}) as r:
                 if r.status != 200:
                     return await ctx.send("Oops! Cannot get a thought...")
                 result = await r.text(encoding="UTF-8")
@@ -146,7 +146,7 @@ class Thoughts(commands.Cog):
         current_url = await self.config.url()
 
         try:    
-            async with aiohttp.request("GET", current_url+"/"+str(apiFolder)+"?q=create&token="+current_token+"&platform=discord&authorID="+str(tAuthorID)+"&tag="+tag+"&msg="+tBaseString+"&version="+str(self.versionapi)+"&versionbot="+str(self.versionbot)+"&author="+tABaseString, headers={"Accept": "text/plain"}) as r:
+            async with aiohttp.request("GET", current_url+"/"+str(apiFolder)+"?f=create&token="+current_token+"&platform=discord&authorID="+str(tAuthorID)+"&tag="+tag+"&msg="+tBaseString+"&version="+str(self.versionapi)+"&versionbot="+str(self.versionbot)+"&author="+tABaseString, headers={"Accept": "text/plain"}) as r:
                 if r.status != 200:
                     return await ctx.send("Oops! Cannot create a thought...")
                 result = await r.text(encoding="UTF-8")
@@ -175,7 +175,7 @@ class Thoughts(commands.Cog):
         # Note: if reason starts with 'wipe', it will be the same as adding the ?wipe=1 flag
 
         try:    
-            async with aiohttp.request("GET", current_url+"/"+str(apiFolder)+"?q=delete&token="+current_token+"&platform=discord&id="+str(id)+"&deleterID="+str(deleterID)+"&reason="+reason+"&version="+str(self.versionapi)+"&versionbot="+str(self.versionbot)+"&deleter="+deleter, headers={"Accept": "text/plain"}) as r:
+            async with aiohttp.request("GET", current_url+"/"+str(apiFolder)+"?f=delete&token="+current_token+"&platform=discord&id="+str(id)+"&deleterID="+str(deleterID)+"&reason="+reason+"&version="+str(self.versionapi)+"&versionbot="+str(self.versionbot)+"&deleter="+deleter, headers={"Accept": "text/plain"}) as r:
                 if r.status != 200:
                     return await ctx.send("Oops! Cannot delete a thought...")
                 result = await r.text(encoding="UTF-8")
