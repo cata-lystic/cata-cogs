@@ -677,7 +677,7 @@ class api extends config {
         $s = $this->req['s'] ?? null; // specific ID or query to be searched
         $limit = $this->req['limit'] ?? $_SESSION['api']['searchLimit']; // amount of search results to return
         $shuffle = $this->req['shuffle'] ?? $_SESSION['api']['shuffle']; // shuffle search results
-        $showAuthor = $this->req['showAuthor'] ?? $_SESSION['api']['showAuthor']; // show author's username before each post
+        $showUser = $this->req['showUser'] ?? $_SESSION['api']['showUser']; // show author's username before each post
         $showID = $this->req['showID'] ?? $_SESSION['api']['showID']; // show unique ID before each post
         $platform = $this->req['platform'] ?? 'web'; // anything besides "web" will be plain text mode
         $wrap = $this->req['wrap'] ?? tools::wrap($_SESSION['api']['wrap']); // no wrap by default
@@ -697,7 +697,7 @@ class api extends config {
             foreach ($data as $id => $val) {
                 if (isset($val['deleted'])) continue;
                 $thisID = ($showID == 1) ? "#{$id}: " : null;
-                $thisAuthor = ($showAuthor == 1) ? " -{$val['user']}" : null;
+                $thisAuthor = ($showUser == 1) ? " -{$val['user']}" : null;
                 echo "<p class='thought'>{$thisID}{$val['msg']}{$thisAuthor}</p>";
             }
         
@@ -737,7 +737,7 @@ class api extends config {
             $isDeleted = isset($data[$s]['deleted']) ?? 0;
             if ($isDeleted == 0) { // Check if post has been deleted (show that it has if the post was directly requested)
                 $thisID = ($showID == 1) ? "#".$s.": " : null;
-                $thisAuthor = ($showAuthor == 1) ? " -{$data[$s]['user']}" : null;
+                $thisAuthor = ($showUser == 1) ? " -{$data[$s]['user']}" : null;
                 echo $thisID."{$wrap}".$data[$s]['msg']."{$wrap}{$thisAuthor}";
             } else {
                 echo "`Post deleted.`";

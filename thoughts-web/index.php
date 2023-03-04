@@ -11,7 +11,7 @@ $f = $_REQUEST['f'] ?? 'search'; // API Function
 $s = $_REQUEST['s'] ?? null; // allow a specific ID to be fetched
 $limit = $_REQUEST['limit'] ?? $config->web['searchLimit']; // amount of search results to return
 $shuffle = $_REQUEST['shuffle'] ?? $config->web['shuffle']; // shuffle search results
-$showAuthor = $_REQUEST['showUser'] ?? $config->web['showUser']; // show author after each post
+$showUser = $_REQUEST['showUser'] ?? $config->web['showUser']; // show author after each post
 $showID = $_REQUEST['showID'] ?? $config->web['showID']; // show unique ID before each post
 $platform = $_REQUEST['platform'] ?? 'web'; // anything besides "web" will be plain text mode
 $wrap = $_REQUEST['wrap'] ?? tools::wrap($config->web['wrap']); // no wrap by default
@@ -74,11 +74,11 @@ class view {
       $s = $args['s'] ?? ''; // Search query
       $limit = $args['limit'] ?? '';
       $wrap = $args['wrap'] ?? '';
-      $showAuthor = $args['showAuthor'] ?? '';
+      $showUser = $args['showUser'] ?? '';
       $showID = $args['showID'] ?? '';
       $shuffle = $args['shuffle'] ?? '';
       $shuffleChecked = ($shuffle == 1) ? "checked" : null;
-      $showAuthorChecked = ($showAuthor == 1) ? "check" : null;
+      $showUserChecked = ($showUser == 1) ? "check" : null;
       $showIDChecked = ($showID == 1) ? "check" : null;
       $submitVisible = ($_SESSION['web']['js'] != 1) ? "<input id='searchSubmit' type='submit' value='Search' />":null; // Submit button only needs to be shown if javascript is disabled
       $searchVisible = ($_SESSION['web']['searchVisible'] == 1) ? null:"fade";
@@ -88,7 +88,7 @@ class view {
         <input type='hidden' name='f' value='search'>
           <p><input type='text' id='searchbox' name='s' placeholder='Search...' value='{$s}' /><p>
           <p><label>Limit: <input type='number' name='limit' value='{$limit}' size='4' /></label> <label>wrap: <input type='text' name='wrap' value='{$wrap}' size='3'></label></p>
-          <p><label><input type='checkbox' name='shuffle' value='1' {$shuffleChecked} /> Shuffle</label> <label><input type='checkbox' name='showAuthor' {$showAuthorChecked} /> Author</label> <label><input type='checkbox' name='showID' {$showIDChecked} /> ID</label></p> {$submitVisible}
+          <p><label><input type='checkbox' name='shuffle' value='1' {$shuffleChecked} /> Shuffle</label> <label><input type='checkbox' name='showUser' {$showUserChecked} /> Author</label> <label><input type='checkbox' name='showID' {$showIDChecked} /> ID</label></p> {$submitVisible}
           <input type='hidden' name='breaks' value='1' />
           <input type='hidden' id='searchJS' name='js' value='1' />
           <input type='hidden' id='showAPI' name='showAPI' value='1' />
