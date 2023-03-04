@@ -5,9 +5,9 @@ session_destroy();
 // Thoughts API is reachable through the CLI. Work in progress.
 if (tools::isCLI() == true) {
 
-    $cliShortOptions = "q:hs:a:i:m:r:t:vb:w:"; // q=query: h=help:: s=search:: a=author:: i=authorID:: m=msg:: r=searchResults:: t=token:: v=version::
+    $cliShortOptions = "q:hs:a:i:m:r:t:vb:w:l"; // q=query: h=help:: s=search:: a=author:: i=authorID:: m=msg:: r=searchResults:: t=token:: v=version::
 
-    $cliLongOptions = ['help', 'search:', 'author:', 'authorID:', 'shuffle:', 'searchResults:', 'token:', 'version', 'man', 'key1:', 'key2:', 'val:', 'apiversion:', 'botversion:', 'break:', 'showID:', 'wrap:', 'id:'];
+    $cliLongOptions = ['help', 'search:', 'author:', 'authorID:', 'shuffle:', 'searchResults:', 'token:', 'version', 'man', 'key1:', 'key2:', 'val:', 'apiversion:', 'botversion:', 'break:', 'showID:', 'wrap:', 'id:', 'list'];
 
     $options = getopt($cliShortOptions, $cliLongOptions);
     //$firstArg = $argv[1] ?? null; // First arg in case they want to skip using -q (coming later)
@@ -22,6 +22,7 @@ if (tools::isCLI() == true) {
         't' => 'token',
         'b' => 'break',
         'w' => 'wrap',
+        'l' => 'list',
         'apiversion' => 'version' // this needs to be changed to apiversion as the main API flag
     ];
     foreach ($optionToVar as $key => $val) {
@@ -45,31 +46,37 @@ if (tools::isCLI() == true) {
         echo "
         Thoughts {$config->versions['api']}
         Required
-            -q             str  Main API function you want to run (search, create, info, etc)
+          -q               str  Main API function you want to run (search, create, info, etc)
         Optional
-            -t --token     str  API Token. Will use 'default' if none given
-            --apiversion   num  API version you'd like to make this call with
-            --botversion   num  Bot version you'd like to make this call with
+          -t --token       str  API Token. Will use 'default' if none given
+          --apiversion     num  API version you'd like to make this call with
+          --botversion     num  Bot version you'd like to make this call with
 
         Search Parameters
-        -s --search      str  Search query (put multiple words in quotes)
-        --id             num  Fetch direct post ID
-        --shuffle        bin  Shuffle search results
-        --searchResults  num  Max number of search results to return
-        --showID         bin  Show ID # of each post
-        -b --break       bin  Show <br /> instead of \n
-        -w --wrap        bin  Wrap (quotes) to use around each result
+          -s --search      str  Search query (put multiple words in quotes)
+          --id             num  Fetch direct post ID
+          -l --list             List all posts (ignores -s and --id)
+          --shuffle        bin  Shuffle search results
+          --searchResults  num  Max number of search results to return
+          --showID         bin  Show ID # of each post
+          -b --break       bin  Show <br /> instead of \\n
+          -w --wrap        bin  Wrap (quotes) to use around each result
 
         Create Parameters
-        Required
-            -a --author    str  Post author
-            -i --authorID  str  Post author's full ID (usually Discord ID)
-            -m --msg       str  Post message contents
-            --tag          str  Post's tag
+          -a --author      str  Post author
+          -i --authorID    str  Post author's full ID (usually Discord ID)
+          -m --msg         str  Post message contents
+          --tag            str  Post's tag (will default to config setting)
+
+        Config Parameters
+          --key1           str  Config setting category to change
+          --key2           str  Config setting to change
+          --val            str  New config setting value
+          -l --list             List current config settings
 
         Info:
-        -h --help        Show this help menu
-        -v --version     Show API version
+          -h --help             Show this help menu
+          -v --version          Show API version
         ";
         die();
     }
@@ -517,28 +524,39 @@ class api extends config {
         $checkToken = $this->token($this->req['token'], 'config');
         if ($checkToken !== true) die($checkToken);
 
-        // Request Parameters: 'key' => [0] default value, [1] required (binary), [2] type (string, number, etc)
-        $params = array(
-            'key1' => [null, 1, 'string'],
-            'key2' => [null, 1, 'string'],
-            'val' => [null, 1, 'string']
-        );
+        // Check if they're just trying to view the list
+        if (isset($_REQUEST['list'])) {
 
-        $p = $this->processParams($params); // Process params into an array. Give error (and optional params) if missing required params
-    
-        // Can't change token from API
-        if ($p['key1'] == 'token')
-            die("You can't change the web tokens from the API");
+            echo "LIST!";
 
-        $val = str_replace("HASHTAG", "#", $p['val']); // convert HASHTAG to #
-        
-        $changeSetting = $this->set($p['key1'], $p['key2'], $p['val']);
-        
-        if ($changeSetting == "OK") {
-            echo "Changed `{$p['key1']} {$p['key2']}` to `{$p['val']}`";
         } else {
-            echo $changeSetting;
+            
+            // Request Parameters: 'key' => [0] default value, [1] required (binary), [2] type (string, number, etc)
+            $params = array(
+                'key1' => [null, 1, 'string'],
+                'key2' => [null, 1, 'string'],
+                'val' => [null, 1, 'string'],
+                'list' => [null, 0, 'binary']
+            );
+
+            $p = $this->processParams($params); // Process params into an array. Give error (and optional params) if missing required params
+        
+            // Can't change token from API
+            if ($p['key1'] == 'token')
+                die("You can't change the web tokens from the API");
+
+            $val = str_replace("HASHTAG", "#", $p['val']); // convert HASHTAG to #
+            
+            $changeSetting = $this->set($p['key1'], $p['key2'], $p['val']);
+            
+            if ($changeSetting == "OK") {
+                echo "Changed `{$p['key1']} {$p['key2']}` to `{$p['val']}`";
+            } else {
+                echo $changeSetting;
+            }
+
         }
+
         die();
     }
 
