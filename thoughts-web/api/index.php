@@ -524,10 +524,11 @@ class api extends config {
         $checkToken = $this->token($this->req['token'], 'config');
         if ($checkToken !== true) die($checkToken);
 
-        // Check if they're just trying to view the list
-        if (isset($_REQUEST['list'])) {
+        // Check if they're just trying to view the list (key1=list can also trigger it)
+        if (isset($_REQUEST['list']) || (isset($_REQUEST['key1']) && $_REQUEST['key1'] == 'list')) {
 
             $getConfigSettings = require(__DIR__."/config.php");
+            unset($set['token'], $set['admin'], $set['mod']); // don't show tokens, admins, or mods
             echo "Current config.php settings:".PHP_EOL;
             foreach ($set as $setParent => $setVal) {
                 foreach ($set[$setParent] as $key => $val) {
