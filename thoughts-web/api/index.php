@@ -52,7 +52,7 @@ class Config {
                 'platform' => array('api', ['alpha'], 'Can be set to anything where the request came from (example: discord)'),
                 'ipLog' => array(1, ['binary'], 'Log IP address of post creator'),
                 'ipHash' => array(1, ['binary'], 'Hash IP addresses'),
-                'cli' => array(1, ['binary'], 'Enable CLI (Command Line Interface) usage of API .php file')),
+                'cli' => array(1, ['binary'], 'Enable CLI (Command Line Interface) usage of API .php file without an Admin Token')),
             "web" => array(
                 'shuffle' => array(1, ['binary'], 'Shuffle search results', '#Website Settings'),
                 'showAuthor' => array(0, ['binary'], 'Show post author before each result'),
@@ -237,8 +237,9 @@ class Config {
             if (in_array($key2, $colorChanges) && strlen($newVal) == 6) $newVal = '#'.$newVal;
 
             // Make user use the --confirm flag if trying to disable CLI from the CLI
-            if ($key2 == 'cli' && tools::isCLI() && !isset($this->req['confirm']))
-                die(PHP_EOL."Are you sure you want to disable CLI access from the CLI?".PHP_EOL."You will not be able to re-enable CLI with the CLI.".PHP_EOL."To re-enable: change \$set['api']['cli'] to 1 in config.php or with your Discord Bot.".PHP_EOL.PHP_EOL."If you are sure, add the --confirm flag to your request".PHP_EOL.PHP_EOL);
+            // An Admin Token will be required to re-enable it (checked in api->cli()) from CLI (can still be changed via config.php, API, or Discord Bot)
+            if ($key2 == 'cli' && $newVal == 0 && tools::isCLI() && !isset($this->req['confirm']))
+                die(PHP_EOL."Are you sure you want to disable CLI access from the CLI?".PHP_EOL."You will not be able to re-enable via CLI without an Admin Token.".PHP_EOL."To re-enable without Admin Token: change \$set['api']['cli'] to 1 in config.php or use API/Discord Bot.".PHP_EOL.PHP_EOL."If you are sure, add the --confirm flag to your request".PHP_EOL.PHP_EOL);
             
             // As far as I know, to do this we have to rewrite the config.php file each time.
             // This will loop through the defaults to get the keys and descriptions to remake the file
@@ -848,12 +849,11 @@ class api extends config {
     function cli() {
 
         // Make sure CLI is enabled
-        if ($this->api['cli'] != 1) die("CLI is disabled");
-    
+        
         $cliShortOptions = "f:hs:a:i:m:r:t:vb:w:l"; // q=query: h=help:: s=search:: a=author:: i=authorID:: m=msg:: r=searchResults:: t=token:: v=version::
-
+        
         $cliLongOptions = ['function:', 'help', 'search:', 'author:', 'authorID:', 'authorid:', 'shuffle:', 'searchResults:', 'searchresults:', 'token:', 'version', 'man', 'key1:', 'key2:', 'val:', 'apiversion:', 'botversion:', 'break:', 'showID:', 'showid:', 'showAuthor:', 'showauthor:', 'wrap:', 'id:', 'list', 'confirm'];
-
+        
         $options = getopt($cliShortOptions, $cliLongOptions);
         
         //$firstArg = $argv[1] ?? null; // First arg in case they want to skip using -q (coming later)
@@ -883,6 +883,11 @@ class api extends config {
                 unset($options[$key]); // remove the old one
             }
         }
+        
+        // End script if CLI is disabled and an Admin Token wasn't provided
+        $tok = $options['token'] ?? 'default';
+    
+        if ($this->api['cli'] != 1 && $this->token($tok, 'admin') !== true) die('CLI is disabled');
 
         // Just show the API version
         if (isset($options['v']) || isset($options['version'])) {
