@@ -275,13 +275,13 @@ class Thoughts(commands.Cog):
         \rValue can be 1 or 0"""
         await self.changeSetting(ctx, 'api', 'shuffle', binary)
 
-    @ts_api.command(name='showid')
+    @ts_api.command(name='showID')
     async def ts_api_showid(self, ctx, binary):
         """Show IDs in search results
         \rValue can be 1 or 0"""
         await self.changeSetting(ctx, 'api', 'showID', binary)
 
-    @ts_api.command(name='showauthor')
+    @ts_api.command(name='showAuthor')
     async def ts_api_showauthor(self, ctx, binary):
         """Show post author in search results
         \rValue can be 1 or 0"""
@@ -304,7 +304,7 @@ class Thoughts(commands.Cog):
         \rValue can be 1 or 0"""
         await self.changeSetting(ctx, 'api', 'create', binary)
 
-    @ts_api.command(name='createflood')
+    @ts_api.command(name='createFlood')
     async def ts_api_createflood(self, ctx, time):
         """Creation flood time limit 
         \rSet how long between creating posts via the API that a user has to wait.\r\r
@@ -313,25 +313,25 @@ class Thoughts(commands.Cog):
         This is separate from the flood limit on your bot users."""
         await self.changeSetting(ctx, 'api', 'createFlood', time)
 
-    @ts_api.command(name='searchlimit')
+    @ts_api.command(name='searchLimit')
     async def ts_api_searchlimit(self, ctx, newLimit):
         """Max search results that can appear via the API
         \rExample: `.tset api searchlimit 500"""
         await self.changeSetting(ctx, 'api', 'searchLimit', newLimit)
 
-    @ts_api.command(name='searchresults')
+    @ts_api.command(name='searchResults')
     async def ts_api_searchresults(self, ctx, newLimit):
         """Default amount of search results
         \rExample: `.tset api searchresults 50"""
         await self.changeSetting(ctx, 'api', 'searchResults', newLimit)
 
-    @ts_api.command(name='iplog')
+    @ts_api.command(name='ipLog')
     async def ts_api_iplog(self, ctx, binary):
         """Log IP address of post creator
         \rValue can be 1 or 0"""
         await self.changeSetting(ctx, 'api', 'ipLog', binary)
 
-    @ts_api.command(name='iphash')
+    @ts_api.command(name='ipHash')
     async def ts_api_iphash(self, ctx, binary):
         """Hash IP addresses
         \rValue can be 1 or 0"""
@@ -381,7 +381,7 @@ class Thoughts(commands.Cog):
 
     # end Set -> API -> tags
 
-    @ts_bot.command(name='deletedreason')
+    @ts_bot.command(name='deletedReason')
     async def ts_bot_deletedreason(self, ctx, binary):
         """Show reason posts were deleted
         \rExample: `.tset bot deletedreason 1"""
@@ -392,7 +392,7 @@ class Thoughts(commands.Cog):
         else:
             return await ctx.send("Error: `bot deletedreason` must be a 1 or 0")
         
-    @ts_bot.command(name='deletedby')
+    @ts_bot.command(name='deletedBy')
     async def ts_bot_deletedby(self, ctx, binary):
         """Show who deleted queried post
         \rExample: `.tset bot deletedby 1"""
@@ -451,11 +451,17 @@ class Thoughts(commands.Cog):
         \rValue can be 1 or 0"""
         await self.changeSetting(ctx, 'web', 'shuffle', binary)
 
-    @ts_web.command(name='showid')
+    @ts_web.command(name='showID')
     async def ts_web_showid(self, ctx, binary):
         """Show IDs in search results
         \rValue can be 1 or 0"""
         await self.changeSetting(ctx, 'web', 'showID', binary)
+
+    @ts_web.command(name='showAuthor')
+    async def ts_web_showauthor(self, ctx, binary):
+        """Show author of posts
+        \rValue can be 1 or 0"""
+        await self.changeSetting(ctx, 'web', 'showAuthor', binary)
 
     @ts_web.command(name='wrap')
     async def ts_web_wrap(self, ctx, wrap):
@@ -499,7 +505,7 @@ class Thoughts(commands.Cog):
         Example: `.tset web theme url #e9e5e5`"""
         await self.changeSetting(ctx, 'theme', 'urlColor', color)
 
-    @ts_web_theme.command(name='fontsize', aliases=['size'])
+    @ts_web_theme.command(name='fontSize', aliases=['size'])
     async def ts_web_fontsize(self, ctx, size):
         """Font size
         \rWebsite's font size.
@@ -507,7 +513,7 @@ class Thoughts(commands.Cog):
         Example: `.tset web theme fontsize #e9e5e5`"""
         await self.changeSetting(ctx, 'theme', 'fontSize', size)
 
-    @ts_web_theme.command(name='radius', aliases=['accentradius'])
+    @ts_web_theme.command(name='radius', aliases=['accentRadius'])
     async def ts_web_accentradius(self, ctx, radius):
         """Accent box border radius
         \rWebsite's box border radius (roundness)
@@ -515,26 +521,26 @@ class Thoughts(commands.Cog):
         Example: `.tset web theme radius 10px`"""
         await self.changeSetting(ctx, 'theme', 'accentRadius', radius)
 
-    @ts_web.command(name='create', aliases=['creation'])
+    @ts_web.command(name='create')
     async def ts_web_create(self, ctx, binary):
         """Enable Create Box
         \rAllow thought creation on the website.
         \rValue can be 1 or 0"""
         await self.changeSetting(ctx, 'web', 'create', binary)
 
-    @ts_web.command(name='createvisible')
+    @ts_web.command(name='createVisible')
     async def ts_web_createvis(self, ctx, binary):
         """Show create box by default
         \rValue can be 1 or 0"""
         await self.changeSetting(ctx, 'web', 'createVisible', binary)
 
-    @ts_web.command(name='versionvisible')
+    @ts_web.command(name='versionVisible')
     async def ts_web_createvis(self, ctx, binary):
         """Show Thoughts Web version in footer
         \rValue can be 1 or 0"""
         await self.changeSetting(ctx, 'web', 'versionVisible', binary)
 
-    @ts_web.command(name='createflood')
+    @ts_web.command(name='createFlood')
     async def ts_web_createflood(self, ctx, time):
         """Creation flood time limit 
         \rSet how long between creating posts a user has to wait on the website.\r\r
@@ -549,7 +555,7 @@ class Thoughts(commands.Cog):
         \rValue can be 1 or 0"""
         await self.changeSetting(ctx, 'web', 'info', binary)
 
-    @ts_web.command(name='infovisible')
+    @ts_web.command(name='infoVisible')
     async def ts_web_infovis(self, ctx, binary):
         """Show API info box by default
         \rValue can be 1 or 0"""
@@ -562,19 +568,19 @@ class Thoughts(commands.Cog):
         \rValue can be 1 or 0"""
         await self.changeSetting(ctx, 'web', 'search', binary)
 
-    @ts_web.command(name='searchvisible')
+    @ts_web.command(name='searchVisible')
     async def ts_web_searchvis(self, ctx, binary):
         """Show search box by default
         \rValue can be 1 or 0"""
         await self.changeSetting(ctx, 'web', 'searchVisible', binary)
 
-    @ts_web.command(name='searchlimit')
+    @ts_web.command(name='searchLimit')
     async def ts_web_searchlimit(self, ctx, newLimit):
         """Max search results that can appear on the website
         \rExample: `.tset web searchlimit 500"""
         await self.changeSetting(ctx, 'web', 'searchLimit', newLimit)
 
-    @ts_web.command(name='searchresults')
+    @ts_web.command(name='searchResults')
     async def ts_web_searchresults(self, ctx, newLimit):
         """Default amount of search results
         \rExample: `.tset web searchresults 50"""

@@ -842,6 +842,9 @@ class api extends config {
 
     // Setup the CLI params into $_REQUESTs
     function cli() {
+
+        // Make sure CLI is enabled
+        if ($this->api['cli'] != 1) die("CLI is disabled");
     
         $cliShortOptions = "f:hs:a:i:m:r:t:vb:w:l"; // q=query: h=help:: s=search:: a=author:: i=authorID:: m=msg:: r=searchResults:: t=token:: v=version::
 
