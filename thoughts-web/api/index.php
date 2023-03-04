@@ -2,6 +2,89 @@
 session_start();
 session_destroy();
 
+// Thoughts API is reachable through the CLI. Work in progress.
+if (tools::isCLI() == true) {
+
+    $cliShortOptions = "q:hs:a:i:m:r:t:vb:w:"; // q=query: h=help:: s=search:: a=author:: i=authorID:: m=msg:: r=searchResults:: t=token:: v=version::
+
+    $cliLongOptions = ['help', 'search:', 'author:', 'authorID:', 'shuffle:', 'searchResults:', 'token:', 'version', 'man', 'key1:', 'key2:', 'val:', 'apiversion:', 'botversion:', 'break:', 'showID:', 'wrap:', 'id:'];
+
+    $options = getopt($cliShortOptions, $cliLongOptions);
+    //$firstArg = $argv[1] ?? null; // First arg in case they want to skip using -q (coming later)
+
+    // Convert all CLI to the proper $_REQUEST they would match
+    $optionToVar = [
+        'search' => 's',
+        'a' => 'author',
+        'i' => 'authorID',
+        'm' => 'msg',
+        'r' => 'searchResults',
+        't' => 'token',
+        'b' => 'break',
+        'w' => 'wrap',
+        'apiversion' => 'version' // this needs to be changed to apiversion as the main API flag
+    ];
+    foreach ($optionToVar as $key => $val) {
+        if (isset($options[$key])) {
+            $options[$val] = $options[$key]; // val is the new key
+            unset($options[$key]); // remove the old one
+        }
+    }
+
+    // Just show the API version
+    if (isset($options['v']) || isset($options['version'])) {
+        $config = new Config();
+        echo PHP_EOL."Thoughts API. Version {$config->versions['api']}".PHP_EOL.PHP_EOL;
+        die();
+    }
+
+    // Just show the help
+    if (isset($options['h']) || isset($options['help']) || isset($options['man'])) {
+        $config = new Config();
+        $n = PHP_EOL;
+        echo "
+        Thoughts {$config->versions['api']}
+        Required
+            -q             str  Main API function you want to run (search, create, info, etc)
+        Optional
+            -t --token     str  API Token. Will use 'default' if none given
+            --apiversion   num  API version you'd like to make this call with
+            --botversion   num  Bot version you'd like to make this call with
+
+        Search Parameters
+        -s --search      str  Search query (put multiple words in quotes)
+        --id             num  Fetch direct post ID
+        --shuffle        bin  Shuffle search results
+        --searchResults  num  Max number of search results to return
+        --showID         bin  Show ID # of each post
+        -b --break       bin  Show <br /> instead of \n
+        -w --wrap        bin  Wrap (quotes) to use around each result
+
+        Create Parameters
+        Required
+            -a --author    str  Post author
+            -i --authorID  str  Post author's full ID (usually Discord ID)
+            -m --msg       str  Post message contents
+            --tag          str  Post's tag
+
+        Info:
+        -h --help        Show this help menu
+        -v --version     Show API version
+        ";
+        die();
+    }
+
+    // Loop through each options (if set) and turn them into the $_REQUESTS
+    foreach ($options as $key => $val) {
+        $_REQUEST[$key] = $val;
+    }
+    if (substr($argv[1], 0, 1) == '?') $_REQUEST['q'] = $argv[1]; // if this doesn't start with ?, replace the query with first arg
+}
+
+
+
+
+
 // These are just here for development purposes
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -498,9 +581,15 @@ class api extends config {
 
         // Process IP address if necessary
         if ($this->api['ipLog'] == 1) {
-            $ip = ($this->api['ipHash'] == 1) ? md5($_SERVER['REMOTE_ADDR']) : $_SERVER['REMOTE_ADDR']; // Check ipHash setting
+
+            // Check if script is being ran from command line
+            if (tools::isCLI())
+                $ip = "CLI";
+            else
+                $ip = ($this->api['ipHash'] == 1) ? md5($_SERVER['REMOTE_ADDR']) : $_SERVER['REMOTE_ADDR']; // Check ipHash setting
+
         } else {
-            $ip = null;
+            $ip = null; 
         }
 
         // Only certain tags are allowed
@@ -712,7 +801,7 @@ class api extends config {
                 $results = 0;
                 foreach($matches as $ids => $vals) {
                     if ($results > $limit-1) break; // stop after the $limit
-                    if ($results > 0) echo ($platform == "web" || $breaks == 1) ? "<br />" : "\n\r"; // different line breaks per platform
+                    if ($results > 0) echo ($platform == "web" || $breaks == 1) ? "<br />" : PHP_EOL; // different line breaks per platform
                     $thisID = ($showID == 1) ? "#".$ids.": " : null;
                     echo "{$thisID}{$wrap}{$vals}{$wrap}";
                     $results++;
@@ -883,7 +972,8 @@ class tools {
         // Try to autodetect the URL. It can overwritten it in settings.
         if ($url == '' || $url == 'auto') {
             $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']) ? 'https://' : 'http://'; 
-            $url = $_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'];
+            $host = $_SERVER['HTTP_HOST'] ?? null;
+            $url = $host.$_SERVER['PHP_SELF'];
             // Remove the main possible files that could be accessed. Remove them and you have the domain.
             if (substr($url, -14) == '/api/index.php') $url = substr($url, 0, -14);
             if (substr($url, -10) == '/index.php') $url = substr($url, 0, -10);
@@ -958,6 +1048,11 @@ class tools {
         }
     }
 
+    // Detect if script is being called from CLI (Command Line Interface)
+    public static function isCLI() {
+        return (PHP_SAPI == "cli") ? true : false;
+    }
+
 }
 
 
@@ -1025,4 +1120,9 @@ function shuffle_assoc($arr) {
 
     $arr = $new;
     return $arr;
+}
+
+// Put a new line at the end of a PHP CLI output
+if (PHP_SAPI == "cli") {
+    echo PHP_EOL;
 }

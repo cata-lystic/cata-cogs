@@ -6,5 +6,23 @@
         "authorID": "1324378924812309",
         "timestamp": 1677345759,
         "source": "web"
+    },
+    "2": {
+        "msg": "lol lol",
+        "tag": "thought",
+        "author": "Catalyst",
+        "authorID": "12345",
+        "timestamp": 1677924384,
+        "source": "api",
+        "ip": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    "3": {
+        "msg": "lol lol",
+        "tag": "thought",
+        "author": "Catalyst",
+        "authorID": "12345",
+        "timestamp": 1677924932,
+        "source": "api",
+        "ip": "CLI"
     }
 }
