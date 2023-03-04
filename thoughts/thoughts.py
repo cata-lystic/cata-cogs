@@ -26,7 +26,7 @@ class Thoughts(commands.Cog):
             "apiFolder" :  "api",
             "limit": 3, # also known as searchResults
             "shuffle": 0,
-            "showAuthor": 1,
+            "showUser": 1,
             "showID": 0
         }
         default_guild = {
@@ -68,11 +68,11 @@ class Thoughts(commands.Cog):
 
         current_token = await self.config.token()
         current_url = await self.config.url()
-        authorID = html.escape(str(ctx.message.author.id))
+        userID = html.escape(str(ctx.message.author.id))
         apiFolder = await self.config.apiFolder()
 
         try:    
-            async with aiohttp.request("GET", current_url+"/"+str(apiFolder)+"?f=tags&s="+str(query)+"&tag="+str(tag1)+"&authorID="+str(authorID)+"&rename="+str(tag2)+"&version="+str(self.versionapi)+"&versionbot="+str(self.versionbot)+"&platform=discord&token="+str(current_token), headers={"Accept": "text/plain"}) as r:
+            async with aiohttp.request("GET", current_url+"/"+str(apiFolder)+"?f=tags&s="+str(query)+"&tag="+str(tag1)+"&userID="+str(userID)+"&rename="+str(tag2)+"&version="+str(self.versionapi)+"&versionbot="+str(self.versionbot)+"&platform=discord&token="+str(current_token), headers={"Accept": "text/plain"}) as r:
                 if r.status != 200:
                     return await ctx.send("Oops! Cannot make tag request...")
                 result = await r.text(encoding="UTF-8")
@@ -105,7 +105,7 @@ class Thoughts(commands.Cog):
 
         current_url = await self.config.url()
         shuffle = await self.config.shuffle()
-        showAuthor = await self.config.showAuthor()
+        showUser = await self.config.showUser()
         showID = await self.config.showID()
         limit = await self.config.limit()
 
@@ -117,7 +117,7 @@ class Thoughts(commands.Cog):
         apiFolder = await self.config.apiFolder()
 
         try:
-            async with aiohttp.request("GET", current_url+"/"+str(apiFolder)+"?f=search&token="+current_token+"&s="+search+"&limit="+str(limit)+"&shuffle="+str(shuffle)+"&showAuthor="+str(showAuthor)+"&showID="+str(showID)+"&reason="+str(deleted_reason)+"&reasonby="+str(deleted_by)+"&platform=discord&version="+str(self.versionapi)+"&versionbot="+str(self.versionbot), headers={"Accept": "text/plain"}) as r:
+            async with aiohttp.request("GET", current_url+"/"+str(apiFolder)+"?f=search&token="+current_token+"&s="+search+"&limit="+str(limit)+"&shuffle="+str(shuffle)+"&showUser="+str(showUser)+"&showID="+str(showID)+"&reason="+str(deleted_reason)+"&reasonby="+str(deleted_by)+"&platform=discord&version="+str(self.versionapi)+"&versionbot="+str(self.versionbot), headers={"Accept": "text/plain"}) as r:
                 if r.status != 200:
                     return await ctx.send("Oops! Cannot get a thought...")
                 result = await r.text(encoding="UTF-8")
@@ -139,22 +139,22 @@ class Thoughts(commands.Cog):
         current_token = await self.config.token()
         apiFolder = await self.config.apiFolder()
 
-        tAuthor = html.escape(str(ctx.message.author))
-        tAuthorID = html.escape(str(ctx.message.author.id))
+        tUser = html.escape(str(ctx.message.author))
+        tUserID = html.escape(str(ctx.message.author.id))
 
-        # Encode msg and author to base64
+        # Encode msg and user to base64
         #tMsg = tMsg.encode("utf8")
         #tBaseString = base64.b64encode(tMsg).decode("utf8")
         tBaseString = tMsg.replace("#", "HASHTAG")
 
-        #tAuthor = tAuthor.encode("utf8")
-        #tABaseString = base64.b64encode(tAuthor).decode("utf8")
-        tABaseString = tAuthor.replace("#", "HASHTAG")
+        #tUser = tUser.encode("utf8")
+        #tABaseString = base64.b64encode(tUser).decode("utf8")
+        tABaseString = tUser.replace("#", "HASHTAG")
 
         current_url = await self.config.url()
 
         try:    
-            async with aiohttp.request("GET", current_url+"/"+str(apiFolder)+"?f=create&token="+current_token+"&platform=discord&authorID="+str(tAuthorID)+"&tag="+tag+"&msg="+tBaseString+"&version="+str(self.versionapi)+"&versionbot="+str(self.versionbot)+"&author="+tABaseString, headers={"Accept": "text/plain"}) as r:
+            async with aiohttp.request("GET", current_url+"/"+str(apiFolder)+"?f=create&token="+current_token+"&platform=discord&userID="+str(tUserID)+"&tag="+tag+"&msg="+tBaseString+"&version="+str(self.versionapi)+"&versionbot="+str(self.versionbot)+"&user="+tABaseString, headers={"Accept": "text/plain"}) as r:
                 if r.status != 200:
                     return await ctx.send("Oops! Cannot create a thought...")
                 result = await r.text(encoding="UTF-8")
@@ -281,11 +281,11 @@ class Thoughts(commands.Cog):
         \rValue can be 1 or 0"""
         await self.changeSetting(ctx, 'api', 'showID', binary)
 
-    @ts_api.command(name='showAuthor')
-    async def ts_api_showauthor(self, ctx, binary):
-        """Show post author in search results
+    @ts_api.command(name='showUser')
+    async def ts_api_showuser(self, ctx, binary):
+        """Show post user in search results
         \rValue can be 1 or 0"""
-        await self.changeSetting(ctx, 'api', 'showAuthor', binary)
+        await self.changeSetting(ctx, 'api', 'showUser', binary)
 
     @ts_api.command(name='wrap')
     async def ts_api_wrap(self, ctx, wrap):
@@ -422,16 +422,16 @@ class Thoughts(commands.Cog):
         else:
             return await ctx.send("Error: `bot shuffle` must be a 1 or 0")
         
-    @ts_bot.command(name='showAuthor')
-    async def ts_bot_showAuthor(self, ctx, binary):
-        """Show author of posts
-        \rExample: `.tset bot showAuthor 1"""
+    @ts_bot.command(name='showUser')
+    async def ts_bot_showUser(self, ctx, binary):
+        """Show username of post creator
+        \rExample: `.tset bot showUser 1"""
 
         if binary == "1" or binary == "0":
-            await self.config.showAuthor.set(binary)
-            return await ctx.send("Set `bot showAuthor` to "+binary)
+            await self.config.showUser.set(binary)
+            return await ctx.send("Set `bot showUser` to "+binary)
         else:
-            return await ctx.send("Error: `bot showAuthor` must be a 1 or 0")
+            return await ctx.send("Error: `bot showUser` must be a 1 or 0")
         
     @ts_bot.command(name='showID')
     async def ts_bot_showID(self, ctx, binary):
@@ -465,11 +465,11 @@ class Thoughts(commands.Cog):
         \rValue can be 1 or 0"""
         await self.changeSetting(ctx, 'web', 'showID', binary)
 
-    @ts_web.command(name='showAuthor')
-    async def ts_web_showauthor(self, ctx, binary):
-        """Show author of posts
+    @ts_web.command(name='showUser')
+    async def ts_web_showuser(self, ctx, binary):
+        """Show user of posts
         \rValue can be 1 or 0"""
-        await self.changeSetting(ctx, 'web', 'showAuthor', binary)
+        await self.changeSetting(ctx, 'web', 'showUser', binary)
 
     @ts_web.command(name='wrap')
     async def ts_web_wrap(self, ctx, wrap):

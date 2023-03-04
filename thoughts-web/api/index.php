@@ -49,7 +49,7 @@ class Config {
                 'create' => array(1, ['binary'], 'Allow new post creation to non-mods via API'),
                 'createFlood' => array('10s', ['alphanum'], 'Time between when a user can post again (format: 5s, 3m, 5d, 7w, etc)'),
                 'shuffle' => array(1, ['binary'], 'Shuffle search results'),
-                'showAuthor' => array(0, ['binary'], 'Show post author before each result'),
+                'showUser' => array(0, ['binary'], 'Show post author\'s username before each result'),
                 'showID' => array(0, ['binary'], 'Show post ID before each result'),
                 'wrap' => array('none', [], 'Wrap (quotes) around each thought. options: \'none\', \'single\', \'double\', or custom'),
                 'breaks' => array(0, ['binary'], 'Use <br /> instead of \n\r in API calls'),
@@ -60,7 +60,7 @@ class Config {
             "web" => array(
                 'enable' => array(1, ['binary'], 'Enable website', '#Website Settings'),
                 'shuffle' => array(1, ['binary'], 'Shuffle search results'),
-                'showAuthor' => array(0, ['binary'], 'Show post author before each result'),
+                'showUser' => array(0, ['binary'], 'Show post author\'s username before each result'),
                 'showID' => array(0, ['binary'], 'Show post ID before each result'),
                 'wrap' => array('none', [], 'Wrap (quotes) around each thought. options: \'none\', \'single\', \'double\', or custom'),
                 'info' => array(1, ['binary'], 'Enable API info box'),
@@ -263,7 +263,7 @@ class Config {
             $checkReq = $this->check($key1, $key2, $newVal);
             if ($checkReq !== true) die($checkReq); // Kill script and show error if fails
             
-            $result = "<?php\n#  API Setup\n# Make unique and secure tokens. Must be at least 8 characters in length with no spaces.\n# You may create multiple tokens with different permissions\n# Permissions: admin, config, create, delete, list, read, search, tags\n# 'admin' permission has full access to all commands. Only give these tokens to people you trust that will help you manage the API and website\n# Do not delete the 'default' token. This is used for when your API is accessed with no other request.\n# All other tokens will inherit 'default' token's permissions\n# The default token permissions should generally not be changed unless you want to prevent public post creation.\n# When config is complete, give an admin token to your Discord Bot with: [p]thoughtset setup api yourAdminToken\n\n# Tokens\n";
+            $result = "<?php\n#  API Setup\n# Make unique and secure tokens. Must be at least 8 characters in length with no spaces.\n# You may create multiple tokens with different permissions\n# Permissions: admin, config, create, delete, list, read, search, tags, user\n# 'admin' permission has full access to all commands. Only give these tokens to people you trust that will help you manage the API and website\n# Do not delete the 'default' token. This is used for when your API is accessed with no other request.\n# All other tokens will inherit 'default' token's permissions\n# The default token permissions should generally not be changed unless you want to prevent public post creation.\n# When config is complete, give an admin token to your Discord Bot with: [p]thoughtset setup api yourAdminToken\n\n# Tokens\n";
 
             // Loop through current $set['token']s and reprint them all out with their permissions
             foreach($set['token'] as $tVal => $tPerms) {
@@ -384,7 +384,7 @@ class api extends config {
         
         Config::__construct();
 
-        $this->allowedFunctions = ['config', 'create', 'delete', 'list', 'search', 'tags', 'info', 'dev', 'new'];
+        $this->allowedFunctions = ['config', 'create', 'delete', 'list', 'search', 'tags', 'info', 'user', 'dev', 'new'];
 
         // If script is ran via CLI, overwrite $_REQUESTs from the params
         if (tools::isCLI()) $this->cli();
@@ -508,7 +508,7 @@ class api extends config {
         $checkAPI = $this->version(1.0); // no optional parameter so it will kill script if fails
 
         // Make sure 'api create' is enabled
-        if ($this->api['create'] == 0 && $this->isMod($this->req['authorID']) == false) die("Post creation is currently disabled");
+        if ($this->api['create'] == 0 && $this->isMod($this->req['userID']) == false) die("Post creation is currently disabled");
 
         // Make sure token is valid and has the proper permissions
         $checkToken = $this->token($this->req['token'], 'create');
@@ -516,8 +516,8 @@ class api extends config {
 
         // Request Parameters: 'key' => [0] default value, [1] required (binary), [2] type (string, number, etc)
         $params = array(
-            'author' => [null, 1, 'string'],
-            'authorID' => [null, 1, 'string'],
+            'user' => [null, 1, 'string'],
+            'userID' => [null, 1, 'string'],
             'msg' => [null, 1, 'string'],
             'tag' => [$this->api['tagDefault'], 0, 'string'],
             'base64' => [0, 0, 'binary'],
@@ -561,15 +561,15 @@ class api extends config {
         // Decode Base64 if requested
         if ($p['base64'] == 1) {
             $msg = base64_decode($p['msg']);
-            $author = base64_decode($p['author']);
+            $user = base64_decode($p['user']);
         }
 
-        // Make sure the author isn't flooding (if they're not a mod)
+        // Make sure the user isn't flooding (if they're not a mod)
         $lastPost = 0;
-        if ($this->isMod($p['author']) == false) {
-            // Loop through the thoughts and find the author's latest post
+        if ($this->isMod($p['user']) == false) {
+            // Loop through the thoughts and find the user's latest post
             foreach ($data as $id => $val) {
-                if ($val['authorID'] == $p['authorID']) {
+                if ($val['userID'] == $p['userID']) {
                     $lastPost = $val['timestamp'];
                 }
             }
@@ -587,7 +587,7 @@ class api extends config {
         echo "`".ucfirst($p['tag'])." posted!` {$_SESSION['api']['url']}?s={$nextID}";
 
         // Add this to the thoughts.json
-        $data[$nextID] = array("msg" => $p['msg'], "tag" => $p['tag'], "author" => str_replace("HASHTAG", "#", $p['author']), "authorID" => $p['authorID'], "timestamp" => time(), "source" => $p['platform']);
+        $data[$nextID] = array("msg" => $p['msg'], "tag" => $p['tag'], "user" => str_replace("HASHTAG", "#", $p['user']), "userID" => $p['userID'], "timestamp" => time(), "source" => $p['platform']);
         if ($ip != null) $data[$nextID]['ip'] = $ip;
         Files::write("thoughts.json", json_encode($data, JSON_PRETTY_PRINT));
         die();
@@ -628,7 +628,7 @@ class api extends config {
             if ($alreadyDeleted == 1) die("#{$id} already deleted");
 
             // Make sure deleter owns the post
-            $posterID = $data[$id]['authorID'];
+            $posterID = $data[$id]['userID'];
 
             if ($p['deleterID'] != $posterID && $this->isMod($p['deleterID']) != true) die("You are not the author of this post");
             
@@ -677,7 +677,7 @@ class api extends config {
         $s = $this->req['s'] ?? null; // specific ID or query to be searched
         $limit = $this->req['limit'] ?? $_SESSION['api']['searchLimit']; // amount of search results to return
         $shuffle = $this->req['shuffle'] ?? $_SESSION['api']['shuffle']; // shuffle search results
-        $showAuthor = $this->req['showAuthor'] ?? $_SESSION['api']['showAuthor']; // show author before each post
+        $showAuthor = $this->req['showAuthor'] ?? $_SESSION['api']['showAuthor']; // show author's username before each post
         $showID = $this->req['showID'] ?? $_SESSION['api']['showID']; // show unique ID before each post
         $platform = $this->req['platform'] ?? 'web'; // anything besides "web" will be plain text mode
         $wrap = $this->req['wrap'] ?? tools::wrap($_SESSION['api']['wrap']); // no wrap by default
@@ -697,7 +697,7 @@ class api extends config {
             foreach ($data as $id => $val) {
                 if (isset($val['deleted'])) continue;
                 $thisID = ($showID == 1) ? "#{$id}: " : null;
-                $thisAuthor = ($showAuthor == 1) ? " -{$val['author']}" : null;
+                $thisAuthor = ($showAuthor == 1) ? " -{$val['user']}" : null;
                 echo "<p class='thought'>{$thisID}{$val['msg']}{$thisAuthor}</p>";
             }
         
@@ -737,7 +737,7 @@ class api extends config {
             $isDeleted = isset($data[$s]['deleted']) ?? 0;
             if ($isDeleted == 0) { // Check if post has been deleted (show that it has if the post was directly requested)
                 $thisID = ($showID == 1) ? "#".$s.": " : null;
-                $thisAuthor = ($showAuthor == 1) ? " -{$data[$s]['author']}" : null;
+                $thisAuthor = ($showAuthor == 1) ? " -{$data[$s]['user']}" : null;
                 echo $thisID."{$wrap}".$data[$s]['msg']."{$wrap}{$thisAuthor}";
             } else {
                 echo "`Post deleted.`";
@@ -807,9 +807,9 @@ class api extends config {
         // Add or remove tag
         if ($s == 'add' || $s == 'remove') {
 
-            $authorID = $this->req['authorID'] ?? null;
-            if ($authorID == null) die("Missing authorID");
-            if ($this->isAdmin($authorID) == false) die("Only admin can edit tags");
+            $userID = $this->req['userID'] ?? null;
+            if ($userID == null) die("Missing userID");
+            if ($this->isAdmin($userID) == false) die("Only admin can edit tags");
             if ($tag == null) die("Missing tag"); // Tag required
 
             if ($s == 'add') {
@@ -861,14 +861,49 @@ class api extends config {
 
     }
 
+    // Load info about a user/users
+    function user() {
+
+        $checkAPI = $this->version(1.0); // no optional parameter so it will kill script if fails
+        
+        // Make sure token is valid and has the proper permissions
+        $checkToken = $this->token($this->req['token'], 'user');
+        if ($checkToken !== true) die($checkToken);
+
+        // Request Parameters: 'key' => [0] default value, [1] required (binary), [2] type (string, number, etc)
+        $params = array(
+            'userID' => [null, 0, 'string'], // ID of the user (this will be prioritized over usern)
+            'user' => [null, 0, 'string'], // username of user
+            'list' => [null, 0, 'string'] // ID of who is requesting delete
+        );
+
+        $p = $this->processParams($params); // Process params into an array. Give error (and optional params) if missing required params
+
+        // Load thoughts data
+        $data = Files::read("thoughts.json");
+        if (!is_array($data)) $data = []; // Create data array if there are no msgs
+        $total = count($data); // total thoughts
+        if ($total == 0) return "There are no posts for this user";
+
+        $results = [];
+        echo "<h1>Posts by {$p['userID']}</h1>";
+        $searchUser = ($p['userID'] != null) ? 'userID' : 'user';
+        foreach($data as $key => $val) {
+            if ($data[$key][$searchUser] == $p[$searchUser]) {
+                echo "#{$key}: {$data[$key]['msg']}".PHP_EOL;
+            }
+        }
+
+    }
+
     // Setup the CLI params into $_REQUESTs
     function cli() {
 
         // Make sure CLI is enabled
         
-        $cliShortOptions = "f:hs:a:i:m:r:t:vb:w:l"; // q=query: h=help:: s=search:: a=author:: i=authorID:: m=msg:: r=searchResults:: t=token:: v=version::
+        $cliShortOptions = "f:hs:a:i:m:r:t:vb:w:l"; // q=query: h=help:: s=search:: u=user:: i=userID:: m=msg:: r=searchResults:: t=token:: v=version::
         
-        $cliLongOptions = ['function:', 'help', 'search:', 'author:', 'authorID:', 'authorid:', 'shuffle:', 'searchResults:', 'searchresults:', 'token:', 'version', 'man', 'key1:', 'key2:', 'val:', 'apiversion:', 'botversion:', 'break:', 'showID:', 'showid:', 'showAuthor:', 'showauthor:', 'wrap:', 'id:', 'list', 'confirm'];
+        $cliLongOptions = ['function:', 'help', 'search:', 'user:', 'userID:', 'userid:', 'shuffle:', 'searchResults:', 'searchresults:', 'token:', 'version', 'man', 'key1:', 'key2:', 'val:', 'apiversion:', 'botversion:', 'break:', 'showID:', 'showid:', 'showUser:', 'showuser:', 'wrap:', 'id:', 'list', 'confirm'];
         
         $options = getopt($cliShortOptions, $cliLongOptions);
         
@@ -879,17 +914,17 @@ class api extends config {
         $optionToVar = [
             'function' => 'f',
             'search' => 's',
-            'a' => 'author',
-            'i' => 'authorID',
+            'u' => 'user',
+            'i' => 'userID',
             'm' => 'msg',
             'r' => 'searchResults',
             't' => 'token',
             'b' => 'break',
             'w' => 'wrap',
             'l' => 'list',
-            'authorid' => 'authorID',
+            'userid' => 'userID',
             'searchresults' => 'searchResults',
-            'showauthor' => 'showAuthor',
+            'showuser' => 'showUser',
             'showid' => 'showID',
             'apiversion' => 'version' // this needs to be changed to apiversion as the main API flag
         ];
@@ -936,8 +971,8 @@ class api extends config {
             -w --wrap        bin  Wrap (quotes) to use around each result
 
             Create Parameters
-            -a --author      str  Post author
-            -i --authorID    str  Post author's full ID (usually Discord ID)
+            -u --user        str  Post author's username
+            -i --userID      str  Post author's full ID (usually Discord ID)
             -m --msg         str  Post message contents
             --tag            str  Post's tag (will default to config setting)
 

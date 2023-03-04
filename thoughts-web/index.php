@@ -11,7 +11,7 @@ $f = $_REQUEST['f'] ?? 'search'; // API Function
 $s = $_REQUEST['s'] ?? null; // allow a specific ID to be fetched
 $limit = $_REQUEST['limit'] ?? $config->web['searchLimit']; // amount of search results to return
 $shuffle = $_REQUEST['shuffle'] ?? $config->web['shuffle']; // shuffle search results
-$showAuthor = $_REQUEST['showAuthor'] ?? $config->web['showAuthor']; // show author after each post
+$showAuthor = $_REQUEST['showUser'] ?? $config->web['showUser']; // show author after each post
 $showID = $_REQUEST['showID'] ?? $config->web['showID']; // show unique ID before each post
 $platform = $_REQUEST['platform'] ?? 'web'; // anything besides "web" will be plain text mode
 $wrap = $_REQUEST['wrap'] ?? tools::wrap($config->web['wrap']); // no wrap by default
@@ -109,8 +109,8 @@ class view {
       <form id='createForm' method='get' action='index.php'>
           <input type='hidden' name='f' value='create' />
           <h1>Create Thought</h1>
-          <p><input type='text' id='createUser' name='author' placeholder='Username' value='' /><p>
-          <p><input type='text' id='createUserID' name='authorID' placeholder='User ID' value='' /><p>
+          <p><input type='text' id='createUser' name='user' placeholder='Username' value='' /><p>
+          <p><input type='text' id='createUserID' name='userID' placeholder='User ID' value='' /><p>
           <p><select id='createTag' name='tag'>";
           $tags = $_SESSION['api']['tags'];
           $createForm .= "<option value='".strtolower($_SESSION['api']['tagDefault'])."'>".ucfirst($_SESSION['api']['tagDefault'])."</option>"; // immediately show the default tag

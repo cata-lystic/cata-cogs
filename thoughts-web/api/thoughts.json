@@ -2,8 +2,8 @@
     "1": {
         "msg": "Testing",
         "tag": "thought",
-        "author": "Catalyst#1494",
-        "authorID": "1324378024812309",
+        "user": "Catalyst#1494",
+        "userID": "1324378024812309",
         "timestamp": 1677345759,
         "source": "web"
     }
