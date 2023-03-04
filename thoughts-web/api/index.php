@@ -885,13 +885,25 @@ class api extends config {
         $total = count($data); // total thoughts
         if ($total == 0) return "There are no posts for this user";
 
-        $results = [];
-        echo "<h1>Posts by {$p['userID']}</h1>";
-        $searchUser = ($p['userID'] != null) ? 'userID' : 'user';
-        foreach($data as $key => $val) {
-            if ($data[$key][$searchUser] == $p[$searchUser]) {
-                echo "#{$key}: {$data[$key]['msg']}".PHP_EOL;
+        if (isset($this->req['list'])) { // Show List
+
+            foreach($data as $key => $val) {
+                if (!isset($data[$key]['deleted'])) {
+                    echo "#{$key}: {$data[$key]['msg']} -{$data[$key]['user']}".PHP_EOL;
+                }
             }
+        
+        } else { // Show only posts by user
+
+            $searchUser = ($p['userID'] != null) ? 'userID' : 'user';
+            $searchUserParse = str_replace("HASHTAG", "#", $p[$searchUser]);
+            echo "<h1>Posts by $searchUserParse</h1>";
+            foreach($data as $key => $val) {
+                if ($data[$key][$searchUser] == $searchUserParse && !isset($data[$key]['deleted'])) {
+                    echo "#{$key}: {$data[$key]['msg']}".PHP_EOL;
+                }
+            }
+
         }
 
     }
