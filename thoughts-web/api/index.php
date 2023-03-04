@@ -144,7 +144,8 @@ class Config {
                 'breaks' => array(0, ['binary'], 'Use <br /> instead of \n\r in API calls'),
                 'platform' => array('api', ['alpha'], 'Can be set to anything where the request came from (example: discord)'),
                 'ipLog' => array(1, ['binary'], 'Log IP address of post creator'),
-                'ipHash' => array(1, ['binary'], 'Hash IP addresses')),
+                'ipHash' => array(1, ['binary'], 'Hash IP addresses'),
+                'cli' => array(1, ['binary'], 'Enable CLI (Command Line Interface) usage of API .php file')),
             "web" => array(
                 'shuffle' => array(1, ['binary'], 'Shuffle search results', '#Website Settings'),
                 'showAuthor' => array(0, ['binary'], 'Show post author before each result'),

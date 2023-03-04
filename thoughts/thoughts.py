@@ -23,7 +23,11 @@ class Thoughts(commands.Cog):
             "token": "",
             "deletedReason": 1,
             "deletedBy": 1,
-            "apiFolder" :  "api"
+            "apiFolder" :  "api",
+            "searchLimit": 3,
+            "shuffle": 0,
+            "showAuthor": 1,
+            "showID": 0
         }
         default_guild = {
             "test": ""
@@ -79,7 +83,7 @@ class Thoughts(commands.Cog):
 
 
     @commands.command(aliases=['thoughts'])
-    async def thought(self, ctx, search="", limit=3, shuffle=1, showID=0):
+    async def thought(self, ctx, search="", limit=3, shuffle=1, showID=0, showAuthor=1):
         """Gets a thought.
 
         **.thought** - Get random thought
@@ -100,6 +104,9 @@ class Thoughts(commands.Cog):
             return await ctx.send("You need to set an API Token. Type `.tset setup token`")
 
         current_url = await self.config.url()
+        shuffle = await self.config.shuffle()
+        showAuthor = await self.config.showAuthor()
+        showID = await self.config.showID()
 
         if current_url == '':
             return await ctx.send("You need to set an API URL. Type `.tset setup url`")
@@ -109,7 +116,7 @@ class Thoughts(commands.Cog):
         apiFolder = await self.config.apiFolder()
 
         try:
-            async with aiohttp.request("GET", current_url+"/"+str(apiFolder)+"?f=search&token="+current_token+"&s="+search+"&limit="+str(limit)+"&shuffle="+str(shuffle)+"&showID="+str(showID)+"&reason="+str(deleted_reason)+"&reasonby="+str(deleted_by)+"&platform=discord&version="+str(self.versionapi)+"&versionbot="+str(self.versionbot), headers={"Accept": "text/plain"}) as r:
+            async with aiohttp.request("GET", current_url+"/"+str(apiFolder)+"?f=search&token="+current_token+"&s="+search+"&limit="+str(limit)+"&shuffle="+str(shuffle)+"&showAuthor="+str(showAuthor)+"&showID="+str(showID)+"&reason="+str(deleted_reason)+"&reasonby="+str(deleted_by)+"&platform=discord&version="+str(self.versionapi)+"&versionbot="+str(self.versionbot), headers={"Accept": "text/plain"}) as r:
                 if r.status != 200:
                     return await ctx.send("Oops! Cannot get a thought...")
                 result = await r.text(encoding="UTF-8")
@@ -328,6 +335,12 @@ class Thoughts(commands.Cog):
         """Hash IP addresses
         \rValue can be 1 or 0"""
         await self.changeSetting(ctx, 'api', 'ipHash', binary)
+
+    @ts_api.command(name='cli')
+    async def ts_api_cli(self, ctx, binary):
+        """Enable CLI of API .php file
+        \rValue can be 1 or 0"""
+        await self.changeSetting(ctx, 'api', 'cli', binary)
 
     # Set -> API -> tags
     @ts_api.group(name='tags', aliases=['tag'])
