@@ -331,6 +331,14 @@ class Thoughts(commands.Cog):
         \rValue can be 1 or 0"""
         await self.changeSetting(ctx, 'api', 'ipLog', binary)
 
+    @ts_api.command(name='enable')
+    async def ts_api_enable(self, ctx, binary):
+        """Enable API
+        Note: Nothing will work without an Admin Token
+        \rValue can be 1 or 0"""
+        await self.changeSetting(ctx, 'api', 'enable', binary)
+
+
     @ts_api.command(name='ipHash')
     async def ts_api_iphash(self, ctx, binary):
         """Hash IP addresses
@@ -520,6 +528,13 @@ class Thoughts(commands.Cog):
         You can use anything the CSS border-radius tag supports\r
         Example: `.tset web theme radius 10px`"""
         await self.changeSetting(ctx, 'theme', 'accentRadius', radius)
+
+    @ts_web.command(name='enable')
+    async def ts_web_enable(self, ctx, binary):
+        """Enable Website
+        Note: Website will not work without an Admin Token
+        \rValue can be 1 or 0"""
+        await self.changeSetting(ctx, 'web', 'enable', binary)
 
     @ts_web.command(name='create')
     async def ts_web_create(self, ctx, binary):

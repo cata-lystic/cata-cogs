@@ -38,6 +38,7 @@ class Config {
         $this->defaults = array(
             'api' => array(
                 'url' => array('auto', [], 'Change if auto detection fails','#API Settings'),
+                'enable' => array(1, ['binary'], 'Do not disable unless you only want Admin Tokens to access API/Website'),
                 'tags' => array(array('thought', 'music', 'spam'), [], 'Tags that thoughts can be categorized into'),
                 'tagDefault' => array('thought', ['alphanum'], 'Default tag for new posts. Must be an existing tag'),
                 'searchLimit' => array(500, ['number'], 'Search results max limit. Cannot be changed by API request'),
@@ -54,7 +55,8 @@ class Config {
                 'ipHash' => array(1, ['binary'], 'Hash IP addresses'),
                 'cli' => array(1, ['binary'], 'Enable CLI (Command Line Interface) usage of API .php file without an Admin Token')),
             "web" => array(
-                'shuffle' => array(1, ['binary'], 'Shuffle search results', '#Website Settings'),
+                'enable' => array(1, ['binary'], 'Enable website', '#Website Settings'),
+                'shuffle' => array(1, ['binary'], 'Shuffle search results'),
                 'showAuthor' => array(0, ['binary'], 'Show post author before each result'),
                 'showID' => array(0, ['binary'], 'Show post ID before each result'),
                 'wrap' => array('none', [], 'Wrap (quotes) around each thought. options: \'none\', \'single\', \'double\', or custom'),
@@ -385,6 +387,12 @@ class api extends config {
         }
 
         if (!isset($this->req['token']) || empty($this->req['token'])) $this->req['token'] = 'default'; // default token if none set
+        
+        // Check if API is enabled (Admin Tokens can still access)
+        if ($this->api['enable'] != 1 && $this->token($this->req['token'], 'admin') !== true) die("API is disabled.");
+
+        // Check if website is enabled (Admin Tokens can still access)
+        if ($this->web['enable'] != 1 && $this->token($this->req['token'], 'admin') !== true) die("Website is disabled.");
 
     }
 

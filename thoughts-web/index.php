@@ -6,6 +6,7 @@ $apiFolder = 'api'; // Only change this if you've moved the API folder
 require_once("$apiFolder/index.php");
 
 // Get possible queries
+// This section is going to be rewritten
 $f = $_REQUEST['f'] ?? 'search'; // API Function
 $s = $_REQUEST['s'] ?? null; // allow a specific ID to be fetched
 $limit = $_REQUEST['limit'] ?? $config->web['searchLimit']; // amount of search results to return

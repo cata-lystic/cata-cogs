@@ -4,7 +4,7 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 
 # Rewrite for the API with optional directories
-RewriteRule ^api/?([0-9.]+)?/?(.+)?$ api/index.php?q=$2&version=$1&three=$3 [L,QSA]
-RewriteRule ^api/?([^/]+)?/?(.+)?$ api/index.php?q=$1&version=$2&three=$3 [L,QSA]
+RewriteRule ^api/?([0-9.]+)?/?(.+)?$ api/index.php?f=$2&version=$1&three=$3 [L,QSA]
+RewriteRule ^api/?([^/]+)?/?(.+)?$ api/index.php?f=$1&version=$2&three=$3 [L,QSA]
 #RewriteRule ^t/?([^/]+)?/?(.+)?$ index.php?q=$1 [L,QSA]
 #RewriteRule ^([^/]+)?/?([^/]+)?/?(.+)?$ api.php? [L,QSA]
