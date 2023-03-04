@@ -232,8 +232,7 @@ class Thoughts(commands.Cog):
     @thoughtset.command(name='list')
     async def ts_list(self, ctx):
         """List all config settings"""
-        await self.changeSetting(ctx, 'list', 'none')
-        pass
+        await self.changeSetting(ctx, 'list', 'none', 'none')
 
     @ts_setup.command(name='token')
     async def ts_setup_token(self, ctx, newToken):
