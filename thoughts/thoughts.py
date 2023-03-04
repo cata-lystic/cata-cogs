@@ -402,6 +402,48 @@ class Thoughts(commands.Cog):
             return await ctx.send("Set `bot deletedby` to "+binary)
         else:
             return await ctx.send("Error: `bot deletedby` must be a 1 or 0")
+        
+    @ts_bot.command(name='shuffle')
+    async def ts_bot_shuffle(self, ctx, binary):
+        """Shuffle search results
+        \rExample: `.tset bot shuffle 1"""
+
+        if binary == "1" or binary == "0":
+            await self.config.shuffle.set(binary)
+            return await ctx.send("Set `bot shuffle` to "+binary)
+        else:
+            return await ctx.send("Error: `bot shuffle` must be a 1 or 0")
+        
+    @ts_bot.command(name='showAuthor')
+    async def ts_bot_showAuthor(self, ctx, binary):
+        """Show author of posts
+        \rExample: `.tset bot showAuthor 1"""
+
+        if binary == "1" or binary == "0":
+            await self.config.showAuthor.set(binary)
+            return await ctx.send("Set `bot showAuthor` to "+binary)
+        else:
+            return await ctx.send("Error: `bot showAuthor` must be a 1 or 0")
+        
+    @ts_bot.command(name='showID')
+    async def ts_bot_showID(self, ctx, binary):
+        """Show ID of posts
+        \rExample: `.tset bot showID 1"""
+
+        if binary == "1" or binary == "0":
+            await self.config.showID.set(binary)
+            return await ctx.send("Set `bot showID` to "+binary)
+        else:
+            return await ctx.send("Error: `bot showID` must be a 1 or 0")
+        
+    @ts_bot.command(name='limit')
+    async def ts_bot_limit(self, ctx, limit):
+        """Amount of results per search
+        \rExample: `.tset bot limit 3"""
+
+        await self.config.limit.set(limit)
+        return await ctx.send("Set `bot limit` to "+limit)
+        
 
     @ts_web.command(name='shuffle')
     async def ts_web_shuffle(self, ctx, binary):
