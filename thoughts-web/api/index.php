@@ -235,6 +235,10 @@ class Config {
             // Make sure color changes at least have '#' at the beginning if only 6 chars was supplied
             $colorChanges = array('fontColor', 'backgroundColor', 'accentColor', 'urlColor');
             if (in_array($key2, $colorChanges) && strlen($newVal) == 6) $newVal = '#'.$newVal;
+
+            // Make user use the --confirm flag if trying to disable CLI from the CLI
+            if ($key2 == 'cli' && tools::isCLI() && !isset($this->req['confirm']))
+                die(PHP_EOL."Are you sure you want to disable CLI access from the CLI?".PHP_EOL."You will not be able to re-enable CLI with the CLI.".PHP_EOL."To re-enable: change \$set['api']['cli'] to 1 in config.php or with your Discord Bot.".PHP_EOL.PHP_EOL."If you are sure, add the --confirm flag to your request".PHP_EOL.PHP_EOL);
             
             // As far as I know, to do this we have to rewrite the config.php file each time.
             // This will loop through the defaults to get the keys and descriptions to remake the file
@@ -848,7 +852,7 @@ class api extends config {
     
         $cliShortOptions = "f:hs:a:i:m:r:t:vb:w:l"; // q=query: h=help:: s=search:: a=author:: i=authorID:: m=msg:: r=searchResults:: t=token:: v=version::
 
-        $cliLongOptions = ['function:', 'help', 'search:', 'author:', 'authorID:', 'shuffle:', 'searchResults:', 'token:', 'version', 'man', 'key1:', 'key2:', 'val:', 'apiversion:', 'botversion:', 'break:', 'showID:', 'wrap:', 'id:', 'list'];
+        $cliLongOptions = ['function:', 'help', 'search:', 'author:', 'authorID:', 'authorid:', 'shuffle:', 'searchResults:', 'searchresults:', 'token:', 'version', 'man', 'key1:', 'key2:', 'val:', 'apiversion:', 'botversion:', 'break:', 'showID:', 'showid:', 'showAuthor:', 'showauthor:', 'wrap:', 'id:', 'list', 'confirm'];
 
         $options = getopt($cliShortOptions, $cliLongOptions);
         
@@ -867,6 +871,10 @@ class api extends config {
             'b' => 'break',
             'w' => 'wrap',
             'l' => 'list',
+            'authorid' => 'authorID',
+            'searchresults' => 'searchResults',
+            'showauthor' => 'showAuthor',
+            'showid' => 'showID',
             'apiversion' => 'version' // this needs to be changed to apiversion as the main API flag
         ];
         foreach ($optionToVar as $key => $val) {
