@@ -12,7 +12,7 @@
 # Tokens
 $set['token']['admintoken'] = ['admin'];
 $set['token']['customtoken'] = ['delete'];
-$set['token']['default'] = ['read', 'create'];
+$set['token']['default'] = ['read', 'create', 'user'];
 
 # Admins and Mods
 $set['admin'] = ['514556311573364746']; # Discord IDs of those that can do anything

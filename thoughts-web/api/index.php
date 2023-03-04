@@ -642,10 +642,10 @@ class api extends config {
                 $reason = trim(substr($p['reason'], 4)); // remove 'wipe' from front of reason
             }
 
-            $data[$id]['deleteReason'] = $reason;
-            if ($wipe == 1) $data[$id]['msg'] = "[WIPED]";
+            $data[$id]['deleteReason'] = $p['reason'];
+            if ($p['wipe'] == 1) $data[$id]['msg'] = "[WIPED]";
             Files::write("thoughts.json", json_encode($data, JSON_PRETTY_PRINT));
-            $delMethod = ($wipe != 1) ? "deleted" : "wiped";
+            $delMethod = ($p['wipe'] != 1) ? "deleted" : "wiped";
             echo "Post #{$id} {$delMethod}";
 
         } else {
