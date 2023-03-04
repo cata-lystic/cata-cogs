@@ -527,7 +527,13 @@ class api extends config {
         // Check if they're just trying to view the list
         if (isset($_REQUEST['list'])) {
 
-            echo "LIST!";
+            $getConfigSettings = require(__DIR__."/config.php");
+            echo "Current config.php settings:".PHP_EOL;
+            foreach ($set as $setParent => $setVal) {
+                foreach ($set[$setParent] as $key => $val) {
+                    echo "{$setParent} {$key}: ".$this->arrayToString($val).PHP_EOL;
+                }
+            }
 
         } else {
             
