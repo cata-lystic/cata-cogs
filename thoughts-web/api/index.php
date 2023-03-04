@@ -136,7 +136,8 @@ class Config {
                 'create' => array(1, ['binary'], 'Allow new post creation to non-mods via API'),
                 'createFlood' => array('10s', ['alphanum'], 'Time between when a user can post again (format: 5s, 3m, 5d, 7w, etc)'),
                 'shuffle' => array(1, ['binary'], 'Shuffle search results'),
-                'showID' => array(0, ['binary'], 'Show thought ID before each result'),
+                'showAuthor' => array(0, ['binary'], 'Show post author before each result'),
+                'showID' => array(0, ['binary'], 'Show post ID before each result'),
                 'wrap' => array('none', [], 'Wrap (quotes) around each thought. options: \'none\', \'single\', \'double\', or custom'),
                 'breaks' => array(0, ['binary'], 'Use <br /> instead of \n\r in API calls'),
                 'platform' => array('api', ['alpha'], 'Can be set to anything where the request came from (example: discord)'),
@@ -144,7 +145,8 @@ class Config {
                 'ipHash' => array(1, ['binary'], 'Hash IP addresses')),
             "web" => array(
                 'shuffle' => array(1, ['binary'], 'Shuffle search results', '#Website Settings'),
-                'showID' => array(0, ['binary'], 'Show thought ID before each result'),
+                'showAuthor' => array(0, ['binary'], 'Show post author before each result'),
+                'showID' => array(0, ['binary'], 'Show post ID before each result'),
                 'wrap' => array('none', [], 'Wrap (quotes) around each thought. options: \'none\', \'single\', \'double\', or custom'),
                 'info' => array(1, ['binary'], 'Enable API info box'),
                 'infoVisible' => array(1, ['binary'], 'Show API info box by default'),
@@ -167,7 +169,6 @@ class Config {
                 'accentRadius' => array("10px", [], 'Border radius of boxes'),
                 'urlColor' => array("#e9e5e5", [], 'URL color'))
             );
-        
 
             $this->load(); // Load the config file and variables
     }
@@ -742,7 +743,8 @@ class api extends config {
         $s = $this->req['s'] ?? null; // specific ID or query to be searched
         $limit = $this->req['limit'] ?? $_SESSION['api']['searchLimit']; // amount of search results to return
         $shuffle = $this->req['shuffle'] ?? $_SESSION['api']['shuffle']; // shuffle search results
-        $showID = $this->req['showID'] ?? $_SESSION['api']['showID']; // show unique ID before each thought
+        $showAuthor = $this->req['showAuthor'] ?? $_SESSION['api']['showAuthor']; // show author before each post
+        $showID = $this->req['showID'] ?? $_SESSION['api']['showID']; // show unique ID before each post
         $platform = $this->req['platform'] ?? 'web'; // anything besides "web" will be plain text mode
         $wrap = $this->req['wrap'] ?? tools::wrap($_SESSION['api']['wrap']); // no wrap by default
         $breaks = $this->req['breaks'] ?? $_SESSION['api']['breaks']; // prefer <br /> over /n/r (web will overwrite this)
@@ -761,7 +763,8 @@ class api extends config {
             foreach ($data as $id => $val) {
                 if (isset($val['deleted'])) continue;
                 $thisID = ($showID == 1) ? "#{$id}: " : null;
-                echo "<p class='thought'>{$thisID}{$val['msg']}</p>";
+                $thisAuthor = ($showAuthor == 1) ? " -{$val['author']}" : null;
+                echo "<p class='thought'>{$thisID}{$val['msg']}{$thisAuthor}</p>";
             }
         
         // ?q=list for a non-web platform just shows a link to the list page
@@ -800,7 +803,8 @@ class api extends config {
             $isDeleted = isset($data[$s]['deleted']) ?? 0;
             if ($isDeleted == 0) { // Check if post has been deleted (show that it has if the post was directly requested)
                 $thisID = ($showID == 1) ? "#".$s.": " : null;
-                echo $thisID."{$wrap}".$data[$s]['msg']."{$wrap} -".$data[$s]['author'];
+                $thisAuthor = ($showAuthor == 1) ? " -{$data[$s]['author']}" : null;
+                echo $thisID."{$wrap}".$data[$s]['msg']."{$wrap}{$thisAuthor}";
             } else {
                 echo "`Post deleted.`";
                 if ($reasonby == 1) echo " Deleted by: ".str_replace("HASHTAG", "#", $data[$s]['deleter']).".";

@@ -273,6 +273,12 @@ class Thoughts(commands.Cog):
         \rValue can be 1 or 0"""
         await self.changeSetting(ctx, 'api', 'showID', binary)
 
+    @ts_api.command(name='showauthor')
+    async def ts_api_showauthor(self, ctx, binary):
+        """Show post author in search results
+        \rValue can be 1 or 0"""
+        await self.changeSetting(ctx, 'api', 'showAuthor', binary)
+
     @ts_api.command(name='wrap')
     async def ts_api_wrap(self, ctx, wrap):
         """Wrap (quotes) around each thought"""
