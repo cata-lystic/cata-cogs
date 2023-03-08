@@ -63,7 +63,7 @@ echo $view->create(); // Create Box
 echo $view->infoBox(); // API Info Box
 
 // Search Bar for Web  
-echo $view->search(array('s'=>$s, 'limit'=>$limit, 'wrap'=>$wrap, 'shuffle'=>$shuffle, 'showID'=>$showID, 'showUser' => $showUser));
+echo $view->search(array('s'=>$s, 'limit'=>$limit, 'wrap'=>$wrap, 'shuffle'=>$shuffle, 'showID'=>$showID, 'showUser' => $showUser, 'js' => $js));
 
 echo $view->footer(); // Footer  
 
@@ -93,16 +93,21 @@ class view {
       $showUser = $args['showUser'] ?? '';
       $showID = $args['showID'] ?? '';
       $shuffle = $args['shuffle'] ?? '';
+      $js = $args['js'] ?? '';
       $shuffleChecked = ($shuffle == 1) ? "checked" : null;
       $showUserChecked = ($showUser == 1) ? "checked" : null;
       $showIDChecked = ($showID == 1) ? "checked" : null;
-      $submitVisible = ($_SESSION['web']['js'] != 1) ? "<input id='searchSubmit' type='submit' value='Search' />":null; // Submit button only needs to be shown if javascript is disabled
+      $submitVisible = ($js != 1) ? "<input id='searchSubmit' type='submit' value='Search' />":null; // Submit button only needs to be shown if javascript is disabled
       $searchVisible = ($_SESSION['web']['searchVisible'] == 1) ? null:"fade";
       return "
       <div id='search' class='fadeBox {$searchVisible}'>
       <form id='searchForm' method='get' action='index.php'>
         <input type='hidden' name='f' value='search'>
           <p><input type='text' id='searchbox' name='s' placeholder='Search...' value='{$s}' /><p>
+          <p>Tag: <select id='searchTag' name='tag'>
+            <option value='all'>All</option>
+            ".$this->tagOptions()."
+          </select></p>
           <p><label>Limit: <input type='number' name='limit' value='{$limit}' size='4' /></label> <label>wrap: <input type='text' name='wrap' value='{$wrap}' size='3'></label></p>
           <p><label><input type='checkbox' name='shuffle' value='1' {$shuffleChecked} /> Shuffle</label> <label><input type='checkbox' id='showUser' name='showUser' {$showUserChecked} /> User</label> <label><input type='checkbox' id='showID' name='showID' {$showIDChecked} /> ID</label></p> {$submitVisible}
           <input type='hidden' name='breaks' value='1' />
@@ -128,13 +133,7 @@ class view {
           <p><input type='text' id='createUser' name='user' placeholder='Username' value='' /><p>
           <p><input type='text' id='createUserID' name='userID' placeholder='User ID' value='' /><p>
           <p><select id='createTag' name='tag'>";
-          $tags = $_SESSION['api']['tags'];
-          $createForm .= "<option value='".strtolower($_SESSION['api']['tagDefault'])."'>".ucfirst($_SESSION['api']['tagDefault'])."</option>"; // immediately show the default tag
-          sort($tags); // sort tags alphabetically
-          foreach ($tags as $name) {
-              if ($name == $_SESSION['api']['tagDefault']) continue; // don't list the default tag
-              $createForm .= "<option value='{$name}'>".ucfirst($name)."</option>";
-          }
+          $createForm .= $this->tagOptions();
           $createForm .= "</select></p>
           <p><input type='text' id='createThought' name='msg' placeholder='Message' value='' /><p>
           <p><input type='submit' id='createSubmit' name='createSubmit' value='Submit Thought' /></p>
@@ -195,6 +194,19 @@ class view {
               {$ret[0]}{$ret[1]}{$ret[2]}{$ret[3]}{$ret[4]}
           </div>
       </div>";
+
+  }
+
+  // Options input boxes for list of tags
+  function tagOptions() {
+    $tags = $_SESSION['api']['tags'];
+    $ops = "<option value='".strtolower($_SESSION['api']['tagDefault'])."'>".ucfirst($_SESSION['api']['tagDefault'])."</option>"; // immediately show the default tag
+      sort($tags); // sort tags alphabetically
+      foreach ($tags as $name) {
+          if ($name == $_SESSION['api']['tagDefault']) continue; // don't list the default tag
+          $ops .= "<option value='{$name}'>".ucfirst($name)."</option>";
+      }
+    return $ops;
   }
 
   // Detect which Javascript and jQuery file to use (or not use)

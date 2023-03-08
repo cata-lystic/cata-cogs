@@ -716,6 +716,7 @@ class api extends Config {
         // Request Parameters: 'key' => [0] default value, [1] required (binary), [2] type (string, number, etc)
         $params = array(
             's' => [null, 0, 'string'],
+            'tag' => ['all', 0, 'string'], // Tag search results must be in
             'limit' => [$_SESSION['api']['searchLimit'], 0, 'number'],
             'shuffle' => [$_SESSION['api']['shuffle'], 0, 'string'], 
             'platform' => ['web', 0, 'string'],
@@ -786,13 +787,14 @@ class api extends Config {
         
             foreach ($data as $id => $val) {
                 if (isset($val['deleted'])) continue; // don't include if message is deleted
+                if ($p['tag'] != 'all' && $p['tag'] != $val['tag']) continue; // don't include if not in requested tag
                 if (preg_match("/{$s}/i", $val['msg'])) { // Search msg. This needs to be heavily improved..
                     $output['results'][$id] = $val; // Add match to results output
                 }
             }
         
             if (count($output['results']) == 0)
-                $output['meta']['error'] = "No thoughts found related to `$s`";
+                $output['meta']['error'] = "No posts found related to `$s` in tag `{$p['tag']}`";
         
         }
 
@@ -834,6 +836,7 @@ class api extends Config {
             }
             $output['meta']['total'] = $results;
             $output['meta']['shuffle'] = $p['shuffle'];
+            $output['meta']['tag'] = $p['tag'];
 
         }
 
