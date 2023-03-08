@@ -77,7 +77,10 @@ class Config {
                 'fontColor' => array('#e9e5e5', [], 'Font color'),
                 'fontSize' => array('1em', [], 'Font size'),
                 'postBg' => array('#393939', [], 'Post background color'),
+                'postBorder' => array('none', [], 'Post border'),
                 'postFontColor' => array('#e9e5e5', [], 'Post font color'),
+                'postMargin' => array("10px", [], 'Post margin'),
+                'postPadding' => array("10px", [], 'Post padding'),
                 'postRadius' => array("10px", [], 'Post border radius'),
                 'postWidth' => array('50%', [], 'Post width'),
                 'accentColor' => array('#393939', [], 'Box accent color'),
@@ -235,7 +238,7 @@ class Config {
             if ($key2 == 'createFlood' && ctype_digit($newVal)) $newVal .= 's';
 
             // Make sure some things at least have 'px' at the end if only a number was supplied
-            $sizeChanges = array('fontSize', 'postWidth', 'accentRadius', 'postRadius');
+            $sizeChanges = array('fontSize', 'postWidth', 'accentRadius', 'postRadius', 'postMargin', 'postPadding');
             if (in_array($key2, $sizeChanges) && ctype_digit($newVal)) $newVal .= 'px';
 
             // Make sure color changes at least have '#' at the beginning if only 6 chars was supplied

@@ -75,3 +75,13 @@ h1 {
     visibility: hidden;
     transition: 1s opacity, 1s visibility;
 }
+
+.post {
+    background: var(--post-bg);
+    border: var(--post-border);
+    color: var(--post-font-color);
+    border-radius: var(--post-radius);
+    width: var(--post-width);
+    margin: var(--post-margin);
+    padding: var(--post-padding);
+}

@@ -28,7 +28,23 @@ echo "<!DOCTYPE html>
 <head>
 <title>Thoughts</title>
 
-<style>:root { --bg-color: {$api->theme['backgroundColor']}; --accent-color: {$api->theme['accentColor']}; --font-color: {$api->theme['fontColor']}; --accent-radius: {$api->theme['accentRadius']}; --font-size: {$api->theme['fontSize']}; --url-color: {$api->theme['urlColor']}; }</style>
+<style>
+:root {
+    --bg-color: {$api->theme['backgroundColor']};
+    --accent-color: {$api->theme['accentColor']};
+    --accent-radius: {$api->theme['accentRadius']};
+    --font-color: {$api->theme['fontColor']};
+    --font-size: {$api->theme['fontSize']};
+    --url-color: {$api->theme['urlColor']};
+    --post-bg: {$api->theme['postBg']};
+    --post-border: {$api->theme['postBorder']};
+    --post-font-color: {$api->theme['postFontColor']};
+    --post-margin: {$api->theme['postMargin']};
+    --post-padding: {$api->theme['postPadding']};
+    --post-radius: {$api->theme['postRadius']};
+    --post-width: {$api->theme['postWidth']};
+}
+</style>
 
 <link rel='stylesheet' href='assets/thoughts.css'>
 </head>

@@ -527,6 +527,13 @@ class Thoughts(commands.Cog):
         Example: `.tset web theme postBg #e9e5e5`"""
         await self.changeSetting(ctx, 'theme', 'postBg', color)
 
+    @ts_web_theme.command(name='postBorder')
+    async def ts_web_postborder(self, ctx, css):
+        """Post's CSS border
+        \nYou can use anything the CSS border tag supports\r
+        Example: `.tset web theme postBorder 1px #007ccf solid`"""
+        await self.changeSetting(ctx, 'theme', 'postBorder', css)
+
     @ts_web_theme.command(name='postColor', aliases=['postfontcolor'])
     async def ts_web_postcolor(self, ctx, color):
         """Post's font color
@@ -540,6 +547,20 @@ class Thoughts(commands.Cog):
         \nYou can use anything the CSS width tag supports\r
         Example: `.tset web theme postWidth 50%`"""
         await self.changeSetting(ctx, 'theme', 'postWidth', width)
+
+    @ts_web_theme.command(name='postMargin')
+    async def ts_web_postmargin(self, ctx, margin):
+        """Post box margin
+        \rYou can use anything the CSS margin tag supports\r
+        Example: `.tset web theme postMargin 10px`"""
+        await self.changeSetting(ctx, 'theme', 'postMargin', margin)
+
+    @ts_web_theme.command(name='postPadding')
+    async def ts_web_postpadding(self, ctx, padding):
+        """Post box padding
+        \rYou can use anything the CSS padding tag supports\r
+        Example: `.tset web theme postPadding 10px`"""
+        await self.changeSetting(ctx, 'theme', 'postPadding', padding)
 
     @ts_web.command(name='enable')
     async def ts_web_enable(self, ctx, binary):
