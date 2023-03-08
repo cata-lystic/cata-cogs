@@ -7,8 +7,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Load api and config classes
-$config = new Config();
+// Load API (which extends Config class)
 $api = new api();
 
 // Process the request immediately if just the api is being loaded
@@ -777,6 +776,7 @@ class api extends config {
             foreach($output['results'] as $ids => $vals) {
                 if ($results > $p['limit']-1) break; // stop after the $p['limit']
                 if (isset($vals['deleted']) && $vals['deleted'] == 1) $vals['msg'] = '[deleted]'; // don't show deleted messages
+                if ($p['wrap'] != null) $vals['msg'] = $p['wrap'].$vals['msg'].$p['wrap'];
                 // JSON output
                 if ($this->req['output'] == 'json') {
                     $output['results'][$ids] = $vals; // only changed if message is deleted
@@ -784,8 +784,15 @@ class api extends config {
                 } else {
                     $thisID = ($p['showID'] == 1) ? "#".$ids.": " : null;
                     $thisUser = ($p['showUser'] == 1) ? " -{$vals['user']}":null;
-                    $output['meta']['success'] .= ($results > 0 && ($p['platform'] == "web" || $p['breaks'] == 1)) ? "<br />" : PHP_EOL; // different line breaks per platform
-                    $output['meta']['success'] .= "{$thisID}{$p['wrap']}{$vals['msg']}{$p['wrap']}{$thisUser}";
+                    //$output['meta']['success'] .= ($results > 0 && ($p['platform'] == "web" || $p['breaks'] == 1)) ? "<br />" : PHP_EOL; // different line breaks per platform
+                    if ($this->source == 'web') {
+                        $html1 = "<p class='post'>";
+                        $html2 = "</p>";
+                    } else {
+                        $html1 = '';
+                        $html2 = '';
+                    }
+                    $output['meta']['success'] .= "{$html1}{$thisID}{$p['wrap']}{$vals['msg']}{$p['wrap']}{$thisUser}{$html2}";
                     // Show Deleted By and Reason if requested
                     if ($p['reasonby'] == 1 && isset($vals['deleter'])) $output['meta']['success'] .= " Deleted by: ".str_replace("HASHTAG", "#", $vals['deleter']).".";
                     if ($p['reason'] == 1 && isset($vals['deleteReason'])) $output['meta']['success'] .= " Reason: {$vals['deleteReason']}.";

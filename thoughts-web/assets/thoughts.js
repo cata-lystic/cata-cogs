@@ -43,6 +43,10 @@ function search() {
   });
   */
 
+  // Check which content to show
+  var showUser = document.getElementById('showUser').checked
+  var showID = document.getElementById('showID').checked
+
   fetch('api.php', {
     method: 'POST',
     body: searchData
@@ -54,8 +58,18 @@ function search() {
       return Promise.reject(response);
     }
   }).then(function (data) {
-    // This is the JSON from our response
-    console.log(data);
+
+    if (!data['meta']['error']) {
+      var output = ''
+      for(x in data['results']) {
+        let user = (showUser) ? " -"+data['results'][x].user : ''
+        let id = (showID) ? "#"+x+": " : ''
+        output += "<p class='post'>"+id+""+data['results'][x].msg+""+user+"</p>"
+      }
+    } else {
+      output = data['meta']['error']
+    }
+    document.getElementById('content').innerHTML = output
   }).catch(function (err) {
     // There was an error
     console.warn('Something went wrong.', err);

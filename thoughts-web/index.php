@@ -9,14 +9,14 @@ require_once("$apiFolder/index.php");
 // This section is going to be rewritten
 $f = $_REQUEST['f'] ?? 'search'; // API Function
 $s = $_REQUEST['s'] ?? null; // allow a specific ID to be fetched
-$limit = $_REQUEST['limit'] ?? $config->web['searchLimit']; // amount of search results to return
-$shuffle = $_REQUEST['shuffle'] ?? $config->web['shuffle']; // shuffle search results
-$showUser = $_REQUEST['showUser'] ?? $config->web['showUser']; // show author after each post
-$showID = $_REQUEST['showID'] ?? $config->web['showID']; // show unique ID before each post
+$limit = $_REQUEST['limit'] ?? $api->web['searchLimit']; // amount of search results to return
+$shuffle = $_REQUEST['shuffle'] ?? $api->web['shuffle']; // shuffle search results
+$showUser = $_REQUEST['showUser'] ?? $api->web['showUser']; // show author after each post
+$showID = $_REQUEST['showID'] ?? $api->web['showID']; // show unique ID before each post
 $platform = $_REQUEST['platform'] ?? 'web'; // anything besides "web" will be plain text mode
-$wrap = $_REQUEST['wrap'] ?? tools::wrap($config->web['wrap']); // no wrap by default
-$breaks = $_REQUEST['breaks'] ?? $config->api['breaks']; // prefer <br /> over /n/r (web will overwrite this)
-$js = $_REQUEST['js'] ?? $config->web['js']; // web javascript features enabled by default
+$wrap = $_REQUEST['wrap'] ?? tools::wrap($api->web['wrap']); // no wrap by default
+$breaks = $_REQUEST['breaks'] ?? $api->api['breaks']; // prefer <br /> over /n/r (web will overwrite this)
+$js = $_REQUEST['js'] ?? $api->web['js']; // web javascript features enabled by default
 $apiRequest = $_REQUEST['api'] ?? null; // API version from requester
 
 if ($platform == "discord") {
@@ -28,7 +28,7 @@ echo "<!DOCTYPE html>
 <head>
 <title>Thoughts</title>
 
-<style>:root { --bg-color: {$config->theme['backgroundColor']}; --accent-color: {$config->theme['accentColor']}; --font-color: {$config->theme['fontColor']}; --accent-radius: {$config->theme['accentRadius']}; --font-size: {$config->theme['fontSize']}; --url-color: {$config->theme['urlColor']}; }</style>
+<style>:root { --bg-color: {$api->theme['backgroundColor']}; --accent-color: {$api->theme['accentColor']}; --font-color: {$api->theme['fontColor']}; --accent-radius: {$api->theme['accentRadius']}; --font-size: {$api->theme['fontSize']}; --url-color: {$api->theme['urlColor']}; }</style>
 
 <link rel='stylesheet' href='assets/thoughts.css'>
 </head>
@@ -47,7 +47,7 @@ echo $view->create(); // Create Box
 echo $view->infoBox(); // API Info Box
 
 // Search Bar for Web  
-echo $view->search(array('s'=>$s, 'limit'=>$limit, 'wrap'=>$wrap, 'shuffle'=>$shuffle, 'showID'=>$showID));
+echo $view->search(array('s'=>$s, 'limit'=>$limit, 'wrap'=>$wrap, 'shuffle'=>$shuffle, 'showID'=>$showID, 'showUser' => $showUser));
 
 echo $view->footer(); // Footer  
 
@@ -78,8 +78,8 @@ class view {
       $showID = $args['showID'] ?? '';
       $shuffle = $args['shuffle'] ?? '';
       $shuffleChecked = ($shuffle == 1) ? "checked" : null;
-      $showUserChecked = ($showUser == 1) ? "check" : null;
-      $showIDChecked = ($showID == 1) ? "check" : null;
+      $showUserChecked = ($showUser == 1) ? "checked" : null;
+      $showIDChecked = ($showID == 1) ? "checked" : null;
       $submitVisible = ($_SESSION['web']['js'] != 1) ? "<input id='searchSubmit' type='submit' value='Search' />":null; // Submit button only needs to be shown if javascript is disabled
       $searchVisible = ($_SESSION['web']['searchVisible'] == 1) ? null:"fade";
       return "
@@ -88,7 +88,7 @@ class view {
         <input type='hidden' name='f' value='search'>
           <p><input type='text' id='searchbox' name='s' placeholder='Search...' value='{$s}' /><p>
           <p><label>Limit: <input type='number' name='limit' value='{$limit}' size='4' /></label> <label>wrap: <input type='text' name='wrap' value='{$wrap}' size='3'></label></p>
-          <p><label><input type='checkbox' name='shuffle' value='1' {$shuffleChecked} /> Shuffle</label> <label><input type='checkbox' name='showUser' {$showUserChecked} /> Author</label> <label><input type='checkbox' name='showID' {$showIDChecked} /> ID</label></p> {$submitVisible}
+          <p><label><input type='checkbox' name='shuffle' value='1' {$shuffleChecked} /> Shuffle</label> <label><input type='checkbox' id='showUser' name='showUser' {$showUserChecked} /> User</label> <label><input type='checkbox' id='showID' name='showID' {$showIDChecked} /> ID</label></p> {$submitVisible}
           <input type='hidden' name='breaks' value='1' />
           <input type='hidden' id='searchJS' name='js' value='1' />
           <input type='hidden' id='showAPI' name='showAPI' value='1' />
