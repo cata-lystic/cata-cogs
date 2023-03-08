@@ -9,7 +9,7 @@
     },
     "2": {
         "msg": "here is the second post",
-        "tag": "thought",
+        "tag": "music",
         "user": "Catalyst#1494",
         "userID": "514556311573364746",
         "timestamp": 1678263031,
@@ -27,7 +27,7 @@
     },
     "4": {
         "msg": "fourth post will go to crashboy",
-        "tag": "thought",
+        "tag": "spam",
         "user": "Crashy#4595",
         "userID": "909716920780070933",
         "timestamp": 1678263071,

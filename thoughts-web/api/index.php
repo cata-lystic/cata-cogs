@@ -51,7 +51,6 @@ class Config {
                 'shuffle' => array(1, ['binary'], 'Shuffle search results'),
                 'showUser' => array(0, ['binary'], 'Show post author\'s username before each result'),
                 'showID' => array(0, ['binary'], 'Show post ID before each result'),
-                'wrap' => array('none', [], 'Wrap (quotes) around each thought. options: \'none\', \'single\', \'double\', or custom'),
                 'breaks' => array(0, ['binary'], 'Use <br /> instead of \n\r in API calls'),
                 'platform' => array('api', ['alpha'], 'Can be set to anything where the request came from (example: discord)'),
                 'ipLog' => array(1, ['binary'], 'Log IP address of post creator'),
@@ -293,7 +292,7 @@ class Config {
                     // $finalVal is the $newVal if this is the changed setting
                     $finalVal = ($oldCategory == $key1 && $oldKey == $key2) ? str_replace("HASHTAG", "#", $this->arrayToString($newVal)) : $this->arrayToString($set[$oldCategory][$oldKey]); 
                         
-                    // Don't includes wrap around the val if it's meant to be a number
+                    // Don't include quotes wrap around the val if it's meant to be a number
                     $reqs = $this->defaults[$oldCategory][$oldKey][1];
                     $wrap = (substr($finalVal, 0, 1) == '[' || in_array("number", $reqs) || in_array("binary", $reqs)) ? null : "'";
                     
@@ -681,11 +680,14 @@ class api extends config {
         $s = $this->req['s'] ?? null; // specific ID or query to be searched
         $limit = $this->req['limit'] ?? $_SESSION['api']['searchLimit']; // amount of search results to return
         $shuffle = $this->req['shuffle'] ?? $_SESSION['api']['shuffle']; // shuffle search results
-        $showUser = $this->req['showUser'] ?? $_SESSION['api']['showUser']; // show author's username before each post
-        $showID = $this->req['showID'] ?? $_SESSION['api']['showID']; // show unique ID before each post
         $platform = $this->req['platform'] ?? 'web'; // anything besides "web" will be plain text mode
-        $wrap = $this->req['wrap'] ?? tools::wrap($_SESSION['api']['wrap']); // no wrap by default
+        
+        // TXT and Web only
+        $showID = $this->req['showID'] ?? $_SESSION['web']['showID']; // show unique ID before each post
+        $showUser = $this->req['showUser'] ?? $_SESSION['web']['showUser']; // show author's username before each post
+        $wrap = $this->req['wrap'] ?? tools::wrap($_SESSION['web']['wrap']); // no wrap by default
         $breaks = $this->req['breaks'] ?? $_SESSION['api']['breaks']; // prefer <br /> over /n/r (web will overwrite this)
+
         $apiRequest = $this->req['api'] ?? null; // API version from requester
         $reason = $this->req['reason'] ?? 1; // Show reason for post deletion
         $reasonby = $this->req['reasonby'] ?? 1; // Show who deleted post
@@ -741,17 +743,21 @@ class api extends config {
             $isDeleted = isset($searchData[$s]['deleted']) ?? 0;
             $output = [];
             if ($isDeleted == 0) { // Check if post has been deleted (show that it has if the post was directly requested)
-                $thisID = ($showID == 1) ? "#".$s.": " : null;
-                $thisAuthor = ($showUser == 1) ? " -{$searchData[$s]['user']}" : null;
+                // JSON output
                 if ($this->req['output'] == 'json') {
-                    $output[] = ['id' => $thisID, 'author' => $thisAuthor, 'msg' => $searchData[$s]['msg'], 'wrap' => $wrap];
+                    $output[] = ['id' => $s, 'user' => $searchData[$s]['user'], 'userID' => $searchData[$s]['userID'], 'msg' => $searchData[$s]['msg']];
                     echo json_encode($output);
+                    // TXT output
                 } else {
-                    echo $thisID."{$wrap}".$searchData[$s]['msg']."{$wrap}{$thisAuthor}";
+                    $thisUser = ($showUser == 1) ? " -{$searchData[$s]['user']}" : null;
+                    $thisID = ($showID == 1) ? "#".$s.": " : null; // Only show ID if requested
+                    echo $thisID."{$wrap}".$searchData[$s]['msg']."{$wrap}{$thisUser}";
                 }
             } else {
+                // JSON output
                 if ($this->req['output'] == 'json') {
                     echo json_encode(['id' => $s, 'user' => $searchData[$s]['user'], 'msg' => "`Post deleted.`", 'deleted' => $searchData[$s]['deleted'], 'deleter' => $searchData[$s]['deleter'], 'deleteReason' => $searchData[$s]['deleteReason']]);
+                // TXT output
                 } else {
                     echo "`Post deleted.`";
                     if ($reasonby == 1) echo " Deleted by: ".str_replace("HASHTAG", "#", $searchData[$s]['deleter']).".";
@@ -767,7 +773,7 @@ class api extends config {
             foreach ($searchData as $id => $val) {
                 if (preg_match("/{$s}/i", $val['msg'])) {
                     if (isset($val['deleted'])) continue; // don't include if message is deleted
-                    $matches[$id] = $val['msg'];
+                    $matches[$id] = $val;
                 }
             }
         
@@ -780,18 +786,22 @@ class api extends config {
                 $output = ($this->req['output'] == 'json') ? [] : '';
                 foreach($matches as $ids => $vals) {
                     if ($results > $limit-1) break; // stop after the $limit
+                    // JSON output
                     if ($this->req['output'] == 'json') {
                         $thisID = $ids;
-                        $output[] = ['id' => $thisID, 'msg' => $vals, 'wrap' => $wrap];
-                        
+                        $output['results'][$thisID] = ['id' => $thisID, 'msg' => $vals['msg'], 'tag' => $vals['tag'], 'user' => $vals['user'], 'userID' => $vals['userID']];
+                    // TXT output
                     } else {
                         $thisID = ($showID == 1) ? "#".$ids.": " : null;
+                        $thisUser = ($showUser == 1) ? " -{$vals['user']}":null;
                         $output .= ($results > 0 && ($platform == "web" || $breaks == 1)) ? "<br />" : PHP_EOL; // different line breaks per platform
-                        $output .= "{$thisID}{$wrap}{$vals}{$wrap}";
+                        $output .= "{$thisID}{$wrap}{$vals['msg']}{$wrap}{$thisUser}";
 
                     }
                     $results++;
                 }
+                $output['meta']['total'] = $results;
+                $output['meta']['shuffle'] = $shuffle;
 
                 echo (is_array($output)) ? json_encode($output) : $output;
             }
