@@ -804,119 +804,134 @@ class api extends config {
     // List and manage Tags
     function tags() {
 
+        // Check API version
         $checkAPI = $this->version(1.0); // no optional parameter so it will kill script if fails
         
+        // Load all current tags
         $tags = $this->api['tags'];
 
         // Request Parameters: 'key' => [0] default value, [1] required (binary), [2] type (string, number, etc)
         $params = array(
-            'action' => ['list', 0, 'string'], // If no action requested, just show list of tags
+            'action' => ['list', 0, 'string'], // If no action requested, show list of tags and meta info
             'tag' => [null, 0, 'string'], // Tag user is requesting
             'rename' => [null, 0, 'string'], // User may be requesting to edit tag's name
             'userID' => [null, 0, 'string'] // UserID of who is add/remove/editing a tag
         );
 
         $p = $this->processParams($params); // Process params into an array. Give error (and optional params) if missing required params
+        $ac = $p['action']; // shortcut for action request
 
         // Make sure this is a valid action
         $actions = ['list', 'add', 'remove', 'edit', 'total', 'default'];
-        if (!in_array($p['action'], $actions)) {
+        if (!in_array($ac, $actions)) {
+
             $output['meta']['error'] = "Invalid action. (allowed: list, add, remove, edit, total, default)";
 
-        // List all tags
-        } else if ($p['action'] == 'list') {
+        // List all tags and meta info (default action)
+        } else if ($ac == 'list') {
 
             // This function only requires 'read' permissions
             $checkToken = $this->token($this->req['token'], 'read');
-            if ($checkToken !== true) die($checkToken);
-
-            $output['tags'] = [];
-            if ($this->req['output'] == 'json') {
-                foreach ($tags as $tag) {
-                    $output['tags'][] = ['name' => $tag];
-                }
-                $output['meta']['total'] = count($output['tags']); // add total to metadata output
-                $output['meta']['default'] = $this->api['tagDefault']; // add default tag to meta
+            if ($checkToken !== true) {
+                $output['meta']['error'] = $checkToken;
             } else {
-                $taglist = '';
-                foreach ($tags as $tag) {
-                    $taglist .= $tag.", ";
+                // JSON output
+                if ($this->req['output'] == 'json') {
+                    // Add all current tags to an output[tags] array
+                    foreach ($tags as $tag) { $output['tags'][] = ['name' => $tag]; }
+                    $output['meta']['total'] = count($output['tags']); // add total to metadata output
+                    $output['meta']['default'] = $this->api['tagDefault']; // add default tag to meta
+                // TXT output
+                } else {
+                    $taglist = ''; // returning a string
+                    // Make a long string with each tag ending in a comma and sapce
+                    foreach ($tags as $tag) { $taglist .= $tag.", "; }
+                    // Output taglist with last comma removed
+                    $output['meta']['success'] = substr($taglist, 0, -2);
                 }
-                $output['meta']['success'] = substr($taglist, 0, -2);
+
             }
 
         // Add, remove, or edit tag
-        } else if ($p['action'] == 'add' || $p['action'] == 'remove' || $p['action'] == 'edit') {
+        } else if ($ac == 'add' || $ac == 'remove' || $ac == 'edit') {
 
-            // This function requires 'tags' permissions
+            // These functions requires 'tags' permissions
             $checkToken = $this->token($this->req['token'], 'tags');
-            if ($checkToken !== true) die($checkToken);
+            if ($checkToken !== true) $output['meta']['error'] = $checkToken;
 
-            if ($p['userID'] == null) die("Missing userID");
-            if ($this->isAdmin($p['userID']) == false) die("Only admin can edit tags");
-            if ($p['tag'] == null) die("Missing tag"); // Tag required
+            // Make sure required fields are filled
+            if ($p['userID'] == null) $output['meta']['error'] = "Missing userID"; // userID required to edit
+            if ($this->isAdmin($p['userID']) == false) $output['meta']['error'] = "Only admin can edit tags"; // Only Admin can edit
+            if ($p['tag'] == null) $output['meta']['error'] = "Missing tag"; // Tag required
 
-            // Add tag
-            if ($p['action'] == 'add') {
-                if (!in_array($p['tag'], $this->api['tags'])) {
-                    array_push($this->api['tags'], $p['tag']);
-                    $this->set('api', 'tags', $this->api['tags']);
-                    $output['meta']['success'] = "Tag `{$p['tag']}` added";
-                } else {
-                    $output['meta']['error'] = "Tag `{$p['tag']}` already exists";
-                }
-            
-            // Remove tag
-            } else if ($p['action'] == 'remove') {
-
-                if (in_array($p['tag'], $this->api['tags'])) {
-                    $tagID = array_search($p['tag'], $this->api['tags']);
-                    unset($this->api['tags'][$tagID]);
-                    $this->set('api', 'tags', $this->api['tags']);
-                    $output['meta']['success'] = "Tag `{$p['tag']}` removed";
-                } else {
-                    $output['meta']['error'] = "Tag `{$p['tag']}` doesn't exist";
-                }
-            
-            // Edit tag
-            } else if ($p['action'] == 'edit') {
-
-                // Make sure tag being renamed exists
-                if (!is_array($tags) || !in_array($p['tag'], $tags)) $output['meta']['error'] = "Tag doesn't exist";
-
-                // Make sure a new tag name was given
-                if (empty($p['rename'])) $output['meta']['error'] = "'rename' flag required";
-
-                $data = Files::read("thoughts.json");
-                if (!is_array($data)) $data = []; // Create data array if there are no posts
-
-                // Rename tag
-                if (!isset($output['meta']['error'])) {
-                    $tagID = array_search($p['tag'], $this->api['tags']);
-                    unset($this->api['tags'][$tagID]);
-                    array_push($this->api['tags'], $p['rename']);
-
-                    // Loop through current posts and change their current tag
-                    foreach($data as $key => $val) {
-                        if ($val['tag'] == $p['tag']) $data[$key]['tag'] = $p['rename'];
+            // Only continue if everything required is set
+            if (!isset($output['meta']['error'])) {
+                // Add tag
+                if ($ac == 'add') {
+                    // Add new tag if it doesn't already exist
+                    if (!in_array($p['tag'], $this->api['tags'])) {
+                        array_push($this->api['tags'], $p['tag']); // add new tag to list of current tags
+                        $this->set('api', 'tags', $this->api['tags']); // set tags in config file with the new list
+                        $output['meta']['success'] = "Tag `{$p['tag']}` added";
+                    } else {
+                        $output['meta']['error'] = "Tag `{$p['tag']}` already exists";
                     }
-                    $this->set('api', 'tags', $this->api['tags']);
-                    Files::write("thoughts.json", json_encode($data, JSON_PRETTY_PRINT));
-                    $output['meta']['success'] = "Tag `{$p['tag']}` renamed to `{$p['rename']}`";
+                // Remove tag
+                } else if ($ac == 'remove') {
+                    // Remove tag if it exists
+                    if (in_array($p['tag'], $this->api['tags'])) { // check if this is in the tags array
+                        $tagID = array_search($p['tag'], $this->api['tags']); // get the tag's array ID
+                        unset($this->api['tags'][$tagID]); // remove tag from current tags
+                        $this->set('api', 'tags', $this->api['tags']); // set tags in config file with the new list
+                        $output['meta']['success'] = "Tag `{$p['tag']}` removed";
+                    } else {
+                        $output['meta']['error'] = "Tag `{$p['tag']}` doesn't exist";
+                    }
+                
+                // Edit tag
+                } else if ($ac == 'edit') {
+
+                    // Make sure tag being renamed exists
+                    if (!is_array($tags) || !in_array($p['tag'], $tags)) $output['meta']['error'] = "Tag `{$p['tag']}` doesn't exist";
+
+                    // Make sure a new tag name was given
+                    if (empty($p['rename'])) $output['meta']['error'] = "'rename' flag required";
+
+                    // Rename tag
+                    if (!isset($output['meta']['error'])) {
+                        $tagID = array_search($p['tag'], $this->api['tags']); // get tag's array ID
+                        unset($this->api['tags'][$tagID]); // remove tag from current tags
+                        array_push($this->api['tags'], $p['rename']); // add new/renamed tag to current tags
+
+                        // Load thoughts.json
+                        $data = Files::read("thoughts.json");
+                        if (!is_array($data)) $data = []; // Create data array if there are no posts
+    
+                        // Loop through current posts and change their current tag
+                        foreach($data as $key => $val) {
+                            if ($val['tag'] == $p['tag']) $data[$key]['tag'] = $p['rename'];
+                        }
+                        $this->set('api', 'tags', $this->api['tags']); // change config.php file with new list of tags
+                        Files::write("thoughts.json", json_encode($data, JSON_PRETTY_PRINT));
+                        $output['meta']['success'] = "Tag `{$p['tag']}` renamed to `{$p['rename']}`";
+                    }
                 }
+            
             }
 
         // Show total tags number
-        } else if ($p['action'] == 'total') {
+        } else if ($ac == 'total') {
             $output['meta']['success'] = count($tags);
 
         // Show default tag
-        }  else if ($p['action'] == 'default') {
+        }  else if ($ac == 'default') {
             $output['meta']['success'] = $this->api['tagDefault'];
         }
 
+        // Output JSON
         if ($this->req['output'] == 'json') {
             echo json_encode($output);
+        // Output TXT
         } else {
             if (isset($output['meta']['success'])) echo $output['meta']['success'];
             if (isset($output['meta']['error'])) echo $output['meta']['error'];
