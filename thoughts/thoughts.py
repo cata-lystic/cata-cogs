@@ -528,7 +528,7 @@ class Thoughts(commands.Cog):
         await self.changeSetting(ctx, 'theme', 'postBg', color)
 
     @ts_web_theme.command(name='postBorder')
-    async def ts_web_postborder(self, ctx, css):
+    async def ts_web_postborder(self, ctx, *, css):
         """Post's CSS border
         \nYou can use anything the CSS border tag supports\r
         Example: `.tset web theme postBorder 1px #007ccf solid`"""
