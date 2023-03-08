@@ -820,6 +820,7 @@ class api extends config {
 
         $p = $this->processParams($params); // Process params into an array. Give error (and optional params) if missing required params
         $ac = $p['action']; // shortcut for action request
+        $t = $p['tag']; // shortcut for supplied tag
 
         // Make sure this is a valid action
         $actions = ['list', 'add', 'remove', 'edit', 'total', 'default'];
@@ -862,44 +863,44 @@ class api extends config {
             // Make sure required fields are filled
             if ($p['userID'] == null) $output['meta']['error'] = "Missing userID"; // userID required to edit
             if ($this->isAdmin($p['userID']) == false) $output['meta']['error'] = "Only admin can edit tags"; // Only Admin can edit
-            if ($p['tag'] == null) $output['meta']['error'] = "Missing tag"; // Tag required
+            if ($t == null) $output['meta']['error'] = "Missing tag"; // Tag required
 
             // Only continue if everything required is set
             if (!isset($output['meta']['error'])) {
                 // Add tag
                 if ($ac == 'add') {
                     // Add new tag if it doesn't already exist
-                    if (!in_array($p['tag'], $this->api['tags'])) {
-                        array_push($this->api['tags'], $p['tag']); // add new tag to list of current tags
+                    if (!in_array($t, $this->api['tags'])) {
+                        array_push($this->api['tags'], $t); // add new tag to list of current tags
                         $this->set('api', 'tags', $this->api['tags']); // set tags in config file with the new list
-                        $output['meta']['success'] = "Tag `{$p['tag']}` added";
+                        $output['meta']['success'] = "Tag `{$t}` added";
                     } else {
-                        $output['meta']['error'] = "Tag `{$p['tag']}` already exists";
+                        $output['meta']['error'] = "Tag `{$t}` already exists";
                     }
                 // Remove tag
                 } else if ($ac == 'remove') {
                     // Remove tag if it exists
-                    if (in_array($p['tag'], $this->api['tags'])) { // check if this is in the tags array
-                        $tagID = array_search($p['tag'], $this->api['tags']); // get the tag's array ID
+                    if (in_array($t, $this->api['tags'])) { // check if this is in the tags array
+                        $tagID = array_search($t, $this->api['tags']); // get the tag's array ID
                         unset($this->api['tags'][$tagID]); // remove tag from current tags
                         $this->set('api', 'tags', $this->api['tags']); // set tags in config file with the new list
-                        $output['meta']['success'] = "Tag `{$p['tag']}` removed";
+                        $output['meta']['success'] = "Tag `{$t}` removed";
                     } else {
-                        $output['meta']['error'] = "Tag `{$p['tag']}` doesn't exist";
+                        $output['meta']['error'] = "Tag `{$t}` doesn't exist";
                     }
                 
                 // Edit tag
                 } else if ($ac == 'edit') {
 
                     // Make sure tag being renamed exists
-                    if (!is_array($tags) || !in_array($p['tag'], $tags)) $output['meta']['error'] = "Tag `{$p['tag']}` doesn't exist";
+                    if (!is_array($tags) || !in_array($t, $tags)) $output['meta']['error'] = "Tag `{$t}` doesn't exist";
 
                     // Make sure a new tag name was given
                     if (empty($p['rename'])) $output['meta']['error'] = "'rename' flag required";
 
                     // Rename tag
                     if (!isset($output['meta']['error'])) {
-                        $tagID = array_search($p['tag'], $this->api['tags']); // get tag's array ID
+                        $tagID = array_search($t, $this->api['tags']); // get tag's array ID
                         unset($this->api['tags'][$tagID]); // remove tag from current tags
                         array_push($this->api['tags'], $p['rename']); // add new/renamed tag to current tags
 
@@ -909,11 +910,11 @@ class api extends config {
     
                         // Loop through current posts and change their current tag
                         foreach($data as $key => $val) {
-                            if ($val['tag'] == $p['tag']) $data[$key]['tag'] = $p['rename'];
+                            if ($val['tag'] == $t) $data[$key]['tag'] = $p['rename'];
                         }
                         $this->set('api', 'tags', $this->api['tags']); // change config.php file with new list of tags
                         Files::write("thoughts.json", json_encode($data, JSON_PRETTY_PRINT));
-                        $output['meta']['success'] = "Tag `{$p['tag']}` renamed to `{$p['rename']}`";
+                        $output['meta']['success'] = "Tag `{$t}` renamed to `{$p['rename']}`";
                     }
                 }
             
