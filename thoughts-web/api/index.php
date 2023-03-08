@@ -874,7 +874,8 @@ class api extends config {
         $params = array(
             'userID' => [null, 0, 'string'], // ID of the user (this will be prioritized over usern)
             'user' => [null, 0, 'string'], // username of user
-            'list' => [null, 0, 'string'] // ID of who is requesting delete
+            'list' => [null, 0, 'string'], // ID of who is requesting delete
+            'count' => [null, 0, 'string']
         );
 
         $p = $this->processParams($params); // Process params into an array. Give error (and optional params) if missing required params
@@ -885,15 +886,27 @@ class api extends config {
         $total = count($data); // total thoughts
         if ($total == 0) return "There are no posts for this user";
 
-        if (isset($this->req['list'])) { // Show List
+        if (isset($this->req['list'])) { // Show List of users
 
+            $uniqueUsers = [];
             foreach($data as $key => $val) {
-                if (!isset($data[$key]['deleted'])) {
-                    echo "#{$key}: {$data[$key]['msg']} -{$data[$key]['user']}".PHP_EOL;
-                }
+                $thisUser = $data[$key]['user'];
+                $uniqueUsers[$thisUser] = $data[$key]['userID'];
+            }
+            
+            foreach($uniqueUsers as $key => $val) {
+                echo $key." ({$val})".PHP_EOL;
             }
         
-        } else { // Show only posts by user
+        } else if (isset($this->req['count'])) { // Count how many unique users there are
+            $uniqueUsers = [];
+            foreach($data as $key => $val) {
+                $thisUser = $data[$key]['userID'];
+                $uniqueUsers[$thisUser] = 1;
+            }
+            echo count($uniqueUsers);
+
+        } else { // Show all posts by user or userID
 
             $searchUser = ($p['userID'] != null) ? 'userID' : 'user';
             $searchUserParse = str_replace("HASHTAG", "#", $p[$searchUser]);
