@@ -1,3 +1,7 @@
+document.addEventListener('DOMContentLoaded', function () {
+  document.getElementById('searchSubmit').style.display = 'none'
+}, false);
+
 // Search form elements changed
 "keyup change".split(" ").forEach(function(e){
   document.getElementById('searchForm').addEventListener(e,search,false);
