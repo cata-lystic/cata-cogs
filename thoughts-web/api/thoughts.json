@@ -6,5 +6,41 @@
         "userID": "1324378024812309",
         "timestamp": 1677345759,
         "source": "web"
+    },
+    "2": {
+        "msg": "hahah one two",
+        "tag": "thought",
+        "user": "Catalyst",
+        "userID": "12345",
+        "timestamp": 1678238943,
+        "source": "api",
+        "ip": "f528764d624db129b32c21fbca0cb8d6"
+    },
+    "3": {
+        "msg": "zzzzzzzzzzzzz okay test one two",
+        "tag": "thought",
+        "user": "Catalyst",
+        "userID": "12345",
+        "timestamp": 1678238954,
+        "source": "api",
+        "ip": "f528764d624db129b32c21fbca0cb8d6"
+    },
+    "4": {
+        "msg": "a few words to test searching",
+        "tag": "thought",
+        "user": "Catalyst",
+        "userID": "12345",
+        "timestamp": 1678238969,
+        "source": "api",
+        "ip": "f528764d624db129b32c21fbca0cb8d6"
+    },
+    "5": {
+        "msg": "nothing rly",
+        "tag": "thought",
+        "user": "Catalyst",
+        "userID": "12345",
+        "timestamp": 1678238980,
+        "source": "api",
+        "ip": "f528764d624db129b32c21fbca0cb8d6"
     }
 }

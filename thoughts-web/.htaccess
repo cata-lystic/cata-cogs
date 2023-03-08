@@ -3,8 +3,10 @@ RewriteEngine on
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 
-# Rewrite for the API with optional directories
-RewriteRule ^api/?([0-9.]+)?/?(.+)?$ api/index.php?f=$2&version=$1&three=$3 [L,QSA]
-RewriteRule ^api/?([^/]+)?/?(.+)?$ api/index.php?f=$1&version=$2&three=$3 [L,QSA]
-#RewriteRule ^t/?([^/]+)?/?(.+)?$ index.php?q=$1 [L,QSA]
-#RewriteRule ^([^/]+)?/?([^/]+)?/?(.+)?$ api.php? [L,QSA]
+# Rewrite /api/version/format/function (ex: /api/1.0/json/info)
+# All fields are auto-detected so the following URLs detect the correct output
+# /api/1.0/info (version: 1.0, function: info)
+# /api/info (function: info)
+# /api/1.0/json/info (version: 1.0, format: json, function: info)
+# /api/1.0/json (version: 1.0, format: json)
+RewriteRule ^api/?([0-9.]+)?/?(txt|text|json+)?/?(.+)?$ api/index.php?version=$1&output=$2&f=$3 [L,QSA] # api/1.0/json/info

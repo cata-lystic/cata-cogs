@@ -409,8 +409,12 @@ class api extends config {
 
         $this->source = ($source != '') ? $source : 'api'; // API is default source
 
-        // Check if there was a 'f' (query) request
+        // Check if there was a 'f' (function) request
         $func = $this->req['f'] ?? null; // no query = search for random thought
+
+        // Check which output type is requested. JSON is default, but API can also output raw text
+        $output = $this->req['output'] ?? 'json'; // output can be 'json', 'txt', or 'text'
+
         if (empty($func)) $func = 'search';
 
         // Make sure this is a valid function
@@ -418,6 +422,8 @@ class api extends config {
 
         // If $apiversion is set, place this as the user's api version
         if ($apiVersion != null) $this->req['version'] = $apiVersion;
+
+
 
         // Run requested function
         $this->$func();
@@ -735,10 +741,13 @@ class api extends config {
 
             // Check if the search is deleted. If it is, show that the post is deleted.
             $isDeleted = isset($data[$s]['deleted']) ?? 0;
+            $output = [];
             if ($isDeleted == 0) { // Check if post has been deleted (show that it has if the post was directly requested)
                 $thisID = ($showID == 1) ? "#".$s.": " : null;
                 $thisAuthor = ($showUser == 1) ? " -{$data[$s]['user']}" : null;
-                echo $thisID."{$wrap}".$data[$s]['msg']."{$wrap}{$thisAuthor}";
+                //echo $thisID."{$wrap}".$data[$s]['msg']."{$wrap}{$thisAuthor}";
+                $output[] = ['id' => $thisID, 'author' => $thisAuthor, 'msg' => $data[$s]['msg'], 'wrap' => $wrap];
+                echo json_encode($output);
             } else {
                 echo "`Post deleted.`";
                 if ($reasonby == 1) echo " Deleted by: ".str_replace("HASHTAG", "#", $data[$s]['deleter']).".";
@@ -762,13 +771,17 @@ class api extends config {
             } else {
                 if ($shuffle == 1) $matches = shuffle_assoc($matches);
                 $results = 0;
+                $output = [];
                 foreach($matches as $ids => $vals) {
                     if ($results > $limit-1) break; // stop after the $limit
-                    if ($results > 0) echo ($platform == "web" || $breaks == 1) ? "<br />" : PHP_EOL; // different line breaks per platform
+                    //if ($results > 0) echo ($platform == "web" || $breaks == 1) ? "<br />" : PHP_EOL; // different line breaks per platform
                     $thisID = ($showID == 1) ? "#".$ids.": " : null;
-                    echo "{$thisID}{$wrap}{$vals}{$wrap}";
+                    //echo "{$thisID}{$wrap}{$vals}{$wrap}";
+                    $output[] = ['id' => $thisID, 'msg' => $vals, 'wrap' => $wrap];
                     $results++;
                 }
+                
+                echo json_encode($output);
             }
         
         }
