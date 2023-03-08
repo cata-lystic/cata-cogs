@@ -411,6 +411,9 @@ class api extends config {
 
         $this->source = ($source != '') ? $source : 'api'; // API is default source
 
+        // force TXT output for web
+        if ($this->source == 'web') $this->req['output'] = 'txt';
+
         // Check if there was a 'f' (function) request
         $func = $this->req['f'] ?? null; // no query = search for random thought
 
@@ -678,6 +681,9 @@ class api extends config {
         if (!is_array($data)) $data = []; // Create data array if there are no msgs
         $total = count($data); // total thoughts
 
+        // A few error checks before continuing
+        if ($total == 0) $output['meta']['error'] = "There are no posts..."; // There has to be at least one post
+
         // Request Parameters: 'key' => [0] default value, [1] required (binary), [2] type (string, number, etc)
         $params = array(
             's' => [null, 0, 'string'],
@@ -703,16 +709,21 @@ class api extends config {
 
         // First check to make sure they're not just asking for a short request
 
-        // ?s=list for a non-web platform just shows a link to the list page
+        // ?s=list for Discord just shows a link to the list page
         if ($s == "list" && $p['platform'] == "discord") {
-            $output['meta']['success'] = "Full list of posts can be found at {$_SESSION['api']['url']}?s=list";
-        }
 
-        // A few error checks before continuing
-        if ($total == 0) $output['meta']['error'] = "There are no posts..."; // There has to be at least one post
-        
+            $output['meta']['success'] = "Full list of posts can be found at {$_SESSION['api']['url']}?s=list";
+
+        // If list is not for Discord, put all non-deleted posts in output results
+        } else if ($s == "list" && $p['platform'] != "discord") {
+
+            foreach($data as $id => $val) {
+                if (isset($val['deleted']) && $val['deleted'] == 1) continue; // skip if deleted 
+                $output['results'][$id] = $val;
+            }
+
         // If $s is empty, fetch a random ID
-        if ($s == null) {
+        } else if ($s == null) {
 
             // If user didn't submit a search query:
             // Generate a random number within the count of the data array
