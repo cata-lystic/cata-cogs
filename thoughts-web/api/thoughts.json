@@ -8,39 +8,39 @@
         "source": "web"
     },
     "2": {
-        "msg": "hahah one two",
+        "msg": "here is the second post",
         "tag": "thought",
-        "user": "Catalyst",
-        "userID": "12345",
-        "timestamp": 1678238943,
-        "source": "api",
-        "ip": "f528764d624db129b32c21fbca0cb8d6"
+        "user": "Catalyst#1494",
+        "userID": "514556311573364746",
+        "timestamp": 1678263031,
+        "source": "discord",
+        "ip": "66efff4c945d3c3b87fc271b47d456db"
     },
     "3": {
-        "msg": "zzzzzzzzzzzzz okay test one two",
+        "msg": "here third post woo",
         "tag": "thought",
-        "user": "Catalyst",
-        "userID": "12345",
-        "timestamp": 1678238954,
-        "source": "api",
-        "ip": "f528764d624db129b32c21fbca0cb8d6"
+        "user": "Crashy#4595",
+        "userID": "909716920780070933",
+        "timestamp": 1678263055,
+        "source": "discord",
+        "ip": "66efff4c945d3c3b87fc271b47d456db"
     },
     "4": {
-        "msg": "a few words to test searching",
+        "msg": "fourth post will go to crashboy",
         "tag": "thought",
-        "user": "Catalyst",
-        "userID": "12345",
-        "timestamp": 1678238969,
-        "source": "api",
-        "ip": "f528764d624db129b32c21fbca0cb8d6"
+        "user": "Crashy#4595",
+        "userID": "909716920780070933",
+        "timestamp": 1678263071,
+        "source": "discord",
+        "ip": "66efff4c945d3c3b87fc271b47d456db"
     },
     "5": {
-        "msg": "nothing rly",
+        "msg": "another post by admin to try things out",
         "tag": "thought",
-        "user": "Catalyst",
-        "userID": "12345",
-        "timestamp": 1678238980,
-        "source": "api",
-        "ip": "f528764d624db129b32c21fbca0cb8d6"
+        "user": "Catalyst#1494",
+        "userID": "514556311573364746",
+        "timestamp": 1678263085,
+        "source": "discord",
+        "ip": "66efff4c945d3c3b87fc271b47d456db"
     }
 }
