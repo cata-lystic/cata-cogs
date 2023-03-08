@@ -455,7 +455,7 @@ class Thoughts(commands.Cog):
         await self.changeSetting(ctx, 'web', 'showUser', binary)
 
     @ts_web.command(name='wrap')
-    async def ts_web_wrap(self, ctx, wrap):
+    async def ts_web_wrap(self, ctx, *, wrap):
         """Wrap (quotes) around each thought"""
         await self.changeSetting(ctx, 'web', 'wrap', wrap)
 
@@ -465,7 +465,7 @@ class Thoughts(commands.Cog):
         """Tag settings"""
 
     @ts_web_theme.command(name='bg', aliases=['bgcolor'])
-    async def ts_web_bgcolor(self, ctx, color):
+    async def ts_web_bgcolor(self, ctx, *, color):
         """Background color
         \rWebsite's background color.
         You can use anything the CSS color tag supports\r
@@ -473,7 +473,7 @@ class Thoughts(commands.Cog):
         await self.changeSetting(ctx, 'theme', 'backgroundColor', color)
 
     @ts_web_theme.command(name='accent', aliases=['accentcolor'])
-    async def ts_web_accentcolor(self, ctx, color):
+    async def ts_web_accentcolor(self, ctx, *, color):
         """Accent color
         \rWebsite's box color for API info, search, creation.
         You can use anything the CSS color tag supports\r
@@ -481,7 +481,7 @@ class Thoughts(commands.Cog):
         await self.changeSetting(ctx, 'theme', 'accentColor', color)
 
     @ts_web_theme.command(name='font', aliases=['fontcolor'])
-    async def ts_web_fontcolor(self, ctx, color):
+    async def ts_web_fontcolor(self, ctx, *, color):
         """Font color
         \rWebsite's font color.
         You can use anything the CSS color tag supports\r
@@ -489,7 +489,7 @@ class Thoughts(commands.Cog):
         await self.changeSetting(ctx, 'theme', 'accentColor', color)
 
     @ts_web_theme.command(name='url', aliases=['urlcolor'])
-    async def ts_web_url(self, ctx, color):
+    async def ts_web_url(self, ctx, *, color):
         """URL color
         \rWebsite's URL color.
         You can use anything the CSS color tag supports\r
@@ -497,7 +497,7 @@ class Thoughts(commands.Cog):
         await self.changeSetting(ctx, 'theme', 'urlColor', color)
 
     @ts_web_theme.command(name='fontSize', aliases=['size'])
-    async def ts_web_fontsize(self, ctx, size):
+    async def ts_web_fontsize(self, ctx, *, size):
         """Font size
         \rWebsite's font size.
         You can use anything the CSS color tag supports\r
@@ -505,7 +505,7 @@ class Thoughts(commands.Cog):
         await self.changeSetting(ctx, 'theme', 'fontSize', size)
 
     @ts_web_theme.command(name='accentRadius')
-    async def ts_web_accentradius(self, ctx, radius):
+    async def ts_web_accentradius(self, ctx, *, radius):
         """Accent box border radius
         \rWebsite's box border radius (roundness)
         You can use anything the CSS border-radius tag supports\r
@@ -513,7 +513,7 @@ class Thoughts(commands.Cog):
         await self.changeSetting(ctx, 'theme', 'accentRadius', radius)
 
     @ts_web_theme.command(name='postRadius')
-    async def ts_web_postradius(self, ctx, radius):
+    async def ts_web_postradius(self, ctx, *, radius):
         """Post box border radius
         \rPost box border radius (roundness)
         You can use anything the CSS border-radius tag supports\r
@@ -521,7 +521,7 @@ class Thoughts(commands.Cog):
         await self.changeSetting(ctx, 'theme', 'postRadius', radius)
 
     @ts_web_theme.command(name='postBg', aliases=['postBackground'])
-    async def ts_web_postbg(self, ctx, color):
+    async def ts_web_postbg(self, ctx, *, color):
         """Post's background color
         \nYou can use anything the CSS color tag supports\r
         Example: `.tset web theme postBg #e9e5e5`"""
@@ -535,28 +535,28 @@ class Thoughts(commands.Cog):
         await self.changeSetting(ctx, 'theme', 'postBorder', css)
 
     @ts_web_theme.command(name='postColor', aliases=['postfontcolor'])
-    async def ts_web_postcolor(self, ctx, color):
+    async def ts_web_postcolor(self, ctx, *, color):
         """Post's font color
         \nYou can use anything the CSS color tag supports\r
         Example: `.tset web theme postFontColor #e9e5e5`"""
         await self.changeSetting(ctx, 'theme', 'postFontColor', color)
 
     @ts_web_theme.command(name='postWidth')
-    async def ts_web_postwidth(self, ctx, width):
+    async def ts_web_postwidth(self, ctx, *, width):
         """Post's box width
         \nYou can use anything the CSS width tag supports\r
         Example: `.tset web theme postWidth 50%`"""
         await self.changeSetting(ctx, 'theme', 'postWidth', width)
 
     @ts_web_theme.command(name='postMargin')
-    async def ts_web_postmargin(self, ctx, margin):
+    async def ts_web_postmargin(self, ctx, *, margin):
         """Post box margin
         \rYou can use anything the CSS margin tag supports\r
         Example: `.tset web theme postMargin 10px`"""
         await self.changeSetting(ctx, 'theme', 'postMargin', margin)
 
     @ts_web_theme.command(name='postPadding')
-    async def ts_web_postpadding(self, ctx, padding):
+    async def ts_web_postpadding(self, ctx, *, padding):
         """Post box padding
         \rYou can use anything the CSS padding tag supports\r
         Example: `.tset web theme postPadding 10px`"""
