@@ -35,11 +35,23 @@
         "ip": "66efff4c945d3c3b87fc271b47d456db"
     },
     "5": {
-        "msg": "another post by admin to try things out",
+        "msg": "fifth post will be deleted",
         "tag": "thought",
         "user": "Catalyst#1494",
         "userID": "514556311573364746",
+        "deleted": 1,
+        "deleter": "Catalyst",
+        "deleteReason": "idk test delete etc",
         "timestamp": 1678263085,
+        "source": "discord",
+        "ip": "66efff4c945d3c3b87fc271b47d456db"
+    },
+    "6": {
+        "msg": "sixth post will also be crashboy",
+        "tag": "music",
+        "user": "Crashy#4595",
+        "userID": "909716920780070933",
+        "timestamp": 1678263071,
         "source": "discord",
         "ip": "66efff4c945d3c3b87fc271b47d456db"
     }

@@ -621,7 +621,7 @@ class api extends config {
         $data = Files::read("thoughts.json");
         if (!is_array($data)) $data = []; // Create data array if there are no msgs
         $total = count($data); // total thoughts
-        if ($total == 0) return "There are no thoughts to delete";
+        if ($total == 0) return "There are no posts to delete";
 
         // Get data about requested ID
         $id = $p['id'];
@@ -673,8 +673,8 @@ class api extends config {
         if ($checkToken !== true) die($checkToken);
 
         // Get Settings and Thoughts
-        $searchData = Files::read("thoughts.json");
-        if (!is_array($searchData)) $searchData = []; // Create data array if there are no msgs
+        $data = Files::read("thoughts.json");
+        if (!is_array($data)) $data = []; // Create data array if there are no msgs
 
         // Get possible queries
         $s = $this->req['s'] ?? null; // specific ID or query to be searched
@@ -692,44 +692,33 @@ class api extends config {
         $reason = $this->req['reason'] ?? 1; // Show reason for post deletion
         $reasonby = $this->req['reasonby'] ?? 1; // Show who deleted post
 
-        $total = count($searchData); // total thoughts
+        $total = count($data); // total thoughts
+        $output = ['results' => []];
         if ($platform == "discord") {
             $wrap = "`"; // force Discord thoughts to be in a quote box
             $limit = ($limit > 5) ? 5 : $limit; // Discord limit can't go past 5 for now. until there's a word count
         }
 
-        // ?q=list creates an entire list of thoughts and then quits
-        if ($s == "list" && $platform != "discord") {
-            foreach ($searchData as $id => $val) {
-                if (isset($val['deleted'])) continue;
-                $thisID = ($showID == 1) ? "#{$id}: " : null;
-                $thisAuthor = ($showUser == 1) ? " -{$val['user']}" : null;
-                echo "<p class='thought'>{$thisID}{$val['msg']}{$thisAuthor}</p>";
-            }
-        
-        // ?q=list for a non-web platform just shows a link to the list page
-        } else if ($s == "list" && $platform == "discord") {
-            echo "Full list of thoughts can be found at {$_SESSION['api']['url']}?q=list";
+        // First check to make sure they're not just asking for a short request
 
-        // ?q=info to display Thoughts info and versions
-        } else if ($s == "info") {
-            $this->info();
-        
-        // If $s is numeric or empty, fetch a random or desired ID
-        } else if ($s == null || is_numeric($s)) {
-                
-            if ($total == 0) die("There are no thoughts...");
+        // ?s=list for a non-web platform just shows a link to the list page
+        if ($s == "list" && $platform == "discord") {
+            $output['meta']['success'] = "Full list of posts can be found at {$_SESSION['api']['url']}?s=list";
+        }
 
-            if ($s > $total) die("I need to think more to get to #".$s);
+        // A few error checks before continuing
+        if ($total == 0) $output['meta']['error'] = "There are no posts..."; // There has to be at least one post
+        
+        // If $s is empty, fetch a random ID
+        if ($s == null) {
 
             // If user didn't submit a search query:
             // Generate a random number within the count of the data array
             // If that ID happens to be deleted, up $rand by 1 and keep trying the next post up until one isn't deleted
             // If the $rand gets higher than $total then output an error or maybe start back at 1?
-
             $rand = rand(1, $total);
             while ($s == null) {
-                $isDeleted = isset($searchData[$rand]['deleted']) ?? 0;
+                $isDeleted = isset($data[$rand]['deleted']) ?? 0;
                 if ($isDeleted != 1){
                     $s = $rand;
                     break;
@@ -738,74 +727,74 @@ class api extends config {
                 }
                 if ($rand > $total) die("Something went wrong... Try again.");
             }
+            $output['results'][$s] = $data[$s]; // add to results (this will be only result)
 
-            // Check if the search is deleted. If it is, show that the post is deleted.
-            $isDeleted = isset($searchData[$s]['deleted']) ?? 0;
-            $output = [];
-            if ($isDeleted == 0) { // Check if post has been deleted (show that it has if the post was directly requested)
-                // JSON output
-                if ($this->req['output'] == 'json') {
-                    $output[] = ['id' => $s, 'user' => $searchData[$s]['user'], 'userID' => $searchData[$s]['userID'], 'msg' => $searchData[$s]['msg']];
-                    echo json_encode($output);
-                    // TXT output
-                } else {
-                    $thisUser = ($showUser == 1) ? " -{$searchData[$s]['user']}" : null;
-                    $thisID = ($showID == 1) ? "#".$s.": " : null; // Only show ID if requested
-                    echo $thisID."{$wrap}".$searchData[$s]['msg']."{$wrap}{$thisUser}";
+        // If $s is a number, fetch a specific ID
+        } else if (is_numeric($s)) {
+
+            // Make sure ID exists
+            $exists = $data[$s] ?? null;
+            if ($exists != null)
+                $output['results'][$s] = $exists; // Add to results (this will be only result)
+            else
+                $output['meta']['error'] = "Post #{$s} does not exist";
+
+        
+        // If $s is a string, search each post to see if that word is in it
+        } else if ($s != null) {
+        
+            foreach ($data as $id => $val) {
+                if (isset($val['deleted'])) continue; // don't include if message is deleted
+                if (preg_match("/{$s}/i", $val['msg'])) { // Search msg. This needs to be heavily improved..
+                    $output['results'][$id] = $val; // Add match to results output
                 }
-            } else {
+            }
+        
+            if (count($output['results']) == 0)
+                $output['meta']['error'] = "No thoughts found related to `$s`";
+        
+        }
+
+        // Process output results if there were no errors
+        if (!isset($output['meta']['error'])) {
+
+            if ($shuffle == 1) $output['results'] = shuffle_assoc($output['results']); // Shuffle results if necessary
+            $results = 0; // keep count of shown results to not go past limit
+
+            // Make output['meta']['success'] a string if TXT is requested
+            if ($this->req['output'] != 'json') $output['meta']['success'] = ''; 
+            
+            foreach($output['results'] as $ids => $vals) {
+                if ($results > $limit-1) break; // stop after the $limit
+                if (isset($vals['deleted']) && $vals['deleted'] == 1) $vals['msg'] = '[deleted]'; // don't show deleted messages
                 // JSON output
                 if ($this->req['output'] == 'json') {
-                    echo json_encode(['id' => $s, 'user' => $searchData[$s]['user'], 'msg' => "`Post deleted.`", 'deleted' => $searchData[$s]['deleted'], 'deleter' => $searchData[$s]['deleter'], 'deleteReason' => $searchData[$s]['deleteReason']]);
+                    $output['results'][$ids] = $vals; // only changed if message is deleted
                 // TXT output
                 } else {
-                    echo "`Post deleted.`";
-                    if ($reasonby == 1) echo " Deleted by: ".str_replace("HASHTAG", "#", $searchData[$s]['deleter']).".";
-                    if ($reason == 1) echo " Reason: {$searchData[$s]['deleteReason']}.";
-                }
-            }
-        
-        // If $s is a string, search each thought to see if that word is in it
-        } else if ($s != null && !is_numeric($s)) {
+                    $thisID = ($showID == 1) ? "#".$ids.": " : null;
+                    $thisUser = ($showUser == 1) ? " -{$vals['user']}":null;
+                    $output['meta']['success'] .= ($results > 0 && ($platform == "web" || $breaks == 1)) ? "<br />" : PHP_EOL; // different line breaks per platform
+                    $output['meta']['success'] .= "{$thisID}{$wrap}{$vals['msg']}{$wrap}{$thisUser}";
+                    // Show Deleted By and Reason if requested
+                    if ($reasonby == 1 && isset($vals['deleter'])) $output['meta']['success'] .= " Deleted by: ".str_replace("HASHTAG", "#", $vals['deleter']).".";
+                    if ($reason == 1 && isset($vals['deleteReason'])) $output['meta']['success'] .= " Reason: {$vals['deleteReason']}.";
 
-            $matches = [];
-        
-            foreach ($searchData as $id => $val) {
-                if (preg_match("/{$s}/i", $val['msg'])) {
-                    if (isset($val['deleted'])) continue; // don't include if message is deleted
-                    $matches[$id] = $val;
                 }
+                $results++;
             }
-        
-            if (count($matches) == 0) {
-                echo "No thoughts found related to `$s`";
-            } else {
-                if ($shuffle == 1) $matches = shuffle_assoc($matches);
-                $results = 0;
-                
-                $output = ($this->req['output'] == 'json') ? [] : '';
-                foreach($matches as $ids => $vals) {
-                    if ($results > $limit-1) break; // stop after the $limit
-                    // JSON output
-                    if ($this->req['output'] == 'json') {
-                        $thisID = $ids;
-                        $output['results'][$thisID] = ['id' => $thisID, 'msg' => $vals['msg'], 'tag' => $vals['tag'], 'user' => $vals['user'], 'userID' => $vals['userID']];
-                    // TXT output
-                    } else {
-                        $thisID = ($showID == 1) ? "#".$ids.": " : null;
-                        $thisUser = ($showUser == 1) ? " -{$vals['user']}":null;
-                        $output .= ($results > 0 && ($platform == "web" || $breaks == 1)) ? "<br />" : PHP_EOL; // different line breaks per platform
-                        $output .= "{$thisID}{$wrap}{$vals['msg']}{$wrap}{$thisUser}";
+            $output['meta']['total'] = $results;
+            $output['meta']['shuffle'] = $shuffle;
 
-                    }
-                    $results++;
-                }
-                $output['meta']['total'] = $results;
-                $output['meta']['shuffle'] = $shuffle;
+        }
 
-                echo (is_array($output)) ? json_encode($output) : $output;
-            }
-        
+        // Output JSON
+        if ($this->req['output'] == 'json') {
+            echo json_encode($output);
+        // Output TXT
+        } else {
+            if (isset($output['meta']['success'])) echo $output['meta']['success'];
+            if (isset($output['meta']['error'])) echo $output['meta']['error'];
         }
         
 
