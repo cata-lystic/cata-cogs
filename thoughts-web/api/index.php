@@ -697,7 +697,7 @@ class api extends config {
 
         $output = ['results' => []];
         if ($p['platform'] == "discord") {
-            $wrap = "`"; // force Discord thoughts to be in a quote box
+            $p['wrap'] = "`"; // force Discord thoughts to be in a quote box
             $p['limit'] = ($p['limit'] > 5) ? 5 : $p['limit']; // Discord limit can't go past 5 for now. until there's a word count
         }
 
@@ -773,13 +773,13 @@ class api extends config {
                     $output['results'][$ids] = $vals; // only changed if message is deleted
                 // TXT output
                 } else {
-                    $thisID = ($showID == 1) ? "#".$ids.": " : null;
-                    $thisUser = ($showUser == 1) ? " -{$vals['user']}":null;
-                    $output['meta']['success'] .= ($results > 0 && ($platform == "web" || $breaks == 1)) ? "<br />" : PHP_EOL; // different line breaks per platform
-                    $output['meta']['success'] .= "{$thisID}{$wrap}{$vals['msg']}{$wrap}{$thisUser}";
+                    $thisID = ($p['showID'] == 1) ? "#".$ids.": " : null;
+                    $thisUser = ($p['showUser'] == 1) ? " -{$vals['user']}":null;
+                    $output['meta']['success'] .= ($results > 0 && ($p['platform'] == "web" || $p['breaks'] == 1)) ? "<br />" : PHP_EOL; // different line breaks per platform
+                    $output['meta']['success'] .= "{$thisID}{$p['wrap']}{$vals['msg']}{$p['wrap']}{$thisUser}";
                     // Show Deleted By and Reason if requested
-                    if ($reasonby == 1 && isset($vals['deleter'])) $output['meta']['success'] .= " Deleted by: ".str_replace("HASHTAG", "#", $vals['deleter']).".";
-                    if ($reason == 1 && isset($vals['deleteReason'])) $output['meta']['success'] .= " Reason: {$vals['deleteReason']}.";
+                    if ($p['reasonby'] == 1 && isset($vals['deleter'])) $output['meta']['success'] .= " Deleted by: ".str_replace("HASHTAG", "#", $vals['deleter']).".";
+                    if ($p['reason'] == 1 && isset($vals['deleteReason'])) $output['meta']['success'] .= " Reason: {$vals['deleteReason']}.";
 
                 }
                 $results++;
