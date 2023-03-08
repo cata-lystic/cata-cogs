@@ -389,6 +389,9 @@ class api extends config {
         // If script is ran via CLI, overwrite $_REQUESTs from the params
         if (tools::isCLI()) $this->cli();
 
+        // JSON output by default, but API can output raw text if output is 'text' or 'txt'
+        if (!isset($_REQUEST['output']) || ($_REQUEST['output'] != 'txt' && $_REQUEST['output'] != 'text')) $_REQUEST['output'] = 'json'; 
+
         // Get all request variables and put them in an array
         foreach($_REQUEST as $key => $val) {
             $this->req[$key] = $val;
@@ -412,9 +415,6 @@ class api extends config {
         // Check if there was a 'f' (function) request
         $func = $this->req['f'] ?? null; // no query = search for random thought
 
-        // Check which output type is requested. JSON is default, but API can also output raw text
-        $output = $this->req['output'] ?? 'json'; // output can be 'json', 'txt', or 'text'
-
         if (empty($func)) $func = 'search';
 
         // Make sure this is a valid function
@@ -422,8 +422,6 @@ class api extends config {
 
         // If $apiversion is set, place this as the user's api version
         if ($apiVersion != null) $this->req['version'] = $apiVersion;
-
-
 
         // Run requested function
         $this->$func();
@@ -676,8 +674,8 @@ class api extends config {
         if ($checkToken !== true) die($checkToken);
 
         // Get Settings and Thoughts
-        $data = Files::read("thoughts.json");
-        if (!is_array($data)) $data = []; // Create data array if there are no msgs
+        $searchData = Files::read("thoughts.json");
+        if (!is_array($searchData)) $searchData = []; // Create data array if there are no msgs
 
         // Get possible queries
         $s = $this->req['s'] ?? null; // specific ID or query to be searched
@@ -692,7 +690,7 @@ class api extends config {
         $reason = $this->req['reason'] ?? 1; // Show reason for post deletion
         $reasonby = $this->req['reasonby'] ?? 1; // Show who deleted post
 
-        $total = count($data); // total thoughts
+        $total = count($searchData); // total thoughts
         if ($platform == "discord") {
             $wrap = "`"; // force Discord thoughts to be in a quote box
             $limit = ($limit > 5) ? 5 : $limit; // Discord limit can't go past 5 for now. until there's a word count
@@ -700,7 +698,7 @@ class api extends config {
 
         // ?q=list creates an entire list of thoughts and then quits
         if ($s == "list" && $platform != "discord") {
-            foreach ($data as $id => $val) {
+            foreach ($searchData as $id => $val) {
                 if (isset($val['deleted'])) continue;
                 $thisID = ($showID == 1) ? "#{$id}: " : null;
                 $thisAuthor = ($showUser == 1) ? " -{$val['user']}" : null;
@@ -729,7 +727,7 @@ class api extends config {
 
             $rand = rand(1, $total);
             while ($s == null) {
-                $isDeleted = isset($data[$rand]['deleted']) ?? 0;
+                $isDeleted = isset($searchData[$rand]['deleted']) ?? 0;
                 if ($isDeleted != 1){
                     $s = $rand;
                     break;
@@ -740,26 +738,33 @@ class api extends config {
             }
 
             // Check if the search is deleted. If it is, show that the post is deleted.
-            $isDeleted = isset($data[$s]['deleted']) ?? 0;
+            $isDeleted = isset($searchData[$s]['deleted']) ?? 0;
             $output = [];
             if ($isDeleted == 0) { // Check if post has been deleted (show that it has if the post was directly requested)
                 $thisID = ($showID == 1) ? "#".$s.": " : null;
-                $thisAuthor = ($showUser == 1) ? " -{$data[$s]['user']}" : null;
-                //echo $thisID."{$wrap}".$data[$s]['msg']."{$wrap}{$thisAuthor}";
-                $output[] = ['id' => $thisID, 'author' => $thisAuthor, 'msg' => $data[$s]['msg'], 'wrap' => $wrap];
-                echo json_encode($output);
+                $thisAuthor = ($showUser == 1) ? " -{$searchData[$s]['user']}" : null;
+                if ($this->req['output'] == 'json') {
+                    $output[] = ['id' => $thisID, 'author' => $thisAuthor, 'msg' => $searchData[$s]['msg'], 'wrap' => $wrap];
+                    echo json_encode($output);
+                } else {
+                    echo $thisID."{$wrap}".$searchData[$s]['msg']."{$wrap}{$thisAuthor}";
+                }
             } else {
-                echo "`Post deleted.`";
-                if ($reasonby == 1) echo " Deleted by: ".str_replace("HASHTAG", "#", $data[$s]['deleter']).".";
-                if ($reason == 1) echo " Reason: {$data[$s]['deleteReason']}.";
+                if ($this->req['output'] == 'json') {
+                    echo json_encode(['id' => $s, 'user' => $searchData[$s]['user'], 'msg' => "`Post deleted.`", 'deleted' => $searchData[$s]['deleted'], 'deleter' => $searchData[$s]['deleter'], 'deleteReason' => $searchData[$s]['deleteReason']]);
+                } else {
+                    echo "`Post deleted.`";
+                    if ($reasonby == 1) echo " Deleted by: ".str_replace("HASHTAG", "#", $searchData[$s]['deleter']).".";
+                    if ($reason == 1) echo " Reason: {$searchData[$s]['deleteReason']}.";
+                }
             }
         
         // If $s is a string, search each thought to see if that word is in it
         } else if ($s != null && !is_numeric($s)) {
-        
+
             $matches = [];
         
-            foreach ($data as $id => $val) {
+            foreach ($searchData as $id => $val) {
                 if (preg_match("/{$s}/i", $val['msg'])) {
                     if (isset($val['deleted'])) continue; // don't include if message is deleted
                     $matches[$id] = $val['msg'];
@@ -771,17 +776,24 @@ class api extends config {
             } else {
                 if ($shuffle == 1) $matches = shuffle_assoc($matches);
                 $results = 0;
-                $output = [];
+                
+                $output = ($this->req['output'] == 'json') ? [] : '';
                 foreach($matches as $ids => $vals) {
                     if ($results > $limit-1) break; // stop after the $limit
-                    //if ($results > 0) echo ($platform == "web" || $breaks == 1) ? "<br />" : PHP_EOL; // different line breaks per platform
-                    $thisID = ($showID == 1) ? "#".$ids.": " : null;
-                    //echo "{$thisID}{$wrap}{$vals}{$wrap}";
-                    $output[] = ['id' => $thisID, 'msg' => $vals, 'wrap' => $wrap];
+                    if ($this->req['output'] == 'json') {
+                        $thisID = $ids;
+                        $output[] = ['id' => $thisID, 'msg' => $vals, 'wrap' => $wrap];
+                        
+                    } else {
+                        $thisID = ($showID == 1) ? "#".$ids.": " : null;
+                        $output .= ($results > 0 && ($platform == "web" || $breaks == 1)) ? "<br />" : PHP_EOL; // different line breaks per platform
+                        $output .= "{$thisID}{$wrap}{$vals}{$wrap}";
+
+                    }
                     $results++;
                 }
-                
-                echo json_encode($output);
+
+                echo (is_array($output)) ? json_encode($output) : $output;
             }
         
         }
@@ -794,82 +806,120 @@ class api extends config {
 
         $checkAPI = $this->version(1.0); // no optional parameter so it will kill script if fails
         
-        $s = $this->req['s'] ?? 'list';
-        $tag = $this->req['tag'] ?? null; // Tag user is requesting
-        $tagRename = $this->req['rename'] ?? null; // User may be requesting to edit tag's name
         $tags = $this->api['tags'];
 
+        // Request Parameters: 'key' => [0] default value, [1] required (binary), [2] type (string, number, etc)
+        $params = array(
+            'action' => ['list', 0, 'string'], // If no action requested, just show list of tags
+            'tag' => [null, 0, 'string'], // Tag user is requesting
+            'rename' => [null, 0, 'string'], // User may be requesting to edit tag's name
+            'userID' => [null, 0, 'string'] // UserID of who is add/remove/editing a tag
+        );
+
+        $p = $this->processParams($params); // Process params into an array. Give error (and optional params) if missing required params
+
+        // Make sure this is a valid action
+        $actions = ['list', 'add', 'remove', 'edit', 'total', 'default'];
+        if (!in_array($p['action'], $actions)) {
+            $output['meta']['error'] = "Invalid action. (allowed: list, add, remove, edit, total, default)";
+
         // List all tags
-        if ($s == 'list') {
+        } else if ($p['action'] == 'list') {
 
             // This function only requires 'read' permissions
             $checkToken = $this->token($this->req['token'], 'read');
             if ($checkToken !== true) die($checkToken);
 
-            $taglist = '';
-            foreach ($tags as $tag) {
-                $taglist .= $tag.", ";
-            }
-            die (substr($taglist, 0, -2));
-        }
-
-        // Anything past this point requires 'tags' permissions
-        $checkToken = $this->token($this->req['token'], 'tags');
-        if ($checkToken !== true) die($checkToken);
-
-        // Add or remove tag
-        if ($s == 'add' || $s == 'remove') {
-
-            $userID = $this->req['userID'] ?? null;
-            if ($userID == null) die("Missing userID");
-            if ($this->isAdmin($userID) == false) die("Only admin can edit tags");
-            if ($tag == null) die("Missing tag"); // Tag required
-
-            if ($s == 'add') {
-                if (!in_array($tag, $this->api['tags'])) {
-                    array_push($this->api['tags'], $tag);
-                    $this->set('api', 'tags', $this->api['tags']);
-                    echo "Tag `$tag` added";
-                } else {
-                    echo "Tag `$tag` already exists";
+            $output['tags'] = [];
+            if ($this->req['output'] == 'json') {
+                foreach ($tags as $tag) {
+                    $output['tags'][] = ['name' => $tag];
                 }
+                $output['meta']['total'] = count($output['tags']); // add total to metadata output
+                $output['meta']['default'] = $this->api['tagDefault']; // add default tag to meta
             } else {
-                //print_r($this->api['tags']);
-                if (in_array($tag, $this->api['tags'])) {
-                    $tagID = array_search($tag, $this->api['tags']);
+                $taglist = '';
+                foreach ($tags as $tag) {
+                    $taglist .= $tag.", ";
+                }
+                $output['meta']['success'] = substr($taglist, 0, -2);
+            }
+
+        // Add, remove, or edit tag
+        } else if ($p['action'] == 'add' || $p['action'] == 'remove' || $p['action'] == 'edit') {
+
+            // This function requires 'tags' permissions
+            $checkToken = $this->token($this->req['token'], 'tags');
+            if ($checkToken !== true) die($checkToken);
+
+            if ($p['userID'] == null) die("Missing userID");
+            if ($this->isAdmin($p['userID']) == false) die("Only admin can edit tags");
+            if ($p['tag'] == null) die("Missing tag"); // Tag required
+
+            // Add tag
+            if ($p['action'] == 'add') {
+                if (!in_array($p['tag'], $this->api['tags'])) {
+                    array_push($this->api['tags'], $p['tag']);
+                    $this->set('api', 'tags', $this->api['tags']);
+                    $output['meta']['success'] = "Tag `{$p['tag']}` added";
+                } else {
+                    $output['meta']['error'] = "Tag `{$p['tag']}` already exists";
+                }
+            
+            // Remove tag
+            } else if ($p['action'] == 'remove') {
+
+                if (in_array($p['tag'], $this->api['tags'])) {
+                    $tagID = array_search($p['tag'], $this->api['tags']);
                     unset($this->api['tags'][$tagID]);
                     $this->set('api', 'tags', $this->api['tags']);
-                    echo "Tag `$tag` removed";
+                    $output['meta']['success'] = "Tag `{$p['tag']}` removed";
                 } else {
-                    echo "Tag `$tag` doesn't exist";
+                    $output['meta']['error'] = "Tag `{$p['tag']}` doesn't exist";
                 }
-            }   
-        }
+            
+            // Edit tag
+            } else if ($p['action'] == 'edit') {
 
-        // Edit tag
-        if ($s == 'edit') {
+                // Make sure tag being renamed exists
+                if (!is_array($tags) || !in_array($p['tag'], $tags)) $output['meta']['error'] = "Tag doesn't exist";
 
-            // Make sure tag exists
-            if (!is_array($tags)) die("Tag doesn't exist");
+                // Make sure a new tag name was given
+                if (empty($p['rename'])) $output['meta']['error'] = "'rename' flag required";
 
-            $data = Files::read("thoughts.json");
-            if (!is_array($data)) $data = []; // Create data array if there are no posts
+                $data = Files::read("thoughts.json");
+                if (!is_array($data)) $data = []; // Create data array if there are no posts
 
-            // Rename tag
-            if ($tagRename != null) {
-                $tagID = array_search($tag, $this->api['tags']);
-                unset($this->api['tags'][$tagID]);
-                array_push($this->api['tags'], $tagRename);
+                // Rename tag
+                if (!isset($output['meta']['error'])) {
+                    $tagID = array_search($p['tag'], $this->api['tags']);
+                    unset($this->api['tags'][$tagID]);
+                    array_push($this->api['tags'], $p['rename']);
 
-                // Loop through current posts and change their current tag
-                foreach($data as $key => $val) {
-                    if ($val['tag'] == $tag) $data[$key]['tag'] = $tagRename;
+                    // Loop through current posts and change their current tag
+                    foreach($data as $key => $val) {
+                        if ($val['tag'] == $p['tag']) $data[$key]['tag'] = $p['rename'];
+                    }
+                    $this->set('api', 'tags', $this->api['tags']);
+                    Files::write("thoughts.json", json_encode($data, JSON_PRETTY_PRINT));
+                    $output['meta']['success'] = "Tag `{$p['tag']}` renamed to `{$p['rename']}`";
                 }
-                $this->set('api', 'tags', $this->api['tags']);
-                Files::write(__DIR__."thoughts.json", json_encode($data, JSON_PRETTY_PRINT));
-                echo "Tag `$tag` renamed to `$tagRename`";
             }
 
+        // Show total tags number
+        } else if ($p['action'] == 'total') {
+            $output['meta']['success'] = count($tags);
+
+        // Show default tag
+        }  else if ($p['action'] == 'default') {
+            $output['meta']['success'] = $this->api['tagDefault'];
+        }
+
+        if ($this->req['output'] == 'json') {
+            echo json_encode($output);
+        } else {
+            if (isset($output['meta']['success'])) echo $output['meta']['success'];
+            if (isset($output['meta']['error'])) echo $output['meta']['error'];
         }
 
     }
