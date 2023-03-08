@@ -21,16 +21,13 @@ $set['mod'] = ['2222222222', '3333333333']; # Discord IDs of those that can mod 
 # API Settings
 $set['api']['url'] = 'auto'; # Change if auto detection fails
 $set['api']['enable'] = 1; # Do not disable unless you only want Admin Tokens to access API/Website
-$set['api']['tags'] = ['thought', 'music', 'spam']; # Tags that thoughts can be categorized into
+$set['api']['tags'] = ['thought', 'music', 'spam', 'something']; # Tags that thoughts can be categorized into
 $set['api']['tagDefault'] = 'thought'; # Default tag for new posts. Must be an existing tag
 $set['api']['searchLimit'] = 500; # Search results max limit. Cannot be changed by API request
 $set['api']['searchResults'] = 3; # Default amount of results per search
 $set['api']['create'] = 1; # Allow new post creation to non-mods via API
 $set['api']['createFlood'] = '10s'; # Time between when a user can post again (format: 5s, 3m, 5d, 7w, etc)
 $set['api']['shuffle'] = 1; # Shuffle search results
-$set['api']['showUser'] = 1; # Show post author's username before each result
-$set['api']['showID'] = 0; # Show post ID before each result
-$set['api']['wrap'] = 'none'; # Wrap (quotes) around each thought. options: 'none', 'single', 'double', or custom
 $set['api']['breaks'] = 0; # Use <br /> instead of \n\r in API calls
 $set['api']['platform'] = 'api'; # Can be set to anything where the request came from (example: discord)
 $set['api']['ipLog'] = 1; # Log IP address of post creator

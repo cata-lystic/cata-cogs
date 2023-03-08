@@ -49,8 +49,6 @@ class Config {
                 'create' => array(1, ['binary'], 'Allow new post creation to non-mods via API'),
                 'createFlood' => array('10s', ['alphanum'], 'Time between when a user can post again (format: 5s, 3m, 5d, 7w, etc)'),
                 'shuffle' => array(1, ['binary'], 'Shuffle search results'),
-                'showUser' => array(0, ['binary'], 'Show post author\'s username before each result'),
-                'showID' => array(0, ['binary'], 'Show post ID before each result'),
                 'breaks' => array(0, ['binary'], 'Use <br /> instead of \n\r in API calls'),
                 'platform' => array('api', ['alpha'], 'Can be set to anything where the request came from (example: discord)'),
                 'ipLog' => array(1, ['binary'], 'Log IP address of post creator'),

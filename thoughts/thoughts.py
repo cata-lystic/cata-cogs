@@ -275,23 +275,6 @@ class Thoughts(commands.Cog):
         \rValue can be 1 or 0"""
         await self.changeSetting(ctx, 'api', 'shuffle', binary)
 
-    @ts_api.command(name='showID')
-    async def ts_api_showid(self, ctx, binary):
-        """Show IDs in search results
-        \rValue can be 1 or 0"""
-        await self.changeSetting(ctx, 'api', 'showID', binary)
-
-    @ts_api.command(name='showUser')
-    async def ts_api_showuser(self, ctx, binary):
-        """Show post user in search results
-        \rValue can be 1 or 0"""
-        await self.changeSetting(ctx, 'api', 'showUser', binary)
-
-    @ts_api.command(name='wrap')
-    async def ts_api_wrap(self, ctx, wrap):
-        """Wrap (quotes) around each thought"""
-        await self.changeSetting(ctx, 'api', 'wrap', wrap)
-
     @ts_api.command(name='breaks')
     async def ts_api_breaks(self, ctx, binary):
         """Receive <br /> instead of newlines
