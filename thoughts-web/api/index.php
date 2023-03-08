@@ -253,7 +253,7 @@ class Config {
             require("config.php"); // old config settings will be in $set
 
             // Make sure this var is an actual setting
-            if (!isset($set[$key1][$key2]) || !isset($_SESSION[$key1][$key2])) return "ERROR: `{$key1} {$key2}` is not a valid setting";
+            if (!isset($set[$key1][$key2]) || !isset($_SESSION[$key1][$key2])) return "`{$key1} {$key2}` is not a valid setting";
             
             // Check to make sure new value meets requirements
             $checkReq = $this->check($key1, $key2, $newVal);
@@ -459,52 +459,79 @@ class api extends Config {
     function config() {
 
         $checkAPI = $this->version(1.0); // no optional parameter so it will kill script if fails
+        if ($checkAPI !== true) $output['meta']['error'] = $checkAPI;
 
         // Make sure token is valid and has the proper permissions
         $checkToken = $this->token($this->req['token'], 'config');
-        if ($checkToken !== true) die($checkToken);
+        if ($checkToken !== true) $output['meta']['error'] = $checkToken;
 
-        // Check if they're just trying to view the list (key1=list can also trigger it)
-        if (isset($_REQUEST['list']) || (isset($_REQUEST['key1']) && $_REQUEST['key1'] == 'list')) {
+        // Continue if no errors
+        if (!isset($output['meta']['error'])) {
 
-            $getConfigSettings = require(__DIR__."/config.php");
-            unset($set['token'], $set['admin'], $set['mod']); // don't show tokens, admins, or mods
-            echo "Current config.php settings:".PHP_EOL;
-            foreach ($set as $setParent => $setVal) {
-                foreach ($set[$setParent] as $key => $val) {
-                    echo "{$setParent} {$key}: ".$this->arrayToString($val).PHP_EOL;
+            // Check if they're just trying to view the list (key1=list can also trigger it)
+            if (isset($_REQUEST['list']) || (isset($_REQUEST['key1']) && $_REQUEST['key1'] == 'list')) {
+
+                $getConfigSettings = require(__DIR__."/config.php"); // Load config file
+                unset($set['token'], $set['admin'], $set['mod']); // don't show tokens, admins, or mods
+
+                // Show a header if TXT output requested
+                if ($this->req['output'] != 'json') $output['meta']['success'] = "Current config.php settings:".PHP_EOL; // header
+
+                // Loop through each of the parent settings
+                foreach ($set as $setParent => $setVal) {
+
+                    // Loop through each of the child settings
+                    foreach ($set[$setParent] as $key => $val) {
+                        // JSON output
+                        if ($this->req['output'] == 'json') {
+                            $output['config'][$setParent][$key] = $val;
+                        // TXT output
+                        } else {
+                            $output['meta']['success'] .= "{$setParent} {$key}: ".$this->arrayToString($val).PHP_EOL;
+                        }
+                    }
+
                 }
-            }
 
-        } else {
-            
-            // Request Parameters: 'key' => [0] default value, [1] required (binary), [2] type (string, number, etc)
-            $params = array(
-                'key1' => [null, 1, 'string'],
-                'key2' => [null, 1, 'string'],
-                'val' => [null, 1, 'string'],
-                'list' => [null, 0, 'binary']
-            );
-
-            $p = $this->processParams($params); // Process params into an array. Give error (and optional params) if missing required params
-        
-            // Can't change token from API
-            if ($p['key1'] == 'token')
-                die("You can't change the web tokens from the API");
-
-            $val = str_replace("HASHTAG", "#", $p['val']); // convert HASHTAG to #
-            
-            $changeSetting = $this->set($p['key1'], $p['key2'], $p['val']);
-            
-            if ($changeSetting == "OK") {
-                echo "Changed `{$p['key1']} {$p['key2']}` to `{$p['val']}`";
+            // Try to change a setting
             } else {
-                echo $changeSetting;
-            }
+                
+                // Request Parameters: 'key' => [0] default value, [1] required (binary), [2] type (string, number, etc)
+                $params = array(
+                    'key1' => [null, 1, 'string'],
+                    'key2' => [null, 1, 'string'],
+                    'val' => [null, 1, 'string'],
+                    'list' => [null, 0, 'binary']
+                );
 
+                $p = $this->processParams($params); // Process params into an array. Give error (and optional params) if missing required params
+            
+                // Can't change token from API
+                if ($p['key1'] == 'token')
+                    die("You can't change the web tokens from the API");
+
+                $val = str_replace("HASHTAG", "#", $p['val']); // convert HASHTAG to #
+                
+                $changeSetting = $this->set($p['key1'], $p['key2'], $p['val']);
+                
+                if ($changeSetting == "OK") {
+                    $output['meta']['success'] = "Changed `{$p['key1']} {$p['key2']}` to `{$p['val']}`";
+                } else {
+                    $output['meta']['error'] = $changeSetting;
+                }
+
+            }
         }
 
-        die();
+        // Output JSON
+        if ($this->req['output'] == 'json') {
+            echo json_encode($output);
+        // Output TXT
+        } else {
+            if (isset($output['meta']['success'])) echo $output['meta']['success'];
+            if (isset($output['meta']['error'])) echo $output['meta']['error'];
+        }
+
     }
 
 
