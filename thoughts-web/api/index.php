@@ -74,6 +74,7 @@ class Config {
                 'jquery' => array('local', [], 'options: local, google, jquery, microsoft, cdnjs, jsdelivr, Custom URL', 'jQuery.js location. Change from "local" to direct URL or built in CDN options')),
             "theme" => array(
                 'backgroundColor' => array('#212121', [], 'Background color', '#Theme Settings'),
+                'font' => array('Arial', [], 'Font family'),
                 'fontColor' => array('#e9e5e5', [], 'Font color'),
                 'fontSize' => array('1em', [], 'Font size'),
                 'postBg' => array('#393939', [], 'Post background color'),

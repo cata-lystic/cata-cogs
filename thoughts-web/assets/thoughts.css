@@ -2,6 +2,7 @@ body {
     background: var(--bg-color);
     color: var(--font-color);
     font-size: var(--font-size);
+    font-family: var(--font-family);
 }
 
 a {

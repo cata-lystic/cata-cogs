@@ -33,6 +33,7 @@ echo "<!DOCTYPE html>
     --bg-color: {$api->theme['backgroundColor']};
     --accent-color: {$api->theme['accentColor']};
     --accent-radius: {$api->theme['accentRadius']};
+    --font-family: {$api->theme['font']};
     --font-color: {$api->theme['fontColor']};
     --font-size: {$api->theme['fontSize']};
     --url-color: {$api->theme['urlColor']};

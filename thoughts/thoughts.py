@@ -480,13 +480,20 @@ class Thoughts(commands.Cog):
         Example: `.tset web theme accent #393939`"""
         await self.changeSetting(ctx, 'theme', 'accentColor', color)
 
-    @ts_web_theme.command(name='font', aliases=['fontcolor'])
+    @ts_web_theme.command(name='font', aliases=['fontFamily'])
+    async def ts_web_font(self, ctx, *, font):
+        """Font family
+        \rYou can use anything the CSS font-family tag supports\r
+        Example: `.tset web theme font Arial`"""
+        await self.changeSetting(ctx, 'theme', 'font', font)
+
+    @ts_web_theme.command(name='fontColor')
     async def ts_web_fontcolor(self, ctx, *, color):
         """Font color
         \rWebsite's font color.
         You can use anything the CSS color tag supports\r
-        Example: `.tset web theme font #e9e5e5`"""
-        await self.changeSetting(ctx, 'theme', 'accentColor', color)
+        Example: `.tset web theme fontColor #e9e5e5`"""
+        await self.changeSetting(ctx, 'theme', 'fontColor', color)
 
     @ts_web_theme.command(name='url', aliases=['urlcolor'])
     async def ts_web_url(self, ctx, *, color):
