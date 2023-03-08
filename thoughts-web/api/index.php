@@ -638,6 +638,7 @@ class api extends config {
             $data[$id]['deleted'] = 1;
             $data[$id]['deleter'] = str_replace("HASHTAG", "#", $p['deleter']);
             $data[$id]['deleterID'] = $p['deleterID'];
+            $data[$id]['deleteTime'] = time(); // Timestamp when deleted
 
             // Make sure deleteReason doesn't start with 'wipe'
             if (substr($p['reason'], 0, 4) == 'wipe') {
@@ -675,34 +676,35 @@ class api extends config {
         // Get Settings and Thoughts
         $data = Files::read("thoughts.json");
         if (!is_array($data)) $data = []; // Create data array if there are no msgs
-
-        // Get possible queries
-        $s = $this->req['s'] ?? null; // specific ID or query to be searched
-        $limit = $this->req['limit'] ?? $_SESSION['api']['searchLimit']; // amount of search results to return
-        $shuffle = $this->req['shuffle'] ?? $_SESSION['api']['shuffle']; // shuffle search results
-        $platform = $this->req['platform'] ?? 'web'; // anything besides "web" will be plain text mode
-        
-        // TXT and Web only
-        $showID = $this->req['showID'] ?? $_SESSION['web']['showID']; // show unique ID before each post
-        $showUser = $this->req['showUser'] ?? $_SESSION['web']['showUser']; // show author's username before each post
-        $wrap = $this->req['wrap'] ?? tools::wrap($_SESSION['web']['wrap']); // no wrap by default
-        $breaks = $this->req['breaks'] ?? $_SESSION['api']['breaks']; // prefer <br /> over /n/r (web will overwrite this)
-
-        $apiRequest = $this->req['api'] ?? null; // API version from requester
-        $reason = $this->req['reason'] ?? 1; // Show reason for post deletion
-        $reasonby = $this->req['reasonby'] ?? 1; // Show who deleted post
-
         $total = count($data); // total thoughts
+
+        // Request Parameters: 'key' => [0] default value, [1] required (binary), [2] type (string, number, etc)
+        $params = array(
+            's' => [null, 0, 'string'],
+            'limit' => [$_SESSION['api']['searchLimit'], 0, 'number'],
+            'shuffle' => [$_SESSION['api']['shuffle'], 0, 'string'], 
+            'platform' => ['web', 0, 'string'],
+            'reason' => [1, 0, 'string'], // show reason for post deletion
+            'reasonby' => [1, 0, 'binary'], // show who deleted post
+            'showID' => [$_SESSION['web']['showID'], 0, 'binary'], // Web only. Show post ID
+            'showUser' => [$_SESSION['web']['showUser'], 0, 'binary'], // Web only. Show post User
+            'wrap' => [tools::wrap($_SESSION['web']['wrap']), 0, 'string'],  // Web only. Show wrap (quotes) around msg
+            'breaks' => [$_SESSION['api']['breaks'], 0, 'binary'] // Show <br /> instead of \\n\\r
+        );
+
+        $p = $this->processParams($params); // Process params into an array. Give error (and optional params) if missing required params
+        $s = $p['s']; // shortcut for search query
+
         $output = ['results' => []];
-        if ($platform == "discord") {
+        if ($p['platform'] == "discord") {
             $wrap = "`"; // force Discord thoughts to be in a quote box
-            $limit = ($limit > 5) ? 5 : $limit; // Discord limit can't go past 5 for now. until there's a word count
+            $p['limit'] = ($p['limit'] > 5) ? 5 : $p['limit']; // Discord limit can't go past 5 for now. until there's a word count
         }
 
         // First check to make sure they're not just asking for a short request
 
         // ?s=list for a non-web platform just shows a link to the list page
-        if ($s == "list" && $platform == "discord") {
+        if ($s == "list" && $p['platform'] == "discord") {
             $output['meta']['success'] = "Full list of posts can be found at {$_SESSION['api']['url']}?s=list";
         }
 
@@ -738,7 +740,6 @@ class api extends config {
                 $output['results'][$s] = $exists; // Add to results (this will be only result)
             else
                 $output['meta']['error'] = "Post #{$s} does not exist";
-
         
         // If $s is a string, search each post to see if that word is in it
         } else if ($s != null) {
@@ -758,14 +759,14 @@ class api extends config {
         // Process output results if there were no errors
         if (!isset($output['meta']['error'])) {
 
-            if ($shuffle == 1) $output['results'] = shuffle_assoc($output['results']); // Shuffle results if necessary
+            if ($p['shuffle'] == 1) $output['results'] = shuffle_assoc($output['results']); // Shuffle results if necessary
             $results = 0; // keep count of shown results to not go past limit
 
             // Make output['meta']['success'] a string if TXT is requested
             if ($this->req['output'] != 'json') $output['meta']['success'] = ''; 
             
             foreach($output['results'] as $ids => $vals) {
-                if ($results > $limit-1) break; // stop after the $limit
+                if ($results > $p['limit']-1) break; // stop after the $p['limit']
                 if (isset($vals['deleted']) && $vals['deleted'] == 1) $vals['msg'] = '[deleted]'; // don't show deleted messages
                 // JSON output
                 if ($this->req['output'] == 'json') {
@@ -784,7 +785,7 @@ class api extends config {
                 $results++;
             }
             $output['meta']['total'] = $results;
-            $output['meta']['shuffle'] = $shuffle;
+            $output['meta']['shuffle'] = $p['shuffle'];
 
         }
 

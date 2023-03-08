@@ -32,7 +32,12 @@
         "userID": "909716920780070933",
         "timestamp": 1678263071,
         "source": "discord",
-        "ip": "66efff4c945d3c3b87fc271b47d456db"
+        "ip": "66efff4c945d3c3b87fc271b47d456db",
+        "deleted": 1,
+        "deleter": "Catalyst",
+        "deleterID": "514556311573364746",
+        "deleteTime": 1678271867,
+        "deleteReason": "dizzzy"
     },
     "5": {
         "msg": "fifth post will be deleted",
