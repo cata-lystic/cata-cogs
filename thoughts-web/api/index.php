@@ -16,12 +16,13 @@ if (!isset($webVersion)) $api->process();
 class Config {
 
     public $defaults;
-    public $versions; // Web, API, and Bot versions to prevent incompatibility
+    public $versions; 
     public $api;
     public $web;
 
     function __construct() {
 
+        // Web, API, and Bot versions to prevent incompatibility
         $this->versions = array(
             'api' => '1.0', // Current API version
             'apiMin' => '1.0', // Minimum supported API version
@@ -31,12 +32,11 @@ class Config {
             'botMin' => '1.0'
         );
 
-        // List of config settings. Array includes the follwoing:
+        // List of config settings. Array includes the following:
         // [0] Default value
         // [1] Requirements
         // [2] Description
         // [3] Comment to place before variable in config file (put ## before it to add an extra blank line)
-        
         $this->defaults = array(
             'api' => array(
                 'url' => array('auto', [], 'Change if auto detection fails','#API Settings'),
@@ -370,7 +370,7 @@ class Config {
 }
 
 
-class api extends config {
+class api extends Config {
 
     public $req = []; // all $_REQUESTs will be stored
     public $allowedFunctions; // All allowed functions by the API
@@ -378,7 +378,7 @@ class api extends config {
 
     function __construct() {
         
-        Config::__construct();
+        parent::__construct(); // Load Config construct to get settings from config.php
 
         $this->allowedFunctions = ['config', 'create', 'delete', 'list', 'search', 'tags', 'info', 'user', 'dev', 'new'];
 
@@ -398,9 +398,6 @@ class api extends config {
         // Check if API is enabled (Admin Tokens can still access)
         if ($this->api['enable'] != 1 && $this->token($this->req['token'], 'admin') !== true) die("API is disabled.");
 
-        // Check if website is enabled (Admin Tokens can still access)
-        if ($this->web['enable'] != 1 && $this->token($this->req['token'], 'admin') !== true) die("Website is disabled.");
-
     }
 
     // Process what has been requested and send to proper function
@@ -409,7 +406,12 @@ class api extends config {
         $this->source = ($source != '') ? $source : 'api'; // API is default source
 
         // force TXT output for web
-        if ($this->source == 'web') $this->req['output'] = 'txt';
+        if ($this->source == 'web') {
+            $this->req['output'] = 'txt';
+
+            // Check if website is enabled (Admin Tokens can still access)
+            if ($this->web['enable'] !== 1 && $this->token($this->req['token'], 'admin') !== true) die("Website is disabled.");
+        }
 
         // Check if there was a 'f' (function) request
         $func = $this->req['f'] ?? null; // no query = search for random thought
