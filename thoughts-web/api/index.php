@@ -13,8 +13,6 @@ $api = new api();
 // Process the request immediately if just the api is being loaded
 if (!isset($webVersion)) $api->process();
 
-
-
 class Db { 
 
     public $db;
@@ -26,30 +24,71 @@ class Db {
      
     }
 
-    public function query($query) {
+    // Load user info by User ID (unique row in database)
+    public function checkUserByID($id) {
 
-        $this->db->exec($query);
+        // Check if user exists
+        $checkUser = $this->db->prepare("SELECT * FROM users WHERE id = ? LIMIT 1");
+        $checkUser->execute([$id]);
+        $userInfo = $checkUser->fetch(PDO::FETCH_OBJ); // load user info into object
+        return $userInfo;
+        
+    }
 
+    // Load user info by Discord ID
+    public function checkUserByDiscord($discordID) {
+
+        // Check if user exists
+        $checkUser = $this->db->prepare("SELECT * FROM users WHERE discordID = ? LIMIT 1");
+        $checkUser->execute([$discordID]);
+        $userInfo = $checkUser->fetch(PDO::FETCH_OBJ); // load user info into object
+        return $userInfo;
     }
 
     // :username, :passhash, :discordid, :timecreated, :ipcreated, :iplast, :regsource, :token
     public function newUser($dat) {
 
         // Check if user exists
-        $checkUser = $this->db->prepare("SELECT count(*) FROM users WHERE username = :username LIMIT 1");
-        $checkUser->execute([$dat[':username']]);
-        $num_rows = $checkUser->fetchColumn();
+        //$checkUser = $this->db->prepare("SELECT id FROM users WHERE username = :username LIMIT 1");
+        //$checkUser->execute([$dat[':username']]);
+        //$userInfo = $checkUser->fetch(PDO::FETCH_OBJ); // load user info into object
+        $userInfo = $this->checkUserByDiscord($dat[':discordid']);
 
-        if ($num_rows == 0) {
+        // Create user if they don't exist
+        if ($userInfo == false) {
 
             $prepare = $this->db->prepare("INSERT INTO 'users' ('username', 'passhash', 'discordID', 'timeCreated', 'ipCreated', 'ipLast', 'regSource', 'admin', 'mod', 'token', 'tokenTemp')
             VALUES (:username, :passhash, :discordid, :timecreated, :ipcreated, :iplast, :regsource, '0', '0', :token, '');");
 
             $prepare->execute($dat);
+            $newUserID = $this->db->lastInsertId();
+            return $newUserID; // return ID of new user
 
         } else {
-            echo "Already exists";
+            return $userInfo->id; // return ID of user
+            //echo "User {$userInfo->id} Already exists";
         }
+    }
+
+    // :msg, :tag, :userid, :username, :timecreated, :platform, :ip
+    public function newPost($dat) {
+
+        $prepare = $this->db->prepare("INSERT INTO 'posts' ('msg', 'tag', 'userID', 'username', 'discordID', 'timeCreated', 'timeDeleted', 'source', 'ip', 'deleted', 'deleter', 'deleterID', 'deleterDiscordID', 'deleteReason')
+        VALUES (:msg, :tag, :userid, :username, :discordid, :timecreated, '0', :platform, :ip, '0', '', '', '', '');");
+
+        if ($prepare->execute($dat)) {
+            $newPostID = $this->db->lastInsertId(); // new post id
+
+            // Set timeLastPost on user to prevent creation flooding
+            $prepareUpdate = $this->db->prepare("UPDATE 'users' SET timeLastPost = ? WHERE discordID = ? LIMIT 1");
+            $prepareUpdate->execute([time(), $dat[':discordid']]);
+
+            return $newPostID; // return new post id
+
+        } else {
+            return print_r($prepare->errorInfo());
+        }
+
     }
 
 }
@@ -420,6 +459,7 @@ class api extends Config {
     public $req = []; // all $_REQUESTs will be stored
     public $allowedFunctions; // All allowed functions by the API
     public $source; // web or api, usually
+    public $db; // SQL database
 
     function __construct() {
         
@@ -442,6 +482,8 @@ class api extends Config {
         
         // Check if API is enabled (Admin Tokens can still access)
         if ($this->api['enable'] != 1 && $this->token($this->req['token'], 'admin') !== true) die("API is disabled.");
+
+        $this->db = new Db();
 
     }
 
@@ -603,19 +645,6 @@ class api extends Config {
 
         $p = $this->processParams($params); // Process params into an array. Give error (and optional params) if missing required params
 
-        $data = Files::read("thoughts.json");
-        if (!is_array($data)) $data = []; // Create data array if there are no msgs
-        $total = count($data); // total thoughts
-
-        // Check if thoughts.json is empty
-        if ($total > 0) {
-            $lastID = key(array_slice($data, -1, 1, true)); // Get the last key's ID
-            $nextID = intval($lastID) + 1; // increase it by 1
-        } else {
-            $total = 0;
-            $nextID = "1";
-        }
-
         // Process IP address if necessary
         if ($this->api['ipLog'] == 1) {
 
@@ -641,33 +670,53 @@ class api extends Config {
             $user = base64_decode($p['user']);
         }
 
-        // Make sure the user isn't flooding (if they're not a mod)
-        $lastPost = 0;
-        if ($this->isMod($p['user']) == false) {
-            // Loop through the thoughts and find the user's latest post
-            foreach ($data as $id => $val) {
-                if ($val['userID'] == $p['userID']) {
-                    $lastPost = $val['timestamp'];
+        // Attempt to get user info from database
+        $userInfo = $this->db->checkUserByDiscord(($p['userID']));
+
+        // If user found, make sure they're not flooding (if they're not a mod)
+        if ($userInfo != false && $this->isMod($p['userID']) == false) {
+            $lastPost = $userInfo->timeLastPost;
+
+            if ($lastPost != 0) {
+                $floodFinal = $lastPost - (time() - intval($_SESSION['api']['createFlood'])); // Subtract last post time from flood check to see seconds left
+                if ($floodFinal > 0) {
+                echo "`Slow down!` You can post again in ".tools::floodTime($floodFinal, 1)."."; // stop if flood triggered
+                die();
                 }
             }
-        }
 
-        if ($lastPost != 0) {
-            $floodFinal = $lastPost - (time() - intval($_SESSION['api']['createFlood'])); // Subtract last post time from flood check to see seconds left
-            if ($floodFinal > 0) {
-            echo "`Slow down!` You can post again in ".tools::floodTime($floodFinal, 1)."."; // stop if flood triggered
-            die();
-            }
         }
 
         // All is well, post results
-        echo "`".ucfirst($p['tag'])." posted!` {$_SESSION['api']['url']}?s={$nextID}";
+        if ($userInfo == false) {
+            $ui = [
+            ':username' => str_replace("HASHTAG", "#", $p['user']),
+            ':passhash' => '',
+            ':discordid' => $p['userID'],
+            ':timecreated' => time(),
+            ':ipcreated' => $ip,
+            ':iplast' => $ip,
+            ':regsource' => $p['platform'],
+            ':token' => $this->req['token']];
+            
+            // Add user to database if they don't already exist (returns new or old userID regardless)
+            $newUserID = $this->db->newUser($ui);
+        }
 
-        // Add this to the thoughts.json
-        $data[$nextID] = array("msg" => $p['msg'], "tag" => $p['tag'], "user" => str_replace("HASHTAG", "#", $p['user']), "userID" => $p['userID'], "timestamp" => time(), "source" => $p['platform']);
-        if ($ip != null) $data[$nextID]['ip'] = $ip;
-        Files::write("thoughts.json", json_encode($data, JSON_PRETTY_PRINT));
-        die();
+        // Add post to database. Return new post ID
+        $postData = [
+        ':msg' => $p['msg'],
+        ':tag' => $p['tag'],
+        ':userid' => $p['userID'],
+        ':username' => str_replace("HASHTAG", "#", $p['user']),
+        ':discordid' => $p['userID'],
+        ':timecreated' => time(),
+        ':platform' => $p['platform'],
+        ':ip' => $ip];
+    
+        $newPostID = $this->db->newPost($postData);
+
+        echo "`".ucfirst($p['tag'])." posted!` {$_SESSION['api']['url']}?s={$newPostID}";
 
     }
 
