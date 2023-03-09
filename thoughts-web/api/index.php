@@ -80,7 +80,7 @@ class Db {
             $newPostID = $this->db->lastInsertId(); // new post id
 
             // Set timeLastPost on user to prevent creation flooding
-            $prepareUpdate = $this->db->prepare("UPDATE 'users' SET timeLastPost = ? WHERE discordID = ? LIMIT 1");
+            $prepareUpdate = $this->db->prepare("UPDATE 'users' SET timeLastPost = ?, totalPosts = totalPosts+1 WHERE discordID = ? LIMIT 1");
             $prepareUpdate->execute([time(), $dat[':discordid']]);
 
             return $newPostID; // return new post id
