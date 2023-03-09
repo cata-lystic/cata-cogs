@@ -1,2 +1,6 @@
 thoughts-web/api/config.php
 thoughts-web/ToDo.txt
+thoughts-web/api/dev.php
+thoughts-web/api/adminer.php
+thoughts-web/api/adminer-4.8.1-sqlite-en/index.php
+thoughts-web/api/database.db

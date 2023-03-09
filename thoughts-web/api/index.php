@@ -13,6 +13,47 @@ $api = new api();
 // Process the request immediately if just the api is being loaded
 if (!isset($webVersion)) $api->process();
 
+
+
+class Db { 
+
+    public $db;
+
+    public function __construct() {
+ 
+        $this->db = new PDO("sqlite:database.db");
+        $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+     
+    }
+
+    public function query($query) {
+
+        $this->db->exec($query);
+
+    }
+
+    // :username, :passhash, :discordid, :timecreated, :ipcreated, :iplast, :regsource, :token
+    public function newUser($dat) {
+
+        // Check if user exists
+        $checkUser = $this->db->prepare("SELECT count(*) FROM users WHERE username = :username LIMIT 1");
+        $checkUser->execute([$dat[':username']]);
+        $num_rows = $checkUser->fetchColumn();
+
+        if ($num_rows == 0) {
+
+            $prepare = $this->db->prepare("INSERT INTO 'users' ('username', 'passhash', 'discordID', 'timeCreated', 'ipCreated', 'ipLast', 'regSource', 'admin', 'mod', 'token', 'tokenTemp')
+            VALUES (:username, :passhash, :discordid, :timecreated, :ipcreated, :iplast, :regsource, '0', '0', :token, '');");
+
+            $prepare->execute($dat);
+
+        } else {
+            echo "Already exists";
+        }
+    }
+
+}
+
 class Config {
 
     public $defaults;
