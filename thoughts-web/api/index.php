@@ -134,6 +134,19 @@ class Db {
 
     }
 
+    // Delete Post
+    public function deletePost($postID, $deleter, $deleterID, $reason, $wipe) {
+
+        try {
+            $delete = $this->db->prepare("UPDATE posts SET deleted = '1', deleter = ?, deleterID = ?, deleterDiscordID = ?, timeDeleted = ?, deleteReason = ? WHERE id = ? LIMIT 1");
+            $delete->execute([$deleter, $deleterID, $deleterID, time(), $reason, $postID]);
+            return true;
+        } catch( PDOException $e) {
+            return $e;
+        }
+
+    }
+
 }
 
 class Config {
@@ -783,43 +796,43 @@ class api extends Config {
 
         $p = $this->processParams($params); // Process params into an array. Give error (and optional params) if missing required params
 
-        // Load thoughts data
-        $data = Files::read("thoughts.json");
-        if (!is_array($data)) $data = []; // Create data array if there are no msgs
-        $total = count($data); // total thoughts
-        if ($total == 0) return "There are no posts to delete";
+        // Get info about this post
+        $post = $this->db->getPostByID($p['id']);
 
         // Get data about requested ID
-        $id = $p['id'];
-        if (isset($data[$id])) {
+        if ($post != false) {
 
-            $alreadyDeleted = $data[$id]['deleted'] ?? 0;
-            if ($alreadyDeleted == 1) die("#{$id} already deleted");
+            if ($post['deleted'] != 1) {
 
-            // Make sure deleter owns the post
-            $posterID = $data[$id]['userID'];
+                // Make sure post author is who is trying to delete it (or they're a mod)
+                if ($post['discordID'] != $p['deleterID'] && !$this->isMod($p['deleterID'])) {
+                    $output['meta']['error'] = "You are not the author of this post";
+                }
 
-            if ($p['deleterID'] != $posterID && $this->isMod($p['deleterID']) != true) die("You are not the author of this post");
-            
-            $data[$id]['deleted'] = 1;
-            $data[$id]['deleter'] = str_replace("HASHTAG", "#", $p['deleter']);
-            $data[$id]['deleterID'] = $p['deleterID'];
-            $data[$id]['deleteTime'] = time(); // Timestamp when deleted
+                // Delete the post
+                $deletePost = $this->db->deletePost($p['id'], $p['deleter'], $p['deleterID'], $p['reason'], $p['wipe']);
+                $delMethod = ($p['wipe'] != 1) ? "deleted" : "wiped"; // wipe doesn't currently work, may be deprecated
 
-            // Make sure deleteReason doesn't start with 'wipe'
-            if (substr($p['reason'], 0, 4) == 'wipe') {
-                $wipe = 1;
-                $reason = trim(substr($p['reason'], 4)); // remove 'wipe' from front of reason
+                if ($deletePost === true) 
+                    $output['meta']['success'] = "Post {$p['id']} {$delMethod}";
+                else
+                    $output['meta']['error'] = $deletePost;
+                
+            } else {
+                $output['meta']['error'] = "Post #{$p['id']} already deleted";
             }
 
-            $data[$id]['deleteReason'] = $p['reason'];
-            if ($p['wipe'] == 1) $data[$id]['msg'] = "[WIPED]";
-            Files::write("thoughts.json", json_encode($data, JSON_PRETTY_PRINT));
-            $delMethod = ($p['wipe'] != 1) ? "deleted" : "wiped";
-            echo "Post #{$id} {$delMethod}";
-
         } else {
-            echo "ID DOESNT EXIST";
+            $output['meta']['error'] = "Post #{$p['id']} doesn't exist.";
+        }
+
+        // Output JSON
+        if ($this->req['output'] == 'json') {
+            echo json_encode($output);
+        // Output TXT
+        } else {
+            if (isset($output['meta']['success'])) echo $output['meta']['success'];
+            if (isset($output['meta']['error'])) echo $output['meta']['error'];
         }
 
     }
