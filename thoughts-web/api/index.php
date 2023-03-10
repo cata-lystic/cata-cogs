@@ -77,10 +77,20 @@ class Db {
     }
 
     // Load post by ID
-    public function getPostByID($id) {
-        $check = $this->db->prepare("SELECT * FROM posts WHERE id = ? LIMIT 1");
-        $check->execute([$id]);
-        $post = $check->fetch(PDO::FETCH_ASSOC); // load user info into array
+    public function getPostByID($id='all') {
+
+        if ($id == 'all') {
+            $check = $this->db->prepare("SELECT * FROM posts");
+            $check->execute();
+        } else if ($id == 'rand') {
+            $check = $this->db->prepare("SELECT * FROM posts ORDER BY RANDOM() LIMIT 1");
+            $check->execute();
+        } else {
+            $check = $this->db->prepare("SELECT * FROM posts WHERE id = ? LIMIT 1");
+            $check->execute([$id]);
+        }
+
+        $post = $check->fetchAll(PDO::FETCH_ASSOC); // load user info into array
         return $post;
     }
 
@@ -900,30 +910,25 @@ class api extends Config {
         // If list is not for Discord, put all non-deleted posts in output results
         } else if ($s == "list" && $p['platform'] != "discord") {
 
-            foreach($data as $id => $val) {
-                if (isset($val['deleted']) && $val['deleted'] == 1) continue; // skip if deleted 
-                $output['results'][$id] = $val;
+            $fetch = $this->db->getPostByID('all');
+            
+            if ($fetch != false) {
+                foreach($fetch as $key => $val) {
+                    $output['results'][$val['id']] = $val; // Add to results (this will be only result)
+                }
+            } else {
+                $output['meta']['error'] = "Post #{$s} does not exist";
             }
 
         // If $s is empty, fetch a random ID
         } else if ($s == null) {
 
-            // If user didn't submit a search query:
-            // Generate a random number within the count of the data array
-            // If that ID happens to be deleted, up $rand by 1 and keep trying the next post up until one isn't deleted
-            // If the $rand gets higher than $total then output an error or maybe start back at 1?
-            $rand = rand(1, $total);
-            while ($s == null) {
-                $isDeleted = isset($data[$rand]['deleted']) ?? 0;
-                if ($isDeleted != 1){
-                    $s = $rand;
-                    break;
-                } else {
-                    $rand++;
-                }
-                if ($rand > $total) die("Something went wrong... Try again.");
-            }
-            $output['results'][$s] = $data[$s]; // add to results (this will be only result)
+            $fetch = $this->db->getPostByID('rand');
+
+            if ($fetch != false)
+                $output['results'][$fetch['id']] = $fetch; // Add to results (this will be only result)
+            else
+                $output['meta']['error'] = "Post #{$s} does not exist";
 
         // If $s is a number, fetch a specific ID
         } else if (is_numeric($s)) {
@@ -932,7 +937,7 @@ class api extends Config {
 
             // Make sure ID exists
             if ($fetch != false)
-                $output['results'][$s] = $fetch; // Add to results (this will be only result)
+                $output['results'][$fetch['id']] = $fetch; // Add to results (this will be only result)
             else
                 $output['meta']['error'] = "Post #{$s} does not exist";
         
@@ -944,7 +949,7 @@ class api extends Config {
             // Make sure posts were returned
             if ($fetch != false) {
                 foreach($fetch as $key => $val) {
-                    $output['results'] = $val; // Add to results (this will be only result)
+                    $output['results'][$val['id']] = $val; // Add to results (this will be only result)
                 }
             } else {
                 $output['meta']['error'] = "No posts found related to `$s` in tag `{$p['tag']}`";
@@ -962,7 +967,6 @@ class api extends Config {
             if ($this->req['output'] != 'json') $output['meta']['success'] = ''; 
             
             foreach($output['results'] as $ids => $vals) {
-                if ($results > $p['limit']-1) break; // stop after the $p['limit']
                 if (isset($vals['deleted']) && $vals['deleted'] == 1) $vals['msg'] = '[deleted]'; // don't show deleted messages
                 if ($p['wrap'] != null) $vals['msg'] = $p['wrap'].$vals['msg'].$p['wrap'];
                 // JSON output
@@ -971,9 +975,9 @@ class api extends Config {
                 // TXT output
                 } else {
                     $thisID = ($p['showID'] == 1) ? "#".$ids.": " : null;
-                    $thisUser = ($p['showUser'] == 1) ? " -{$vals['user']}":null;
+                    $thisUser = ($p['showUser'] == 1) ? " -{$vals['username']}":null;
                     //$output['meta']['success'] .= ($results > 0 && ($p['platform'] == "web" || $p['breaks'] == 1)) ? "<br />" : PHP_EOL; // different line breaks per platform
-                    if ($this->source == 'web') {
+                    if ($this->source == 'web' || $this->req['platform'] == 'web') {
                         $html1 = "<p class='post'>";
                         $html2 = "</p>";
                     } else {
@@ -982,13 +986,14 @@ class api extends Config {
                     }
                     $output['meta']['success'] .= "{$html1}{$thisID}{$p['wrap']}{$vals['msg']}{$p['wrap']}{$thisUser}{$html2}";
                     // Show Deleted By and Reason if requested
-                    if ($p['reasonby'] == 1 && isset($vals['deleter'])) $output['meta']['success'] .= " Deleted by: ".str_replace("HASHTAG", "#", $vals['deleter']).".";
-                    if ($p['reason'] == 1 && isset($vals['deleteReason'])) $output['meta']['success'] .= " Reason: {$vals['deleteReason']}.";
+                    if ($p['reasonby'] === 1 && $vals['deleter'] != '') $output['meta']['success'] .= " Deleted by: ".str_replace("HASHTAG", "#", $vals['deleter']).".";
+                    if ($p['reason'] === 1 && $vals['deleteReason'] != '') $output['meta']['success'] .= " Reason: {$vals['deleteReason']}.";
 
                 }
                 $results++;
             }
             $output['meta']['total'] = $results;
+            $output['meta']['searchQuery'] = $p['s'];
             $output['meta']['shuffle'] = $p['shuffle'];
             $output['meta']['tag'] = $p['tag'];
 
@@ -1163,48 +1168,63 @@ class api extends Config {
         if (isset($this->req['list'])) { // Show List of users
 
             $fetch = $this->db->checkUserByID('all'); // fetch all users
-            $output = [];
+
             if ($fetch != false) {
-                foreach($fetch as $key => $val) {
-                    $output['results'][] = $val;
+                // JSON output
+                if ($this->req['output'] == 'json') {
+                    foreach($fetch as $key => $val) {
+                        $output['results'][] = $val;
+                    }
+                // TXT output
+                } else {
+                    $output['meta']['success'] = "<h1>All Users</h1>";
+                    foreach($fetch as $key=> $val) {
+                        $output['meta']['success'] .= "<p>{$val['username']} ({$val['discordID']})</p>";
+                    }
                 }
             }
 
             $output['meta']['total'] = count($fetch);
 
-            echo json_encode($output);
-
-            // These go elsewhere |
-            // $output['meta']['search'] = $p['s'];
-            // $output['meta']['tag'] = $p['tag'];
-        
         } else if (isset($this->req['count'])) { // Count how many unique users there are
 
-            $output['success'] = $this->db->userCount();
-
-            echo ($this->req['output'] == 'json') ? json_encode($output) : $output['success'];
+            $output['meta']['success'] = $this->db->userCount();
 
         } else { // Show all posts by user or userID
-            //$db = $this->db;
+
             if ($p['discordID'] != null) {
                 $userPosts = $this->db->getPostByDiscord($p['discordID']);
             } else {
                 $userPosts = $this->db->getPostByUsername($p['user']);
             }
             
-            //$what = print_r($userPosts);
-            //echo "<pre>{$what}</pre>";
-            $output = [];
             if ($userPosts != false) {
-                foreach($userPosts as $key => $val) {
-                    $output['results'][] = $val;
+                // JSON output
+                if ($this->req['output'] == 'json') {
+                    foreach($userPosts as $key => $val) {
+                        $output['results'][] = $val;
+                    }
+                // TXT output
+                } else {
+                    $postsBy = ($p['user'] != '') ? $p['user'] : $p['discordID'];
+                    $output['meta']['success'] = "<h1>Posts by $postsBy</h1>";
+                    foreach($userPosts as $key=> $val) {
+                        $output['meta']['success'] .= "<p>{$val['msg']} -{$val['username']}</p>";
+                    }
                 }
             }
 
             $output['meta']['total'] = count($userPosts);
 
-            echo json_encode($output);
+        }
 
+        // Output JSON
+        if ($this->req['output'] == 'json') {
+            echo json_encode($output);
+        // Output TXT
+        } else {
+            if (isset($output['meta']['success'])) echo $output['meta']['success'];
+            if (isset($output['meta']['error'])) echo $output['meta']['error'];
         }
 
     }
