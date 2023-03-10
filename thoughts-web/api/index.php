@@ -27,12 +27,22 @@ class Db {
     // Load user info by User ID (unique row in database)
     public function checkUserByID($id) {
 
-        // Check if user exists
-        $checkUser = $this->db->prepare("SELECT * FROM users WHERE id = ? LIMIT 1");
-        $checkUser->execute([$id]);
-        $userInfo = $checkUser->fetch(PDO::FETCH_OBJ); // load user info into object
+        if ($id == 'all') {
+            $checkUser = $this->db->prepare("SELECT id, username, discordID, admin, mod, totalPosts FROM users");
+            $checkUser->execute();
+        } else {
+            $checkUser = $this->db->prepare("SELECT id, username, discordID, admin, mod, totalPosts FROM users WHERE id = ? LIMIT 1");
+            $checkUser->execute([$id]);
+
+        }
+        $userInfo = $checkUser->fetchAll(PDO::FETCH_ASSOC); // load user info into object
         return $userInfo;
         
+    }
+
+    // Count how many current users there are
+    public function userCount() {
+        return $this->db->query("SELECT COUNT(*) FROM users")->fetchColumn();
     }
 
     // Load user info by Discord ID
@@ -41,7 +51,7 @@ class Db {
         // Check if user exists
         $checkUser = $this->db->prepare("SELECT * FROM users WHERE discordID = ? LIMIT 1");
         $checkUser->execute([$discordID]);
-        $userInfo = $checkUser->fetch(PDO::FETCH_OBJ); // load user info into object
+        $userInfo = $checkUser->fetch(PDO::FETCH_ASSOC); // load user info into object
         return $userInfo;
     }
 
@@ -49,9 +59,6 @@ class Db {
     public function newUser($dat) {
 
         // Check if user exists
-        //$checkUser = $this->db->prepare("SELECT id FROM users WHERE username = :username LIMIT 1");
-        //$checkUser->execute([$dat[':username']]);
-        //$userInfo = $checkUser->fetch(PDO::FETCH_OBJ); // load user info into object
         $userInfo = $this->checkUserByDiscord($dat[':discordid']);
 
         // Create user if they don't exist
@@ -65,9 +72,45 @@ class Db {
             return $newUserID; // return ID of new user
 
         } else {
-            return $userInfo->id; // return ID of user
-            //echo "User {$userInfo->id} Already exists";
+            return $userInfo['id']; // return ID of user
         }
+    }
+
+    // Load post by ID
+    public function getPostByID($id) {
+        $check = $this->db->prepare("SELECT * FROM posts WHERE id = ? LIMIT 1");
+        $check->execute([$id]);
+        $post = $check->fetch(PDO::FETCH_ASSOC); // load user info into array
+        return $post;
+    }
+
+    // Load post by Discord ID
+    public function getPostByDiscord($id) {
+        $check = $this->db->prepare("SELECT * FROM posts WHERE discordID = ?");
+        $check->execute([$id]);
+        $post = $check->fetchAll(PDO::FETCH_ASSOC); // load user info into array
+        return $post;
+    }
+
+    // Load post by Username
+    public function getPostByUsername($user) {
+        $check = $this->db->prepare("SELECT * FROM posts WHERE username = ?");
+        $check->execute([$user]);
+        $post = $check->fetchAll(PDO::FETCH_ASSOC); // load user info into array
+        return $post;
+    }
+
+    // Load posts by Search
+    public function getPostBySearch($msg, $tag='all') {
+        if ($tag == 'all') {
+            $check = $this->db->prepare("SELECT * FROM posts WHERE msg LIKE ?");
+            $check->execute(["%{$msg}%"]);
+        } else {
+            $check = $this->db->prepare("SELECT * FROM posts WHERE msg LIKE ? AND tag = ?");
+            $check->execute(["%{$msg}%", $tag]);
+        }
+        $post = $check->fetchAll(PDO::FETCH_ASSOC); // load user info into array
+        return $post;
     }
 
     // :msg, :tag, :userid, :username, :timecreated, :platform, :ip
@@ -675,7 +718,7 @@ class api extends Config {
 
         // If user found, make sure they're not flooding (if they're not a mod)
         if ($userInfo != false && $this->isMod($p['userID']) == false) {
-            $lastPost = $userInfo->timeLastPost;
+            $lastPost = $userInfo['timeLastPost'];
 
             if ($lastPost != 0) {
                 $floodFinal = $lastPost - (time() - intval($_SESSION['api']['createFlood'])); // Subtract last post time from flood check to see seconds left
@@ -865,27 +908,28 @@ class api extends Config {
 
         // If $s is a number, fetch a specific ID
         } else if (is_numeric($s)) {
+            
+            $fetch = $this->db->getPostByID($s);
 
             // Make sure ID exists
-            $exists = $data[$s] ?? null;
-            if ($exists != null)
-                $output['results'][$s] = $exists; // Add to results (this will be only result)
+            if ($fetch != false)
+                $output['results'][$s] = $fetch; // Add to results (this will be only result)
             else
                 $output['meta']['error'] = "Post #{$s} does not exist";
         
         // If $s is a string, search each post to see if that word is in it
         } else if ($s != null) {
         
-            foreach ($data as $id => $val) {
-                if (isset($val['deleted'])) continue; // don't include if message is deleted
-                if ($p['tag'] != 'all' && $p['tag'] != $val['tag']) continue; // don't include if not in requested tag
-                if (preg_match("/{$s}/i", $val['msg'])) { // Search msg. This needs to be heavily improved..
-                    $output['results'][$id] = $val; // Add match to results output
+            $fetch = $this->db->getPostBySearch($s, $p['tag']);
+
+            // Make sure posts were returned
+            if ($fetch != false) {
+                foreach($fetch as $key => $val) {
+                    $output['results'] = $val; // Add to results (this will be only result)
                 }
-            }
-        
-            if (count($output['results']) == 0)
+            } else {
                 $output['meta']['error'] = "No posts found related to `$s` in tag `{$p['tag']}`";
+            }
         
         }
 
@@ -1093,7 +1137,8 @@ class api extends Config {
 
         // Request Parameters: 'key' => [0] default value, [1] required (binary), [2] type (string, number, etc)
         $params = array(
-            'userID' => [null, 0, 'string'], // ID of the user (this will be prioritized over usern)
+            'id' => [null, 0, 'number'], // ID of the user in database
+            'discordID' => [null, 0, 'number'], // Discord ID of user
             'user' => [null, 0, 'string'], // username of user
             'list' => [null, 0, 'string'], // ID of who is requesting delete
             'count' => [null, 0, 'string']
@@ -1101,42 +1146,50 @@ class api extends Config {
 
         $p = $this->processParams($params); // Process params into an array. Give error (and optional params) if missing required params
 
-        // Load thoughts data
-        $data = Files::read("thoughts.json");
-        if (!is_array($data)) $data = []; // Create data array if there are no msgs
-        $total = count($data); // total thoughts
-        if ($total == 0) return "There are no posts for this user";
-
         if (isset($this->req['list'])) { // Show List of users
 
-            $uniqueUsers = [];
-            foreach($data as $key => $val) {
-                $thisUser = $data[$key]['user'];
-                $uniqueUsers[$thisUser] = $data[$key]['userID'];
-            }
-            
-            foreach($uniqueUsers as $key => $val) {
-                echo $key." ({$val})".PHP_EOL;
-            }
-        
-        } else if (isset($this->req['count'])) { // Count how many unique users there are
-            $uniqueUsers = [];
-            foreach($data as $key => $val) {
-                $thisUser = $data[$key]['userID'];
-                $uniqueUsers[$thisUser] = 1;
-            }
-            echo count($uniqueUsers);
-
-        } else { // Show all posts by user or userID
-
-            $searchUser = ($p['userID'] != null) ? 'userID' : 'user';
-            $searchUserParse = str_replace("HASHTAG", "#", $p[$searchUser]);
-            echo "<h1>Posts by $searchUserParse</h1>";
-            foreach($data as $key => $val) {
-                if ($data[$key][$searchUser] == $searchUserParse && !isset($data[$key]['deleted'])) {
-                    echo "#{$key}: {$data[$key]['msg']}".PHP_EOL;
+            $fetch = $this->db->checkUserByID('all'); // fetch all users
+            $output = [];
+            if ($fetch != false) {
+                foreach($fetch as $key => $val) {
+                    $output['results'][] = $val;
                 }
             }
+
+            $output['meta']['total'] = count($fetch);
+
+            echo json_encode($output);
+
+            // These go elsewhere |
+            // $output['meta']['search'] = $p['s'];
+            // $output['meta']['tag'] = $p['tag'];
+        
+        } else if (isset($this->req['count'])) { // Count how many unique users there are
+
+            $output['success'] = $this->db->userCount();
+
+            echo ($this->req['output'] == 'json') ? json_encode($output) : $output['success'];
+
+        } else { // Show all posts by user or userID
+            //$db = $this->db;
+            if ($p['discordID'] != null) {
+                $userPosts = $this->db->getPostByDiscord($p['discordID']);
+            } else {
+                $userPosts = $this->db->getPostByUsername($p['user']);
+            }
+            
+            //$what = print_r($userPosts);
+            //echo "<pre>{$what}</pre>";
+            $output = [];
+            if ($userPosts != false) {
+                foreach($userPosts as $key => $val) {
+                    $output['results'][] = $val;
+                }
+            }
+
+            $output['meta']['total'] = count($userPosts);
+
+            echo json_encode($output);
 
         }
 
