@@ -147,6 +147,20 @@ class Db {
 
     }
 
+    // Tag renamed, update all posts in database
+    public function postUpdateTag($oldTag, $newTag) {
+
+        try {
+            $delete = $this->db->prepare("UPDATE posts SET tag = ? WHERE tag = ?");
+            $delete->execute([$newTag, $oldTag]);
+            return true;
+        } catch( PDOException $e) {
+            return $e;
+        }
+
+    }
+
+
 }
 
 class Config {
@@ -791,7 +805,7 @@ class api extends Config {
             'deleter' => [null, 1, 'string'], // Name of who is requesting delete
             'deleterID' => [null, 1, 'string'], // ID of who is requesting delete
             'reason' => [null, 1, 'string'], // Reason this post was deleted
-            'wipe' => [0, 0, 'binary'] // Wipe=1 will remove the original text from the .json file instead of just marking it as deleted
+            'wipe' => [0, 0, 'binary'] // Wipe=1 will remove the original text from the msg instead of just marking it as deleted
         );
 
         $p = $this->processParams($params); // Process params into an array. Give error (and optional params) if missing required params
@@ -814,7 +828,7 @@ class api extends Config {
                 $delMethod = ($p['wipe'] != 1) ? "deleted" : "wiped"; // wipe doesn't currently work, may be deprecated
 
                 if ($deletePost === true) 
-                    $output['meta']['success'] = "Post {$p['id']} {$delMethod}";
+                    $output['meta']['success'] = "Post #{$p['id']} {$delMethod}";
                 else
                     $output['meta']['error'] = $deletePost;
                 
@@ -851,14 +865,6 @@ class api extends Config {
         // Make sure token is valid and has the proper permissions
         $checkToken = $this->token($this->req['token'], 'read');
         if ($checkToken !== true) die($checkToken);
-
-        // Get Settings and Thoughts
-        $data = Files::read("thoughts.json");
-        if (!is_array($data)) $data = []; // Create data array if there are no msgs
-        $total = count($data); // total thoughts
-
-        // A few error checks before continuing
-        if ($total == 0) $output['meta']['error'] = "There are no posts..."; // There has to be at least one post
 
         // Request Parameters: 'key' => [0] default value, [1] required (binary), [2] type (string, number, etc)
         $params = array(
@@ -1103,16 +1109,11 @@ class api extends Config {
                         unset($this->api['tags'][$tagID]); // remove tag from current tags
                         array_push($this->api['tags'], $p['rename']); // add new/renamed tag to current tags
 
-                        // Load thoughts.json
-                        $data = Files::read("thoughts.json");
-                        if (!is_array($data)) $data = []; // Create data array if there are no posts
+                        // Change tag for all posts in database
+                        $changeTags = $this->db->postUpdateTag($p['tag'], $p['rename']);
     
-                        // Loop through current posts and change their current tag
-                        foreach($data as $key => $val) {
-                            if ($val['tag'] == $t) $data[$key]['tag'] = $p['rename'];
-                        }
                         $this->set('api', 'tags', $this->api['tags']); // change config.php file with new list of tags
-                        Files::write("thoughts.json", json_encode($data, JSON_PRETTY_PRINT));
+
                         $output['meta']['success'] = "Tag `{$t}` renamed to `{$p['rename']}`";
                     }
                 }
